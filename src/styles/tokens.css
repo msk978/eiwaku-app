@@ -1,0 +1,16 @@
+:root {
+  --bg: #f4f6f9;
+  --surface: #ffffff;
+  --border: #dde2ea;
+  --text: #1c2430;
+  --text-muted: #6b7686;
+  --accent: #3d5a80;
+  --accent-soft: #e4ebf5;
+  --success: #2f7d5e;
+  --success-soft: #e2efe8;
+  --danger: #b3432f;
+  --danger-soft: #f5e4e0;
+
+  --font-ui: 'IBM Plex Sans', system-ui, sans-serif;
+  --font-serif: 'Literata', Georgia, serif;
+}
