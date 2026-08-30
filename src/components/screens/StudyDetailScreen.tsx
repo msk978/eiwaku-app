@@ -1,22 +1,40 @@
+import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useEntries } from '../../hooks/useEntries';
 import { useMarkings } from '../../hooks/useMarkings';
 import { useRequireEntry } from '../../hooks/useRequireEntry';
 import { useSessions } from '../../hooks/useSessions';
 import { useSettings } from '../../hooks/useSettings';
 import { joinTokens } from '../../lib/joinTokens';
+import { formatRelativeDate } from '../../lib/relativeDate';
+import { lastStudiedAt } from '../../lib/stats';
 import { BackButton } from '../common/BackButton';
 import { BarHistory } from '../common/BarHistory';
 import { RatioSlider } from '../common/RatioSlider';
+import { PencilIcon } from '../common/icons';
 
 export function StudyDetailScreen() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const entry = useRequireEntry(id);
+  const { setEntryTitle } = useEntries();
   const { ranges } = useMarkings(id ?? '');
   const { sessions, studyCount } = useSessions(id ?? '');
   const { settings, setQuizRatio } = useSettings();
+  const [editingTitle, setEditingTitle] = useState(false);
+  const [titleDraft, setTitleDraft] = useState('');
 
   if (!entry) return null;
+
+  const startEditingTitle = () => {
+    setTitleDraft(entry.title ?? '');
+    setEditingTitle(true);
+  };
+
+  const commitTitle = () => {
+    setEntryTitle(entry.id, titleDraft);
+    setEditingTitle(false);
+  };
 
   const wordCount = entry.tokens.filter((t) => /[A-Za-z0-9]/.test(t)).length;
   const estimated = Math.min(ranges.length, Math.max(1, Math.round(ranges.length * settings.quizRatio)));
@@ -30,6 +48,42 @@ export function StudyDetailScreen() {
 
       <div className="screen-body">
         <div className="card">
+          {editingTitle ? (
+            <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
+              <input
+                autoFocus
+                type="text"
+                value={titleDraft}
+                onChange={(e) => setTitleDraft(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && commitTitle()}
+                placeholder="タイトルを入力"
+                style={{
+                  flex: 1,
+                  background: 'var(--bg)',
+                  border: '1px solid var(--border)',
+                  borderRadius: 8,
+                  padding: '6px 10px',
+                  fontSize: 14,
+                  color: 'var(--text)',
+                }}
+              />
+              <button className="secondary-btn" style={{ padding: '6px 14px' }} onClick={commitTitle}>
+                保存
+              </button>
+            </div>
+          ) : (
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={startEditingTitle}
+              style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10, cursor: 'pointer' }}
+            >
+              <span style={{ fontSize: 14.5, fontWeight: 600, color: entry.title ? 'var(--text)' : 'var(--text-muted)' }}>
+                {entry.title || 'タイトルを追加'}
+              </span>
+              <PencilIcon />
+            </div>
+          )}
           <div style={{ fontFamily: 'var(--font-serif)', fontSize: 15, lineHeight: 1.6 }}>
             {joinTokens(entry.tokens.slice(0, 28))}
             {entry.tokens.length > 28 ? '...' : ''}
@@ -37,6 +91,7 @@ export function StudyDetailScreen() {
           <div style={{ display: 'flex', gap: 16, marginTop: 12, fontSize: 12.5, color: 'var(--text-muted)' }}>
             <span>{wordCount}語</span>
             <span>マーキング {ranges.length}箇所</span>
+            <span>最終学習: {formatRelativeDate(lastStudiedAt(sessions))}</span>
           </div>
         </div>
 

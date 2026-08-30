@@ -2,6 +2,7 @@ export interface Entry {
   id: string;
   createdAt: string;
   tokens: string[];
+  title?: string;
 }
 
 export interface MarkingRange {

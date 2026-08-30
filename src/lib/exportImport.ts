@@ -51,9 +51,12 @@ export function parseImportFile(raw: string): ImportResult {
     return { ok: false, error: { kind: 'invalid-shape' } };
   }
 
-  const entries = d.entries as { id: unknown; tokens: unknown }[];
+  const entries = d.entries as { id: unknown; tokens: unknown; title?: unknown }[];
   for (const e of entries) {
     if (typeof e.id !== 'string' || !Array.isArray(e.tokens)) {
+      return { ok: false, error: { kind: 'invalid-shape' } };
+    }
+    if (e.title !== undefined && typeof e.title !== 'string') {
       return { ok: false, error: { kind: 'invalid-shape' } };
     }
   }

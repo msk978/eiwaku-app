@@ -5,6 +5,7 @@ import { loadData, saveData } from '../lib/storage';
 type Action =
   | { type: 'ADD_ENTRY'; entry: Entry }
   | { type: 'DELETE_ENTRY'; entryId: string }
+  | { type: 'SET_ENTRY_TITLE'; entryId: string; title: string | undefined }
   | { type: 'SET_MARKING_RANGES'; entryId: string; ranges: MarkingRange[] }
   | { type: 'ADD_SESSION'; session: SessionRecord }
   | { type: 'SET_QUIZ_RATIO'; ratio: number }
@@ -24,6 +25,13 @@ function reducer(state: AppData, action: Action): AppData {
         entries: state.entries.filter((e) => e.id !== action.entryId),
         markings: state.markings.filter((m) => m.entryId !== action.entryId),
         sessions: state.sessions.filter((s) => s.entryId !== action.entryId),
+      };
+    case 'SET_ENTRY_TITLE':
+      return {
+        ...state,
+        entries: state.entries.map((e) =>
+          e.id === action.entryId ? { ...e, title: action.title } : e,
+        ),
       };
     case 'SET_MARKING_RANGES': {
       const exists = state.markings.some((m) => m.entryId === action.entryId);

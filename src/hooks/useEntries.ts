@@ -7,14 +7,24 @@ export function useEntries() {
   const { data, dispatch } = useAppData();
 
   const addEntry = useCallback(
-    (rawText: string): Entry => {
+    (rawText: string, title?: string): Entry => {
+      const trimmedTitle = title?.trim();
       const entry: Entry = {
         id: crypto.randomUUID(),
         createdAt: new Date().toISOString(),
         tokens: tokenize(rawText),
+        title: trimmedTitle ? trimmedTitle : undefined,
       };
       dispatch({ type: 'ADD_ENTRY', entry });
       return entry;
+    },
+    [dispatch],
+  );
+
+  const setEntryTitle = useCallback(
+    (entryId: string, title: string) => {
+      const trimmed = title.trim();
+      dispatch({ type: 'SET_ENTRY_TITLE', entryId, title: trimmed ? trimmed : undefined });
     },
     [dispatch],
   );
@@ -31,5 +41,5 @@ export function useEntries() {
     [data.entries],
   );
 
-  return { entries: data.entries, addEntry, deleteEntry, getEntry };
+  return { entries: data.entries, addEntry, deleteEntry, getEntry, setEntryTitle };
 }

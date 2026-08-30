@@ -36,6 +36,14 @@ export function TrashIcon({ size = 18, color = '#b3432f' }: IconProps) {
   );
 }
 
+export function PencilIcon({ size = 16, color = '#6b7686' }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17 3a2.83 2.83 0 0 1 4 4L7 21l-4 1 1-4Z" />
+    </svg>
+  );
+}
+
 export function CheckIcon({ size = 18, color = '#2f7d5e' }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">

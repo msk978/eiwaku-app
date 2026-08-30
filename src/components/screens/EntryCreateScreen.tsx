@@ -7,6 +7,7 @@ export function EntryCreateScreen() {
   const navigate = useNavigate();
   const { addEntry } = useEntries();
   const [text, setText] = useState('');
+  const [title, setTitle] = useState('');
 
   const wordCount = useMemo(
     () => text.trim().split(/\s+/).filter(Boolean).length,
@@ -22,7 +23,7 @@ export function EntryCreateScreen() {
 
   const handleSave = () => {
     if (!text.trim()) return;
-    const entry = addEntry(text);
+    const entry = addEntry(text, title);
     navigate(`/entries/${entry.id}/mark`, { replace: true });
   };
 
@@ -34,6 +35,22 @@ export function EntryCreateScreen() {
       </div>
 
       <div className="screen-body">
+        <div style={{ fontSize: 13, color: 'var(--text-muted)', fontWeight: 500 }}>タイトル(任意)</div>
+        <input
+          type="text"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="例: Chapter 3 dialogue"
+          style={{
+            width: '100%',
+            background: 'var(--surface)',
+            border: '1px solid var(--border)',
+            borderRadius: 10,
+            padding: '10px 14px',
+            fontSize: 14.5,
+            color: 'var(--text)',
+          }}
+        />
         <div style={{ fontSize: 13, color: 'var(--text-muted)', fontWeight: 500 }}>英文(100〜300語程度)</div>
         <textarea
           value={text}

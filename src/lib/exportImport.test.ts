@@ -59,4 +59,28 @@ describe('buildExportFile / parseImportFile round trip', () => {
     const result = parseImportFile(JSON.stringify({ schemaVersion: 1, data: {} }));
     expect(result).toEqual({ ok: false, error: { kind: 'invalid-shape' } });
   });
+
+  it('round-trips an entry with a title', () => {
+    const withTitle: AppData = {
+      ...validData,
+      entries: [{ ...validData.entries[0]!, title: 'Greeting' }],
+    };
+    const file = buildExportFile(withTitle);
+    const result = parseImportFile(JSON.stringify(file));
+    expect(result).toEqual({ ok: true, data: withTitle });
+  });
+
+  it('accepts an entry with no title (old-shape import)', () => {
+    const file = buildExportFile(validData);
+    const result = parseImportFile(JSON.stringify(file));
+    expect(result.ok).toBe(true);
+  });
+
+  it('rejects an entry whose title is not a string', () => {
+    const file = buildExportFile(validData);
+    const raw = JSON.parse(JSON.stringify(file));
+    raw.data.entries[0].title = 123;
+    const result = parseImportFile(JSON.stringify(raw));
+    expect(result).toEqual({ ok: false, error: { kind: 'invalid-shape' } });
+  });
 });
