@@ -6,16 +6,24 @@ import { useMarkings } from '../../hooks/useMarkings';
 import { useRequireEntry } from '../../hooks/useRequireEntry';
 import { useSessions } from '../../hooks/useSessions';
 import { useSettings } from '../../hooks/useSettings';
-import { pickBlanks, quizCandidates } from '../../lib/quizSelection';
+import { adjacentEntries } from '../../lib/adjacentEntries';
+import { blankCount, pickBlanks, quizCandidates } from '../../lib/quizSelection';
 import { buildQuizPieces } from '../../lib/quizPieces';
 import { BackButton } from '../common/BackButton';
+import { EntrySwitcher } from '../common/EntrySwitcher';
 import { GlossEditor } from '../common/GlossEditor';
 import { WordToken, type WordTokenVariant } from '../common/WordToken';
 
 export function QuizScreen() {
   const { id } = useParams<{ id: string }>();
+  // 題材を切り替えたら穴・表示状態をリセットする
+  return <QuizSession key={id} />;
+}
+
+function QuizSession() {
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { dispatch } = useAppData();
+  const { data, dispatch } = useAppData();
   const entry = useRequireEntry(id);
   const { ranges } = useMarkings(id ?? '');
   const { settings, quizMode, showGlossHints, setShowGlossHints } = useSettings();
@@ -71,6 +79,19 @@ export function QuizScreen() {
     setActiveIndex(null);
   };
 
+  // 現在の出題設定で穴を作れる題材だけを移動先にする
+  const playable = data.entries.filter((e) => {
+    if (e.id === entry.id) return true;
+    const entryRanges = data.markings.find((m) => m.entryId === e.id)?.ranges ?? [];
+    return blankCount(quizCandidates(e.tokens, entryRanges, quizMode), e.pinned ?? [], settings.quizRatio) > 0;
+  });
+  const adjacent = adjacentEntries(playable, entry.id);
+
+  const moveTo = (targetId: string) => {
+    recordSession();
+    navigate(`/entries/${targetId}/quiz`, { replace: true });
+  };
+
   const handleFinish = () => {
     recordSession();
     navigate(`/entries/${id}`, { replace: true });
@@ -102,6 +123,10 @@ export function QuizScreen() {
           和訳ヒント {showGlossHints ? 'ON' : 'OFF'}
         </button>
       </div>
+      <EntrySwitcher {...adjacent} onMove={(e) => moveTo(e.id)} />
+      {entry.title && (
+        <div style={{ margin: '-4px 20px 10px', fontSize: 13, fontWeight: 600, textAlign: 'center' }}>{entry.title}</div>
+      )}
       <div style={{ height: 4, background: 'var(--border)', borderRadius: 2, margin: '0 20px 14px' }}>
         <div
           style={{

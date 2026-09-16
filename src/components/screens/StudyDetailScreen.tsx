@@ -10,15 +10,22 @@ import { joinTokens } from '../../lib/joinTokens';
 import { formatRelativeDate } from '../../lib/relativeDate';
 import { blankCount, quizCandidates } from '../../lib/quizSelection';
 import { lastStudiedAt } from '../../lib/stats';
+import { adjacentEntries } from '../../lib/adjacentEntries';
 import { BackButton } from '../common/BackButton';
+import { EntrySwitcher } from '../common/EntrySwitcher';
 import { RatioSlider } from '../common/RatioSlider';
 import { PencilIcon } from '../common/icons';
 
 export function StudyDetailScreen() {
   const { id } = useParams<{ id: string }>();
+  return <StudyDetail key={id} />;
+}
+
+function StudyDetail() {
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const entry = useRequireEntry(id);
-  const { setEntryTitle } = useEntries();
+  const { entries, setEntryTitle } = useEntries();
   const { dispatch } = useAppData();
   const { ranges } = useMarkings(id ?? '');
   const { sessions, studyCount } = useSessions(id ?? '');
@@ -52,7 +59,10 @@ export function StudyDetailScreen() {
         <BackButton to="/" />
         <div className="topbar-title">学習を始める</div>
       </div>
-
+      <EntrySwitcher
+        {...adjacentEntries(entries, entry.id)}
+        onMove={(e) => navigate(`/entries/${e.id}`, { replace: true })}
+      />
       <div className="screen-body">
         <div className="card">
           {editingTitle ? (
