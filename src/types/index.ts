@@ -7,6 +7,8 @@ export interface Entry {
   glosses?: Record<string, string>;
   /** 出題割合に関係なく常に穴にするトークンのインデックス */
   pinned?: number[];
+  /** 内蔵の教材ライブラリから追加した題材のID */
+  presetId?: string;
 }
 
 export interface MarkingRange {

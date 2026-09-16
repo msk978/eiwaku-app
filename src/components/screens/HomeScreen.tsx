@@ -7,6 +7,8 @@ import { joinTokens } from '../../lib/joinTokens';
 import { formatRelativeDate } from '../../lib/relativeDate';
 import { filterAndSortEntries, type SortMode } from '../../lib/homeListView';
 import { sessionsForEntry } from '../../lib/stats';
+import { PRESET_TOPICS } from '../../lib/presetLibrary';
+import { presetEntriesToAdd } from '../../lib/presets';
 import { Fab } from '../common/Fab';
 import { EmptyState } from '../common/EmptyState';
 import { GearIcon } from '../common/icons';
@@ -19,13 +21,32 @@ const SORT_LABEL: Record<SortMode, string> = {
 export function HomeScreen() {
   const navigate = useNavigate();
   const { entries } = useEntries();
-  const { data } = useAppData();
+  const { data, dispatch } = useAppData();
   const [query, setQuery] = useState('');
   const [sortMode, setSortMode] = useState<SortMode>('registered');
 
   const rows = useMemo(
     () => filterAndSortEntries(entries, data.sessions, query, sortMode),
     [entries, data.sessions, query, sortMode],
+  );
+
+  const addedPresetIds = new Set(entries.map((e) => e.presetId).filter(Boolean));
+  const missingPresets = PRESET_TOPICS.filter((t) => !addedPresetIds.has(t.presetId)).length;
+  const addPresets = () => dispatch({ type: 'ADD_ENTRIES', entries: presetEntriesToAdd(PRESET_TOPICS, entries) });
+  const libraryCard = missingPresets > 0 && (
+    <div className="card" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+      <div style={{ flex: 1, fontSize: 13, lineHeight: 1.5 }}>
+        <div style={{ fontWeight: 600 }}>教材ライブラリ</div>
+        <div style={{ color: 'var(--text-muted)', fontSize: 12.5 }}>
+          {missingPresets === PRESET_TOPICS.length
+            ? `エッセイ題材 ${PRESET_TOPICS.length}本を追加できます`
+            : `未追加の題材が ${missingPresets}本あります`}
+        </div>
+      </div>
+      <button className="primary-btn" style={{ padding: '9px 16px', fontSize: 13.5, flexShrink: 0 }} onClick={addPresets}>
+        まとめて追加
+      </button>
+    </div>
   );
 
   return (
@@ -38,11 +59,17 @@ export function HomeScreen() {
       </div>
 
       {entries.length === 0 ? (
-        <EmptyState
-          message={'まだ英文が登録されていません。\n右下のボタンから最初の英文を登録しましょう。'}
-        />
+        <>
+          <div className="screen-body" style={{ flex: 'none', paddingBottom: 0 }}>
+            {libraryCard}
+          </div>
+          <EmptyState
+            message={'まだ英文が登録されていません。\n右下のボタンから最初の英文を登録しましょう。'}
+          />
+        </>
       ) : (
         <div className="screen-body" style={{ paddingBottom: 100 }}>
+          {libraryCard}
           <div style={{ display: 'flex', gap: 8 }}>
             <input
               type="text"

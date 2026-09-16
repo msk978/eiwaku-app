@@ -4,6 +4,7 @@ import { loadData, saveData } from '../lib/storage';
 
 type Action =
   | { type: 'ADD_ENTRY'; entry: Entry }
+  | { type: 'ADD_ENTRIES'; entries: Entry[] }
   | { type: 'DELETE_ENTRY'; entryId: string }
   | { type: 'SET_ENTRY_TITLE'; entryId: string; title: string | undefined }
   | { type: 'SET_MARKING_RANGES'; entryId: string; ranges: MarkingRange[] }
@@ -23,6 +24,12 @@ function reducer(state: AppData, action: Action): AppData {
         ...state,
         entries: [...state.entries, action.entry],
         markings: [...state.markings, { entryId: action.entry.id, ranges: [] }],
+      };
+    case 'ADD_ENTRIES':
+      return {
+        ...state,
+        entries: [...state.entries, ...action.entries],
+        markings: [...state.markings, ...action.entries.map((e) => ({ entryId: e.id, ranges: [] }))],
       };
     case 'DELETE_ENTRY':
       return {
