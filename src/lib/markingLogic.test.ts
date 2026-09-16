@@ -1,54 +1,51 @@
 import { describe, expect, it } from 'vitest';
-import { handleTokenTap } from './markingLogic';
+import { isMarked, toggleWordMarking } from './markingLogic';
 
-describe('handleTokenTap', () => {
-  it('sets pendingStart on the first tap of an unmarked token', () => {
-    const result = handleTokenTap([], null, 5);
-    expect(result).toEqual({ ranges: [], pendingStart: 5 });
+describe('toggleWordMarking', () => {
+  it('marks a single word on tap', () => {
+    expect(toggleWordMarking([], 5)).toEqual([{ start: 5, end: 5 }]);
   });
 
-  it('confirms a range spanning start and end tokens', () => {
-    const result = handleTokenTap([], 5, 8);
-    expect(result).toEqual({ ranges: [{ start: 5, end: 8 }], pendingStart: null });
+  it('marks adjacent words as separate single-word ranges', () => {
+    const once = toggleWordMarking([], 5);
+    expect(toggleWordMarking(once, 6)).toEqual([
+      { start: 5, end: 5 },
+      { start: 6, end: 6 },
+    ]);
   });
 
-  it('normalizes the range when the end token is tapped before the start', () => {
-    const result = handleTokenTap([], 8, 5);
-    expect(result).toEqual({ ranges: [{ start: 5, end: 8 }], pendingStart: null });
+  it('unmarks a single-word marking on re-tap', () => {
+    expect(toggleWordMarking([{ start: 5, end: 5 }], 5)).toEqual([]);
   });
 
-  it('confirms a single-word range when the same token is tapped twice', () => {
-    const result = handleTokenTap([], 5, 5);
-    expect(result).toEqual({ ranges: [{ start: 5, end: 5 }], pendingStart: null });
+  it('removes only the tapped word from a legacy multi-word range', () => {
+    expect(toggleWordMarking([{ start: 2, end: 4 }], 3)).toEqual([
+      { start: 2, end: 2 },
+      { start: 4, end: 4 },
+    ]);
   });
 
-  it('removes an existing marking on a first-tap re-tap', () => {
-    const ranges = [{ start: 2, end: 4 }];
-    const result = handleTokenTap(ranges, null, 3);
-    expect(result).toEqual({ ranges: [], pendingStart: null });
+  it('trims the edge of a legacy multi-word range', () => {
+    expect(toggleWordMarking([{ start: 2, end: 4 }], 2)).toEqual([{ start: 3, end: 4 }]);
   });
 
-  it('leaves other markings untouched when removing one', () => {
-    const ranges = [{ start: 2, end: 4 }, { start: 10, end: 10 }];
-    const result = handleTokenTap(ranges, null, 3);
-    expect(result.ranges).toEqual([{ start: 10, end: 10 }]);
-  });
-
-  it('overwrites an overlapping existing range entirely rather than trimming it', () => {
-    const ranges = [{ start: 2, end: 4 }];
-    const result = handleTokenTap(ranges, 3, 6);
-    expect(result).toEqual({ ranges: [{ start: 3, end: 6 }], pendingStart: null });
-  });
-
-  it('removes multiple overlapping ranges when a new range spans them', () => {
-    const ranges = [{ start: 0, end: 1 }, { start: 5, end: 6 }, { start: 9, end: 10 }];
-    const result = handleTokenTap(ranges, 1, 9);
-    expect(result.ranges).toEqual([{ start: 1, end: 9 }]);
+  it('leaves other markings untouched', () => {
+    const ranges = [{ start: 2, end: 2 }, { start: 10, end: 10 }];
+    expect(toggleWordMarking(ranges, 2)).toEqual([{ start: 10, end: 10 }]);
   });
 
   it('keeps ranges sorted by start position', () => {
-    const ranges = [{ start: 10, end: 10 }];
-    const result = handleTokenTap(ranges, 0, 2);
-    expect(result.ranges).toEqual([{ start: 0, end: 2 }, { start: 10, end: 10 }]);
+    expect(toggleWordMarking([{ start: 10, end: 10 }], 0)).toEqual([
+      { start: 0, end: 0 },
+      { start: 10, end: 10 },
+    ]);
+  });
+});
+
+describe('isMarked', () => {
+  it('detects indices inside any range', () => {
+    const ranges = [{ start: 2, end: 4 }];
+    expect(isMarked(ranges, 3)).toBe(true);
+    expect(isMarked(ranges, 5)).toBe(false);
   });
 });

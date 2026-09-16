@@ -1,0 +1,2 @@
+English-Japanese dictionary "ejdict-hand" (Public Domain)
+https://github.com/kujirahand/EJDict

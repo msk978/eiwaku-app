@@ -1,28 +1,18 @@
 import type { MarkingRange } from '../types';
 
-export interface TapResult {
-  ranges: MarkingRange[];
-  pendingStart: number | null;
-}
-
-export function handleTokenTap(
-  ranges: MarkingRange[],
-  pendingStart: number | null,
-  tapped: number,
-): TapResult {
-  if (pendingStart === null) {
-    const covering = ranges.find((r) => tapped >= r.start && tapped <= r.end);
-    if (covering) {
-      return { ranges: ranges.filter((r) => r !== covering), pendingStart: null };
-    }
-    return { ranges, pendingStart: tapped };
+export function toggleWordMarking(ranges: MarkingRange[], tapped: number): MarkingRange[] {
+  const covering = ranges.find((r) => tapped >= r.start && tapped <= r.end);
+  if (!covering) {
+    return [...ranges, { start: tapped, end: tapped }].sort((a, b) => a.start - b.start);
   }
 
-  const start = Math.min(pendingStart, tapped);
-  const end = Math.max(pendingStart, tapped);
+  const split: MarkingRange[] = [];
+  if (covering.start < tapped) split.push({ start: covering.start, end: tapped - 1 });
+  if (tapped < covering.end) split.push({ start: tapped + 1, end: covering.end });
 
-  const kept = ranges.filter((r) => r.end < start || r.start > end);
-  const next = [...kept, { start, end }].sort((a, b) => a.start - b.start);
+  return [...ranges.filter((r) => r !== covering), ...split].sort((a, b) => a.start - b.start);
+}
 
-  return { ranges: next, pendingStart: null };
+export function isMarked(ranges: MarkingRange[], index: number): boolean {
+  return ranges.some((r) => index >= r.start && index <= r.end);
 }

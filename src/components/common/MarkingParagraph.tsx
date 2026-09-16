@@ -1,4 +1,5 @@
 import { Fragment } from 'react';
+import { isMarked } from '../../lib/markingLogic';
 import { isWordToken } from '../../lib/tokenize';
 import type { MarkingRange } from '../../types';
 import { WordToken } from './WordToken';
@@ -6,11 +7,11 @@ import { WordToken } from './WordToken';
 interface MarkingParagraphProps {
   tokens: string[];
   ranges: MarkingRange[];
-  pendingStart: number | null;
+  activeIndex: number | null;
   onTap: (index: number) => void;
 }
 
-export function MarkingParagraph({ tokens, ranges, pendingStart, onTap }: MarkingParagraphProps) {
+export function MarkingParagraph({ tokens, ranges, activeIndex, onTap }: MarkingParagraphProps) {
   return (
     <div
       style={{
@@ -22,8 +23,8 @@ export function MarkingParagraph({ tokens, ranges, pendingStart, onTap }: Markin
       {tokens.map((token, i) => {
         const isWord = isWordToken(token);
         const nextIsPunct = i + 1 < tokens.length && !isWordToken(tokens[i + 1]!);
-        const covering = ranges.find((r) => i >= r.start && i <= r.end);
-        const variant = pendingStart === i ? 'pendingStart' : covering ? 'marked' : 'normal';
+        const marked = isMarked(ranges, i);
+        const variant = marked ? (activeIndex === i ? 'markedActive' : 'marked') : 'normal';
         return (
           <Fragment key={i}>
             {i > 0 && isWord && ' '}

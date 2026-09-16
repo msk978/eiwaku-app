@@ -3,6 +3,10 @@ export interface Entry {
   createdAt: string;
   tokens: string[];
   title?: string;
+  /** 手動で修正した和訳。キーはトークンのインデックス */
+  glosses?: Record<string, string>;
+  /** 出題割合に関係なく常に穴にするトークンのインデックス */
+  pinned?: number[];
 }
 
 export interface MarkingRange {
@@ -23,8 +27,12 @@ export interface SessionRecord {
   correctCount: number;
 }
 
+export type QuizMode = 'marked' | 'allWords';
+
 export interface Settings {
   quizRatio: number;
+  quizMode?: QuizMode;
+  showGlossHints?: boolean;
 }
 
 export interface AppData {

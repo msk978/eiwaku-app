@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { pickQuizRanges } from './quizSelection';
+import { blankCount, pickBlanks, pickQuizRanges, quizCandidates, quizCount } from './quizSelection';
 import type { MarkingRange } from '../types';
 
 describe('pickQuizRanges', () => {
@@ -60,5 +60,64 @@ describe('pickQuizRanges', () => {
     const result = pickQuizRanges(ranges, 1, Math.random);
     const starts = result.map((r) => r.start);
     expect(starts).toEqual([...starts].sort((a, b) => a - b));
+  });
+});
+
+describe('quizCandidates', () => {
+  const tokens = ['Keep', 'up', 'with', 'it', ',', 'please', '.'];
+
+  it('uses every word token (not punctuation) in allWords mode', () => {
+    expect(quizCandidates(tokens, [], 'allWords').map((r) => r.start)).toEqual([0, 1, 2, 3, 5]);
+  });
+
+  it('splits marked ranges into single-word ranges in marked mode', () => {
+    expect(quizCandidates(tokens, [{ start: 0, end: 2 }], 'marked')).toEqual([
+      { start: 0, end: 0 },
+      { start: 1, end: 1 },
+      { start: 2, end: 2 },
+    ]);
+  });
+
+  it('skips punctuation inside marked ranges and dedupes overlaps', () => {
+    expect(quizCandidates(tokens, [{ start: 3, end: 5 }, { start: 5, end: 5 }], 'marked')).toEqual([
+      { start: 3, end: 3 },
+      { start: 5, end: 5 },
+    ]);
+  });
+});
+
+describe('quizCount', () => {
+  it('applies the ratio in 10% steps with at least one blank', () => {
+    expect(quizCount(50, 0.3)).toBe(15);
+    expect(quizCount(3, 0.1)).toBe(1);
+    expect(quizCount(0, 0.5)).toBe(0);
+  });
+});
+
+describe('pickBlanks', () => {
+  const candidates: MarkingRange[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => ({ start: i, end: i }));
+
+  it('always includes pinned spots, even when the ratio is low', () => {
+    const result = pickBlanks(candidates, [3, 7], 0.1, Math.random).map((r) => r.start);
+    expect(result).toEqual([3, 7]);
+  });
+
+  it('fills the rest randomly up to the ratio', () => {
+    const result = pickBlanks(candidates, [3], 0.5, Math.random).map((r) => r.start);
+    expect(result).toHaveLength(5);
+    expect(result).toContain(3);
+    expect(new Set(result).size).toBe(5);
+  });
+
+  it('includes pinned spots outside the current candidates', () => {
+    expect(pickBlanks([], [4], 0.5).map((r) => r.start)).toEqual([4]);
+  });
+});
+
+describe('blankCount', () => {
+  it('never drops below the number of pinned spots', () => {
+    const candidates: MarkingRange[] = [0, 1, 2, 3].map((i) => ({ start: i, end: i }));
+    expect(blankCount(candidates, [0, 1, 2], 0.1)).toBe(3);
+    expect(blankCount(candidates, [], 0.5)).toBe(2);
   });
 });

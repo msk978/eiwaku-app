@@ -1,20 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { accuracyRate, lastStudiedAt, sessionsForEntry, studyCount } from './stats';
+import { lastStudiedAt, sessionsForEntry, studyCount } from './stats';
 import type { SessionRecord } from '../types';
-
-describe('accuracyRate', () => {
-  it('returns null when there are no sessions', () => {
-    expect(accuracyRate([])).toBeNull();
-  });
-
-  it('computes a weighted accuracy across multiple sessions', () => {
-    const sessions: SessionRecord[] = [
-      { id: 's1', entryId: 'e1', timestamp: 't1', totalQuestions: 4, correctCount: 2 },
-      { id: 's2', entryId: 'e1', timestamp: 't2', totalQuestions: 6, correctCount: 6 },
-    ];
-    expect(accuracyRate(sessions)).toBeCloseTo(0.8);
-  });
-});
 
 describe('studyCount', () => {
   it('counts the number of sessions', () => {

@@ -14,7 +14,6 @@ import { GearIcon } from '../common/icons';
 const SORT_LABEL: Record<SortMode, string> = {
   registered: '登録順',
   lastStudied: '最近学習した順',
-  accuracy: '正答率順',
 };
 
 export function HomeScreen() {
@@ -83,7 +82,7 @@ export function HomeScreen() {
           {rows.length === 0 ? (
             <EmptyState message={`「${query}」に一致する英文はありません`} />
           ) : (
-            rows.map(({ entry, lastStudied, accuracy }) => {
+            rows.map(({ entry, lastStudied }) => {
               const sessions = sessionsForEntry(data.sessions, entry.id);
               const preview = joinTokens(entry.tokens.slice(0, 24));
               return (
@@ -114,7 +113,6 @@ export function HomeScreen() {
                   </div>
                   <div style={{ display: 'flex', gap: 14, fontSize: 12.5, color: 'var(--text-muted)' }}>
                     <span>{entry.tokens.filter((t) => /[A-Za-z0-9]/.test(t)).length}語</span>
-                    <span>正答率 {accuracy === null ? '—' : `${Math.round(accuracy * 100)}%`}</span>
                     <span>学習 {studyCount(sessions)}回</span>
                     <span>{formatRelativeDate(lastStudied)}</span>
                   </div>

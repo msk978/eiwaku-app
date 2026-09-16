@@ -1,13 +1,12 @@
-import { accuracyRate, lastStudiedAt, sessionsForEntry } from './stats';
+import { lastStudiedAt, sessionsForEntry } from './stats';
 import { joinTokens } from './joinTokens';
 import type { Entry, SessionRecord } from '../types';
 
-export type SortMode = 'registered' | 'lastStudied' | 'accuracy';
+export type SortMode = 'registered' | 'lastStudied';
 
 export interface HomeListRow {
   entry: Entry;
   lastStudied: string | null;
-  accuracy: number | null;
 }
 
 function matches(entry: Entry, query: string): boolean {
@@ -17,7 +16,7 @@ function matches(entry: Entry, query: string): boolean {
   return joinTokens(entry.tokens).toLowerCase().includes(q);
 }
 
-function compareNullableDesc(a: number | string | null, b: number | string | null): number {
+function compareNullableDesc(a: string | null, b: string | null): number {
   if (a === null && b === null) return 0;
   if (a === null) return 1;
   if (b === null) return -1;
@@ -37,15 +36,11 @@ export function filterAndSortEntries(
       return {
         entry,
         lastStudied: lastStudiedAt(entrySessions),
-        accuracy: accuracyRate(entrySessions),
       };
     });
 
   if (sortMode === 'lastStudied') {
     return rows.sort((a, b) => compareNullableDesc(a.lastStudied, b.lastStudied));
-  }
-  if (sortMode === 'accuracy') {
-    return rows.sort((a, b) => compareNullableDesc(a.accuracy, b.accuracy));
   }
   return rows;
 }

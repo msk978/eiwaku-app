@@ -1,82 +1,112 @@
 import { Fragment, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useAppData } from '../../context/AppDataContext';
+import { useGlosses } from '../../hooks/useGlosses';
 import { useMarkings } from '../../hooks/useMarkings';
 import { useRequireEntry } from '../../hooks/useRequireEntry';
 import { useSessions } from '../../hooks/useSessions';
 import { useSettings } from '../../hooks/useSettings';
-import { pickQuizRanges } from '../../lib/quizSelection';
+import { pickBlanks, quizCandidates } from '../../lib/quizSelection';
 import { buildQuizPieces } from '../../lib/quizPieces';
 import { BackButton } from '../common/BackButton';
-import { WordToken } from '../common/WordToken';
-import { CheckIcon, XIcon } from '../common/icons';
-
-type Phase = 'hidden' | 'revealed' | 'graded';
+import { GlossEditor } from '../common/GlossEditor';
+import { WordToken, type WordTokenVariant } from '../common/WordToken';
 
 export function QuizScreen() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { dispatch } = useAppData();
   const entry = useRequireEntry(id);
   const { ranges } = useMarkings(id ?? '');
-  const { settings } = useSettings();
+  const { settings, quizMode, showGlossHints, setShowGlossHints } = useSettings();
   const { addSession } = useSessions(id ?? '');
 
-  const [quizRanges] = useState(() => pickQuizRanges(ranges, settings.quizRatio));
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [phase, setPhase] = useState<Phase>('hidden');
-  const [lastGradeCorrect, setLastGradeCorrect] = useState<boolean | null>(null);
-  const [correctCount, setCorrectCount] = useState(0);
+  const drawBlanks = () =>
+    entry ? pickBlanks(quizCandidates(entry.tokens, ranges, quizMode), entry.pinned ?? [], settings.quizRatio) : [];
+
+  const [blanks, setBlanks] = useState(drawBlanks);
+  const [revealed, setRevealed] = useState<Set<number>>(() => new Set());
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const { glossFor, setGloss } = useGlosses(
+    entry,
+    blanks.map((r) => r.start),
+  );
 
   useEffect(() => {
-    if (entry && quizRanges.length === 0) {
+    if (entry && blanks.length === 0) {
       navigate(`/entries/${id}`, { replace: true });
     }
-  }, [entry, quizRanges.length, id, navigate]);
+  }, [entry, blanks.length, id, navigate]);
 
-  if (!entry || quizRanges.length === 0) return null;
+  if (!entry || blanks.length === 0) return null;
 
-  const pieces = buildQuizPieces(entry.tokens, quizRanges);
-  const total = quizRanges.length;
-  const currentBlankLabel =
-    pieces.find((p): p is Extract<typeof p, { type: 'blank' }> => p.type === 'blank' && p.rangeIndex === currentIndex)
-      ?.label ?? '';
+  const pinned = new Set(entry.pinned ?? []);
+  const pieces = buildQuizPieces(entry.tokens, blanks);
+  const total = blanks.length;
+  const pinnedInBlanks = blanks.filter((r) => pinned.has(r.start)).length;
+  const allRevealed = revealed.size === total;
 
-  const handleReveal = (rangeIndex: number) => {
-    if (rangeIndex !== currentIndex || phase !== 'hidden') return;
-    setPhase('revealed');
-  };
-
-  const handleGrade = (correct: boolean) => {
-    setLastGradeCorrect(correct);
-    setPhase('graded');
-    if (correct) setCorrectCount((c) => c + 1);
-  };
-
-  const handleNext = () => {
-    const nextCorrect = correctCount;
-    if (currentIndex === total - 1) {
-      addSession(total, nextCorrect);
-      navigate(`/entries/${id}/quiz/result`, {
-        replace: true,
-        state: { total, correct: nextCorrect },
-      });
+  const handleTap = (tokenIndex: number) => {
+    setActiveIndex(tokenIndex);
+    if (!revealed.has(tokenIndex)) {
+      setRevealed((prev) => new Set(prev).add(tokenIndex));
       return;
     }
-    setCurrentIndex((i) => i + 1);
-    setPhase('hidden');
-    setLastGradeCorrect(null);
+    dispatch({ type: 'TOGGLE_PIN', entryId: entry.id, index: tokenIndex });
+  };
+
+  const toggleRevealAll = () => {
+    setRevealed(allRevealed ? new Set() : new Set(blanks.map((r) => r.start)));
+    setActiveIndex(null);
+  };
+
+  const recordSession = () => {
+    if (revealed.size > 0) addSession(total);
+  };
+
+  const handleRedraw = () => {
+    recordSession();
+    setBlanks(drawBlanks());
+    setRevealed(new Set());
+    setActiveIndex(null);
+  };
+
+  const handleFinish = () => {
+    recordSession();
+    navigate(`/entries/${id}`, { replace: true });
   };
 
   return (
     <div className="app-shell">
       <div className="topbar">
         <BackButton to={`/entries/${id}`} />
-        <div className="topbar-title">設問 {currentIndex + 1} / {total}</div>
+        <div className="topbar-title" style={{ fontSize: 16 }}>
+          穴 {total}箇所
+          <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--pin-text)', marginLeft: 8 }}>
+            固定 {pinnedInBlanks}
+          </span>
+        </div>
+        <button
+          onClick={() => setShowGlossHints(!showGlossHints)}
+          aria-pressed={showGlossHints}
+          style={{
+            background: showGlossHints ? 'var(--accent-soft)' : 'none',
+            border: '1.5px solid ' + (showGlossHints ? 'var(--accent)' : 'var(--border)'),
+            color: showGlossHints ? 'var(--accent)' : 'var(--text-muted)',
+            borderRadius: 999,
+            padding: '5px 12px',
+            fontSize: 12.5,
+            fontWeight: 600,
+          }}
+        >
+          和訳ヒント {showGlossHints ? 'ON' : 'OFF'}
+        </button>
       </div>
       <div style={{ height: 4, background: 'var(--border)', borderRadius: 2, margin: '0 20px 14px' }}>
         <div
           style={{
             height: '100%',
-            width: `${(currentIndex / total) * 100}%`,
+            width: `${(revealed.size / total) * 100}%`,
             background: 'var(--accent)',
             borderRadius: 2,
             transition: 'width 0.2s',
@@ -92,29 +122,33 @@ export function QuizScreen() {
             if (piece.type === 'text') {
               return <Fragment key={i}>{space}{piece.text}</Fragment>;
             }
-            const j = piece.rangeIndex;
-            let variant: 'blankHidden' | 'revealedPending' | 'revealedCorrect' | 'revealedIncorrect' = 'blankHidden';
-            let label = '';
-            if (j < currentIndex) {
-              variant = 'revealedPending';
-              label = piece.label;
-            } else if (j === currentIndex) {
-              if (phase === 'hidden') {
-                variant = 'blankHidden';
-              } else if (phase === 'revealed') {
-                variant = 'revealedPending';
-                label = piece.label;
-              } else {
-                variant = lastGradeCorrect ? 'revealedCorrect' : 'revealedIncorrect';
-                label = piece.label;
-              }
-            }
+            const tokenIndex = blanks[piece.rangeIndex]!.start;
+            const isRevealed = revealed.has(tokenIndex);
+            const isPinned = pinned.has(tokenIndex);
+            const variant: WordTokenVariant = isRevealed
+              ? isPinned
+                ? 'revealedPinned'
+                : 'revealedPending'
+              : isPinned
+                ? 'blankPinned'
+                : 'blankHidden';
+            const token = (
+              <WordToken variant={variant} onClick={() => handleTap(tokenIndex)}>
+                {isRevealed ? piece.label : ''}
+              </WordToken>
+            );
+            const hint = showGlossHints ? glossFor(tokenIndex).text : undefined;
             return (
               <Fragment key={i}>
                 {space}
-                <WordToken variant={variant} onClick={j === currentIndex && phase === 'hidden' ? () => handleReveal(j) : undefined}>
-                  {label}
-                </WordToken>
+                {hint ? (
+                  <ruby style={{ rubyAlign: 'center' }}>
+                    {token}
+                    <rt style={{ fontFamily: 'var(--font-ui)', fontSize: 10, color: 'var(--text-muted)', lineHeight: 1 }}>{hint}</rt>
+                  </ruby>
+                ) : (
+                  token
+                )}
               </Fragment>
             );
           })}
@@ -126,68 +160,44 @@ export function QuizScreen() {
           flexShrink: 0,
           background: 'var(--surface)',
           borderTop: '1px solid var(--border)',
-          padding: '16px 18px 22px',
-          minHeight: 96,
+          padding: '14px 18px 22px',
           display: 'flex',
           flexDirection: 'column',
-          justifyContent: 'center',
-          gap: 10,
+          gap: 12,
         }}
       >
-        {phase === 'hidden' && (
-          <div style={{ fontSize: 13, color: 'var(--text-muted)', textAlign: 'center' }}>
-            空欄をタップすると答えが表示されます
+        {activeIndex !== null && revealed.has(activeIndex) ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <GlossEditor
+              key={activeIndex}
+              word={entry.tokens[activeIndex]!}
+              gloss={glossFor(activeIndex)}
+              onSave={(text) => setGloss(activeIndex, text)}
+            />
+            <div style={{ fontSize: 12.5, color: pinned.has(activeIndex) ? 'var(--pin-text)' : 'var(--text-muted)' }}>
+              {pinned.has(activeIndex)
+                ? '固定中: 割合を変えても毎回穴になります(もう一度タップで解除)'
+                : 'もう一度タップすると、この穴を固定できます'}
+            </div>
+          </div>
+        ) : (
+          <div style={{ fontSize: 13, color: 'var(--text-muted)', textAlign: 'center', lineHeight: 1.6 }}>
+            好きな空欄をタップして答えを表示。
+            <br />
+            間違えた・覚えたい穴はもう一度タップで固定。
           </div>
         )}
-        {phase === 'revealed' && (
-          <>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-              <span style={{ fontFamily: 'var(--font-serif)', fontSize: 16, fontWeight: 600 }}>{currentBlankLabel}</span>
-              <div style={{ display: 'flex', gap: 10 }}>
-                <button
-                  onClick={() => handleGrade(false)}
-                  aria-label="不正解"
-                  style={{ width: 44, height: 44, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1.5px solid var(--danger)', background: 'none' }}
-                >
-                  <XIcon />
-                </button>
-                <button
-                  onClick={() => handleGrade(true)}
-                  aria-label="正解"
-                  style={{ width: 44, height: 44, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1.5px solid var(--success)', background: 'none' }}
-                >
-                  <CheckIcon />
-                </button>
-              </div>
-            </div>
-            <div style={{ fontSize: 13, color: 'var(--text-muted)', textAlign: 'center' }}>思い出せたか自己採点してください</div>
-          </>
-        )}
-        {phase === 'graded' && (
-          <>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <div
-                style={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: '50%',
-                  background: lastGradeCorrect ? 'var(--success-soft)' : 'var(--danger-soft)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                {lastGradeCorrect ? <CheckIcon size={16} /> : <XIcon size={16} />}
-              </div>
-              <span style={{ fontSize: 13.5, color: 'var(--text-muted)' }}>
-                {lastGradeCorrect ? '正解として記録しました' : '不正解として記録しました'}
-              </span>
-            </div>
-            <button className="primary-btn" onClick={handleNext}>
-              {currentIndex === total - 1 ? '結果を見る' : '次の空欄へ'}
-            </button>
-          </>
-        )}
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button className="secondary-btn" style={{ flex: 1, padding: '11px 6px', fontSize: 13.5 }} onClick={toggleRevealAll}>
+            {allRevealed ? 'すべて隠す' : 'すべて表示'}
+          </button>
+          <button className="secondary-btn" style={{ flex: 1, padding: '11px 6px', fontSize: 13.5 }} onClick={handleRedraw}>
+            穴を引き直す
+          </button>
+          <button className="primary-btn" style={{ flex: 1, padding: '11px 6px', fontSize: 13.5 }} onClick={handleFinish}>
+            終了
+          </button>
+        </div>
       </div>
     </div>
   );

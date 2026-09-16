@@ -3,11 +3,11 @@ import type { ReactNode } from 'react';
 export type WordTokenVariant =
   | 'normal'
   | 'marked'
-  | 'pendingStart'
+  | 'markedActive'
   | 'blankHidden'
   | 'revealedPending'
-  | 'revealedCorrect'
-  | 'revealedIncorrect';
+  | 'blankPinned'
+  | 'revealedPinned';
 
 const VARIANT_STYLE: Record<WordTokenVariant, React.CSSProperties> = {
   normal: {},
@@ -17,10 +17,12 @@ const VARIANT_STYLE: Record<WordTokenVariant, React.CSSProperties> = {
     color: '#2c4560',
     borderRadius: 5,
   },
-  pendingStart: {
-    outline: '2px dashed var(--accent)',
+  markedActive: {
+    background: 'var(--accent-soft)',
+    boxShadow: 'inset 0 -2px 0 var(--accent)',
+    color: '#2c4560',
+    outline: '2px solid var(--accent)',
     outlineOffset: 1,
-    background: '#fff',
     borderRadius: 5,
   },
   blankHidden: {
@@ -36,21 +38,22 @@ const VARIANT_STYLE: Record<WordTokenVariant, React.CSSProperties> = {
     borderBottom: '2px solid var(--accent)',
     padding: '0 2px',
   },
-  revealedCorrect: {
-    color: 'var(--success)',
-    fontWeight: 600,
-    borderBottom: '2px solid var(--success)',
-    background: 'var(--success-soft)',
-    borderRadius: 5,
-    padding: '1px 5px',
+  blankPinned: {
+    display: 'inline-block',
+    minWidth: 64,
+    height: 20,
+    borderBottom: '2px solid var(--pin)',
+    background: 'var(--pin-soft)',
+    borderRadius: '5px 5px 0 0',
+    verticalAlign: 'middle',
   },
-  revealedIncorrect: {
-    color: 'var(--danger)',
+  revealedPinned: {
+    color: 'var(--pin-text)',
     fontWeight: 600,
-    borderBottom: '2px solid var(--danger)',
-    background: 'var(--danger-soft)',
+    borderBottom: '2px solid var(--pin)',
+    background: 'var(--pin-soft)',
     borderRadius: 5,
-    padding: '1px 5px',
+    padding: '0 4px',
   },
 };
 

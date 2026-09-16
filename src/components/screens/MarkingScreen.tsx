@@ -1,32 +1,38 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useGlosses } from '../../hooks/useGlosses';
 import { useMarkings } from '../../hooks/useMarkings';
 import { useRequireEntry } from '../../hooks/useRequireEntry';
-import { handleTokenTap } from '../../lib/markingLogic';
+import { isMarked, toggleWordMarking } from '../../lib/markingLogic';
+import { expandToWordRanges } from '../../lib/quizSelection';
+import { GlossEditor } from '../common/GlossEditor';
 import { MarkingParagraph } from '../common/MarkingParagraph';
 import { BackButton } from '../common/BackButton';
 
 export function MarkingScreen() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [pendingStart, setPendingStart] = useState<number | null>(null);
+  const [lastTapped, setLastTapped] = useState<number | null>(null);
 
   const entry = useRequireEntry(id);
   const { ranges, setRanges } = useMarkings(id ?? '');
+  const activeIndex = lastTapped !== null && isMarked(ranges, lastTapped) ? lastTapped : null;
+  const { glossFor, setGloss } = useGlosses(entry, activeIndex !== null ? [activeIndex] : []);
 
   if (!entry) return null;
 
+  const markedWordCount = expandToWordRanges(entry.tokens, ranges).length;
+
   const onTap = (index: number) => {
-    const result = handleTokenTap(ranges, pendingStart, index);
-    setRanges(result.ranges);
-    setPendingStart(result.pendingStart);
+    setRanges(toggleWordMarking(ranges, index));
+    setLastTapped(index);
   };
 
   return (
     <div className="app-shell">
       <div className="topbar">
         <BackButton to="/" />
-        <div className="topbar-title" style={{ flex: 1 }}>覚える語句を選択</div>
+        <div className="topbar-title" style={{ flex: 1 }}>穴埋めにする単語を選択</div>
         <button
           onClick={() => navigate('/', { replace: true })}
           style={{ background: 'none', border: 'none', color: 'var(--accent)', fontSize: 14.5, fontWeight: 600, padding: '8px 4px' }}
@@ -36,7 +42,7 @@ export function MarkingScreen() {
       </div>
 
       <div className="screen-body" style={{ flex: 1 }}>
-        <MarkingParagraph tokens={entry.tokens} ranges={ranges} pendingStart={pendingStart} onTap={onTap} />
+        <MarkingParagraph tokens={entry.tokens} ranges={ranges} activeIndex={activeIndex} onTap={onTap} />
       </div>
 
       <div
@@ -47,15 +53,20 @@ export function MarkingScreen() {
           padding: '14px 20px 22px',
           display: 'flex',
           flexDirection: 'column',
-          gap: 6,
+          gap: 8,
         }}
       >
-        <div style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--accent)' }}>
-          {ranges.length}箇所 選択中
-          {pendingStart !== null ? ' ・ 開始語をタップ済み' : ''}
-        </div>
+        <div style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--accent)' }}>{markedWordCount}語 選択中</div>
+        {activeIndex !== null && (
+          <GlossEditor
+            key={activeIndex}
+            word={entry.tokens[activeIndex]!}
+            gloss={glossFor(activeIndex)}
+            onSave={(text) => setGloss(activeIndex, text)}
+          />
+        )}
         <div style={{ fontSize: 12.5, color: 'var(--text-muted)' }}>
-          単語をタップ → もう一度別の単語をタップして範囲を確定。マーキング済みの語句は再タップで解除されます。
+          タップした単語が1語ずつ穴埋めの対象になります。もう一度タップすると解除されます。和訳はタップして修正できます。
         </div>
       </div>
     </div>

@@ -38,9 +38,4 @@ describe('filterAndSortEntries', () => {
     const rows = filterAndSortEntries(entries, sessions, '', 'lastStudied');
     expect(rows.map((r) => r.entry.id)).toEqual(['e2', 'e1', 'e3']);
   });
-
-  it('sorts by accuracy descending, with entries lacking sessions last', () => {
-    const rows = filterAndSortEntries(entries, sessions, '', 'accuracy');
-    expect(rows.map((r) => r.entry.id)).toEqual(['e1', 'e2', 'e3']);
-  });
 });

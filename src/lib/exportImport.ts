@@ -51,12 +51,27 @@ export function parseImportFile(raw: string): ImportResult {
     return { ok: false, error: { kind: 'invalid-shape' } };
   }
 
-  const entries = d.entries as { id: unknown; tokens: unknown; title?: unknown }[];
+  const entries = d.entries as { id: unknown; tokens: unknown; title?: unknown; glosses?: unknown; pinned?: unknown }[];
   for (const e of entries) {
     if (typeof e.id !== 'string' || !Array.isArray(e.tokens)) {
       return { ok: false, error: { kind: 'invalid-shape' } };
     }
     if (e.title !== undefined && typeof e.title !== 'string') {
+      return { ok: false, error: { kind: 'invalid-shape' } };
+    }
+    if (
+      e.glosses !== undefined &&
+      (typeof e.glosses !== 'object' ||
+        e.glosses === null ||
+        Object.values(e.glosses).some((g) => typeof g !== 'string'))
+    ) {
+      return { ok: false, error: { kind: 'invalid-shape' } };
+    }
+    if (
+      e.pinned !== undefined &&
+      (!Array.isArray(e.pinned) ||
+        e.pinned.some((i) => typeof i !== 'number' || i < 0 || i >= (e.tokens as unknown[]).length))
+    ) {
       return { ok: false, error: { kind: 'invalid-shape' } };
     }
   }

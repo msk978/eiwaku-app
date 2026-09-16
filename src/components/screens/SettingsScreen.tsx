@@ -24,7 +24,7 @@ function importErrorMessage(kind: ImportError['kind']): string {
 
 export function SettingsScreen() {
   const { data, dispatch } = useAppData();
-  const { settings } = useSettings();
+  const { settings, quizMode } = useSettings();
   const { entries, deleteEntry } = useEntries();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -77,7 +77,7 @@ export function SettingsScreen() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontSize: 14.5 }}>出題する割合</span>
               <span style={{ fontSize: 13.5, color: 'var(--text-muted)' }}>
-                {Math.round(settings.quizRatio * 100)}%(学習開始画面で変更)
+                {quizMode === 'allWords' ? '全単語' : 'マーキング'}から{Math.round(settings.quizRatio * 100)}%(学習開始画面で変更)
               </span>
             </div>
           </div>
