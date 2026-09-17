@@ -79,3 +79,28 @@ function shuffle<T>(items: T[], rng: () => number): T[] {
   }
   return pool;
 }
+
+const ARTICLES = new Set(['a', 'an', 'the']);
+
+export function isArticle(token: string): boolean {
+  return ARTICLES.has(token.toLowerCase());
+}
+
+/**
+ * 出題候補を作る。割合が100%未満のときは冠詞(a/an/the)を自動の穴にしない。
+ * 手動で固定した穴は冠詞でも残す。
+ */
+export function blankCandidates(
+  tokens: string[],
+  ranges: MarkingRange[],
+  mode: QuizMode,
+  pinned: number[],
+  ratio: number,
+): MarkingRange[] {
+  const candidates = quizCandidates(tokens, ranges, mode);
+  if (ratio >= 1) return candidates;
+  const pinnedSet = new Set(pinned);
+  return candidates.filter(
+    (r) => pinnedSet.has(r.start) || r.start !== r.end || !isArticle(tokens[r.start] ?? ''),
+  );
+}

@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { blankCount, pickBlanks, pickQuizRanges, quizCandidates, quizCount } from './quizSelection';
+import {
+  blankCandidates,
+  blankCount,
+  pickBlanks,
+  pickQuizRanges,
+  quizCandidates,
+  quizCount,
+} from './quizSelection';
 import type { MarkingRange } from '../types';
 
 describe('pickQuizRanges', () => {
@@ -119,5 +126,26 @@ describe('blankCount', () => {
     const candidates: MarkingRange[] = [0, 1, 2, 3].map((i) => ({ start: i, end: i }));
     expect(blankCount(candidates, [0, 1, 2], 0.1)).toBe(3);
     expect(blankCount(candidates, [], 0.5)).toBe(2);
+  });
+});
+
+describe('blankCandidates', () => {
+  const tokens = ['The', 'cat', 'ate', 'a', 'fish', 'and', 'an', 'egg', '.'];
+
+  it('leaves out articles while the ratio is under 100%', () => {
+    expect(blankCandidates(tokens, [], 'allWords', [], 0.5).map((r) => r.start)).toEqual([1, 2, 4, 5, 7]);
+  });
+
+  it('includes articles at 100%', () => {
+    expect(blankCandidates(tokens, [], 'allWords', [], 1).map((r) => r.start)).toEqual([0, 1, 2, 3, 4, 5, 6, 7]);
+  });
+
+  it('keeps an article that was pinned by hand', () => {
+    expect(blankCandidates(tokens, [], 'allWords', [3], 0.5).map((r) => r.start)).toEqual([1, 2, 3, 4, 5, 7]);
+  });
+
+  it('keeps a marked phrase that merely contains an article', () => {
+    const marked = blankCandidates(tokens, [{ start: 3, end: 4 }], 'marked', [], 0.5);
+    expect(marked.map((r) => r.start)).toEqual([4]);
   });
 });

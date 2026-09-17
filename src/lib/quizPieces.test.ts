@@ -6,9 +6,9 @@ describe('buildQuizPieces', () => {
     const tokens = ['I', 'will', 'come', 'up', 'with', 'a', 'plan', '.'];
     const pieces = buildQuizPieces(tokens, [{ start: 2, end: 4 }]);
     expect(pieces).toEqual([
-      { type: 'text', text: 'I will', leadsWithWord: true },
+      { type: 'text', text: 'I will', leadsWithWord: true, start: 0, end: 1 },
       { type: 'blank', rangeIndex: 0, label: 'come up with' },
-      { type: 'text', text: 'a plan.', leadsWithWord: true },
+      { type: 'text', text: 'a plan.', leadsWithWord: true, start: 5, end: 7 },
     ]);
   });
 
@@ -23,9 +23,9 @@ describe('buildQuizPieces', () => {
     const pieces = buildQuizPieces(tokens, [{ start: 0, end: 0 }, { start: 2, end: 2 }]);
     expect(pieces).toEqual([
       { type: 'blank', rangeIndex: 0, label: 'wait' },
-      { type: 'text', text: ',', leadsWithWord: false },
+      { type: 'text', text: ',', leadsWithWord: false, start: 1, end: 1 },
       { type: 'blank', rangeIndex: 1, label: 'really' },
-      { type: 'text', text: '?', leadsWithWord: false },
+      { type: 'text', text: '?', leadsWithWord: false, start: 3, end: 3 },
     ]);
   });
 });

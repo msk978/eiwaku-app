@@ -7,8 +7,9 @@ import { useRequireEntry } from '../../hooks/useRequireEntry';
 import { useSessions } from '../../hooks/useSessions';
 import { useSettings } from '../../hooks/useSettings';
 import { adjacentEntries } from '../../lib/adjacentEntries';
-import { blankCount, pickBlanks, quizCandidates } from '../../lib/quizSelection';
+import { blankCandidates, blankCount, pickBlanks } from '../../lib/quizSelection';
 import { buildQuizPieces } from '../../lib/quizPieces';
+import { isWordToken } from '../../lib/tokenize';
 import { BackButton } from '../common/BackButton';
 import { EntrySwitcher } from '../common/EntrySwitcher';
 import { GlossEditor } from '../common/GlossEditor';
@@ -30,7 +31,13 @@ function QuizSession() {
   const { addSession } = useSessions(id ?? '');
 
   const drawBlanks = () =>
-    entry ? pickBlanks(quizCandidates(entry.tokens, ranges, quizMode), entry.pinned ?? [], settings.quizRatio) : [];
+    entry
+      ? pickBlanks(
+          blankCandidates(entry.tokens, ranges, quizMode, entry.pinned ?? [], settings.quizRatio),
+          entry.pinned ?? [],
+          settings.quizRatio,
+        )
+      : [];
 
   const [blanks, setBlanks] = useState(drawBlanks);
   const [revealed, setRevealed] = useState<Set<number>>(() => new Set());
@@ -63,6 +70,13 @@ function QuizSession() {
     dispatch({ type: 'TOGGLE_PIN', entryId: entry.id, index: tokenIndex });
   };
 
+  // 穴になっていない語をタップしたら、その場で固定の穴にする
+  const addPinnedBlank = (tokenIndex: number) => {
+    dispatch({ type: 'TOGGLE_PIN', entryId: entry.id, index: tokenIndex });
+    setBlanks((prev) => [...prev, { start: tokenIndex, end: tokenIndex }].sort((a, b) => a.start - b.start));
+    setActiveIndex(tokenIndex);
+  };
+
   const toggleRevealAll = () => {
     setRevealed(allRevealed ? new Set() : new Set(blanks.map((r) => r.start)));
     setActiveIndex(null);
@@ -83,7 +97,14 @@ function QuizSession() {
   const playable = data.entries.filter((e) => {
     if (e.id === entry.id) return true;
     const entryRanges = data.markings.find((m) => m.entryId === e.id)?.ranges ?? [];
-    return blankCount(quizCandidates(e.tokens, entryRanges, quizMode), e.pinned ?? [], settings.quizRatio) > 0;
+    const pinnedOf = e.pinned ?? [];
+    return (
+      blankCount(
+        blankCandidates(e.tokens, entryRanges, quizMode, pinnedOf, settings.quizRatio),
+        pinnedOf,
+        settings.quizRatio,
+      ) > 0
+    );
   });
   const adjacent = adjacentEntries(playable, entry.id);
 
@@ -145,7 +166,24 @@ function QuizSession() {
             const leadsWithWord = piece.type === 'blank' ? true : piece.leadsWithWord;
             const space = i > 0 && leadsWithWord ? ' ' : '';
             if (piece.type === 'text') {
-              return <Fragment key={i}>{space}{piece.text}</Fragment>;
+              return (
+                <Fragment key={i}>
+                  {space}
+                  {entry.tokens.slice(piece.start, piece.end + 1).map((token, k) => {
+                    const tokenIndex = piece.start + k;
+                    const gap = k > 0 && isWordToken(token) ? ' ' : '';
+                    if (!isWordToken(token)) return <Fragment key={tokenIndex}>{gap}{token}</Fragment>;
+                    return (
+                      <Fragment key={tokenIndex}>
+                        {gap}
+                        <WordToken variant="normal" onClick={() => addPinnedBlank(tokenIndex)} paddingLeft={0} paddingRight={0}>
+                          {token}
+                        </WordToken>
+                      </Fragment>
+                    );
+                  })}
+                </Fragment>
+              );
             }
             const tokenIndex = blanks[piece.rangeIndex]!.start;
             const isRevealed = revealed.has(tokenIndex);
@@ -210,6 +248,8 @@ function QuizSession() {
             好きな空欄をタップして答えを表示。
             <br />
             間違えた・覚えたい穴はもう一度タップで固定。
+            <br />
+            穴以外の語をタップすると、その語も固定の穴にできます。
           </div>
         )}
         <div style={{ display: 'flex', gap: 8 }}>

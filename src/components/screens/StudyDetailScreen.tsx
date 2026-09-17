@@ -8,7 +8,7 @@ import { useSessions } from '../../hooks/useSessions';
 import { useSettings } from '../../hooks/useSettings';
 import { joinTokens } from '../../lib/joinTokens';
 import { formatRelativeDate } from '../../lib/relativeDate';
-import { blankCount, quizCandidates } from '../../lib/quizSelection';
+import { blankCandidates, blankCount, quizCandidates } from '../../lib/quizSelection';
 import { lastStudiedAt } from '../../lib/stats';
 import { adjacentEntries } from '../../lib/adjacentEntries';
 import { BackButton } from '../common/BackButton';
@@ -46,7 +46,7 @@ function StudyDetail() {
   };
 
   const wordCount = entry.tokens.filter((t) => /[A-Za-z0-9]/.test(t)).length;
-  const candidates = quizCandidates(entry.tokens, ranges, quizMode);
+  const candidates = blankCandidates(entry.tokens, ranges, quizMode, entry.pinned ?? [], settings.quizRatio);
   const markedWordCount = quizCandidates(entry.tokens, ranges, 'marked').length;
   const pinnedCount = entry.pinned?.length ?? 0;
   const estimated = blankCount(candidates, entry.pinned ?? [], settings.quizRatio);
