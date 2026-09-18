@@ -80,15 +80,23 @@ function shuffle<T>(items: T[], rng: () => number): T[] {
   return pool;
 }
 
-const ARTICLES = new Set(['a', 'an', 'the']);
+const AUTO_SKIP_WORDS = new Set([
+  // 冠詞
+  'a', 'an', 'the',
+  // be動詞
+  'am', 'is', 'are', 'was', 'were', 'be', 'been', 'being',
+  // 等位接続詞
+  'and',
+]);
 
-export function isArticle(token: string): boolean {
-  return ARTICLES.has(token.toLowerCase());
+/** 自動の穴埋めでは避ける語(冠詞・be動詞・and) */
+export function isAutoSkipWord(token: string): boolean {
+  return AUTO_SKIP_WORDS.has(token.toLowerCase());
 }
 
 /**
- * 出題候補を作る。割合が100%未満のときは冠詞(a/an/the)を自動の穴にしない。
- * 手動で固定した穴は冠詞でも残す。
+ * 出題候補を作る。割合が100%未満のときは冠詞・be動詞・and を自動の穴にしない。
+ * 手動で固定した穴はこれらの語でも残す。
  */
 export function blankCandidates(
   tokens: string[],
@@ -101,6 +109,6 @@ export function blankCandidates(
   if (ratio >= 1) return candidates;
   const pinnedSet = new Set(pinned);
   return candidates.filter(
-    (r) => pinnedSet.has(r.start) || r.start !== r.end || !isArticle(tokens[r.start] ?? ''),
+    (r) => pinnedSet.has(r.start) || r.start !== r.end || !isAutoSkipWord(tokens[r.start] ?? ''),
   );
 }

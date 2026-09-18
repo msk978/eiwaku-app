@@ -130,22 +130,23 @@ describe('blankCount', () => {
 });
 
 describe('blankCandidates', () => {
-  const tokens = ['The', 'cat', 'ate', 'a', 'fish', 'and', 'an', 'egg', '.'];
+  const tokens = ['The', 'cat', 'is', 'small', 'and', 'a', 'dog', 'was', 'here', '.'];
 
-  it('leaves out articles while the ratio is under 100%', () => {
-    expect(blankCandidates(tokens, [], 'allWords', [], 0.5).map((r) => r.start)).toEqual([1, 2, 4, 5, 7]);
+  it('leaves out articles, be verbs and and while the ratio is under 100%', () => {
+    expect(blankCandidates(tokens, [], 'allWords', [], 0.5).map((r) => r.start)).toEqual([1, 3, 6, 8]);
   });
 
-  it('includes articles at 100%', () => {
-    expect(blankCandidates(tokens, [], 'allWords', [], 1).map((r) => r.start)).toEqual([0, 1, 2, 3, 4, 5, 6, 7]);
+  it('includes them at 100%', () => {
+    expect(blankCandidates(tokens, [], 'allWords', [], 1).map((r) => r.start)).toEqual([
+      0, 1, 2, 3, 4, 5, 6, 7, 8,
+    ]);
   });
 
-  it('keeps an article that was pinned by hand', () => {
-    expect(blankCandidates(tokens, [], 'allWords', [3], 0.5).map((r) => r.start)).toEqual([1, 2, 3, 4, 5, 7]);
+  it('keeps a skipped word that was pinned by hand', () => {
+    expect(blankCandidates(tokens, [], 'allWords', [2], 0.5).map((r) => r.start)).toEqual([1, 2, 3, 6, 8]);
   });
 
-  it('keeps a marked phrase that merely contains an article', () => {
-    const marked = blankCandidates(tokens, [{ start: 3, end: 4 }], 'marked', [], 0.5);
-    expect(marked.map((r) => r.start)).toEqual([4]);
+  it('applies the same rule to marked ranges', () => {
+    expect(blankCandidates(tokens, [{ start: 2, end: 3 }], 'marked', [], 0.5).map((r) => r.start)).toEqual([3]);
   });
 });
