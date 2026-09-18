@@ -133,22 +133,22 @@ describe('blankCandidates', () => {
   const tokens = ['The', 'cat', 'is', 'small', 'and', 'a', 'dog', 'was', 'here', '.'];
 
   it('leaves out articles, be verbs and and while the ratio is under 100%', () => {
-    expect(blankCandidates(tokens, [], 'allWords', [], 0.5).map((r) => r.start)).toEqual([1, 3, 6, 8]);
+    expect(blankCandidates(tokens, [], 'allWords', 0.5).map((r) => r.start)).toEqual([1, 3, 6, 8]);
   });
 
   it('includes them at 100%', () => {
-    expect(blankCandidates(tokens, [], 'allWords', [], 1).map((r) => r.start)).toEqual([
-      0, 1, 2, 3, 4, 5, 6, 7, 8,
-    ]);
+    expect(blankCandidates(tokens, [], 'allWords', 1).map((r) => r.start)).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8]);
   });
 
   it('keeps a skipped word that was pinned by hand', () => {
-    expect(blankCandidates(tokens, [], 'allWords', [2], 0.5).map((r) => r.start)).toEqual([1, 2, 3, 6, 8]);
+    expect(blankCandidates(tokens, [], 'allWords', 0.5, { pinned: [2] }).map((r) => r.start)).toEqual([
+      1, 2, 3, 6, 8,
+    ]);
   });
 
   it('leaves out linking adverbs and frequency adverbs', () => {
     const adverbs = ['However', ',', 'people', 'often', 'travel', '.', 'Moreover', ',', 'they', 'rarely', 'rest', '.'];
-    expect(blankCandidates(adverbs, [], 'allWords', [], 0.5).map((r) => adverbs[r.start])).toEqual([
+    expect(blankCandidates(adverbs, [], 'allWords', 0.5).map((r) => adverbs[r.start])).toEqual([
       'people',
       'travel',
       'they',
@@ -156,7 +156,18 @@ describe('blankCandidates', () => {
     ]);
   });
 
-  it('applies the same rule to marked ranges', () => {
-    expect(blankCandidates(tokens, [{ start: 2, end: 3 }], 'marked', [], 0.5).map((r) => r.start)).toEqual([3]);
+  it('keeps every marked word, even a be verb or an article', () => {
+    expect(blankCandidates(tokens, [{ start: 0, end: 3 }], 'marked', 0.5).map((r) => r.start)).toEqual([
+      0, 1, 2, 3,
+    ]);
+  });
+
+  it('drops excluded words in both modes and at 100%', () => {
+    expect(blankCandidates(tokens, [], 'allWords', 1, { excluded: [1] }).map((r) => r.start)).toEqual([
+      0, 2, 3, 4, 5, 6, 7, 8,
+    ]);
+    expect(blankCandidates(tokens, [{ start: 0, end: 3 }], 'marked', 0.5, { excluded: [1] }).map((r) => r.start)).toEqual([
+      0, 2, 3,
+    ]);
   });
 });

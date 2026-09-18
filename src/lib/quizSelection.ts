@@ -104,21 +104,35 @@ export function isAutoSkipWord(token: string): boolean {
   return AUTO_SKIP_WORDS.has(token.toLowerCase());
 }
 
+export interface BlankOptions {
+  /** 必ず穴にするトークン */
+  pinned?: number[];
+  /** 穴にしないトークン */
+  excluded?: number[];
+}
+
 /**
- * 出題候補を作る。割合が100%未満のときは冠詞・be動詞・and・接続副詞・頻度の副詞を自動の穴にしない。
- * 手動で固定した穴はこれらの語でも残す。
+ * 出題候補を作る。
+ * - 除外した語はどの割合でも候補に入れない。
+ * - 「全単語からランダム」で割合が100%未満のときは、冠詞・be動詞・and・
+ *   接続副詞・頻度の副詞も候補に入れない。マーキングした語には適用しない。
+ * - 手動で固定した語はどちらの場合も候補に残す。
  */
 export function blankCandidates(
   tokens: string[],
   ranges: MarkingRange[],
   mode: QuizMode,
-  pinned: number[],
   ratio: number,
+  options: BlankOptions = {},
 ): MarkingRange[] {
-  const candidates = quizCandidates(tokens, ranges, mode);
-  if (ratio >= 1) return candidates;
-  const pinnedSet = new Set(pinned);
-  return candidates.filter(
-    (r) => pinnedSet.has(r.start) || r.start !== r.end || !isAutoSkipWord(tokens[r.start] ?? ''),
-  );
+  const pinnedSet = new Set(options.pinned ?? []);
+  const excludedSet = new Set(options.excluded ?? []);
+  const skipFunctionWords = ratio < 1 && mode === 'allWords';
+
+  return quizCandidates(tokens, ranges, mode).filter((r) => {
+    if (pinnedSet.has(r.start)) return true;
+    if (r.start === r.end && excludedSet.has(r.start)) return false;
+    if (!skipFunctionWords) return true;
+    return r.start !== r.end || !isAutoSkipWord(tokens[r.start] ?? '');
+  });
 }

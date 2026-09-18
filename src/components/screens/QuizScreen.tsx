@@ -33,7 +33,10 @@ function QuizSession() {
   const drawBlanks = () =>
     entry
       ? pickBlanks(
-          blankCandidates(entry.tokens, ranges, quizMode, entry.pinned ?? [], settings.quizRatio),
+          blankCandidates(entry.tokens, ranges, quizMode, settings.quizRatio, {
+            pinned: entry.pinned,
+            excluded: entry.excluded,
+          }),
           entry.pinned ?? [],
           settings.quizRatio,
         )
@@ -56,6 +59,7 @@ function QuizSession() {
   if (!entry || blanks.length === 0) return null;
 
   const pinned = new Set(entry.pinned ?? []);
+  const excluded = new Set(entry.excluded ?? []);
   const pieces = buildQuizPieces(entry.tokens, blanks);
   const total = blanks.length;
   const pinnedInBlanks = blanks.filter((r) => pinned.has(r.start)).length;
@@ -75,6 +79,20 @@ function QuizSession() {
     dispatch({ type: 'TOGGLE_PIN', entryId: entry.id, index: tokenIndex });
     setBlanks((prev) => [...prev, { start: tokenIndex, end: tokenIndex }].sort((a, b) => a.start - b.start));
     setActiveIndex(tokenIndex);
+  };
+
+  // 除外した語は今の出題からも外す
+  const toggleExclude = (tokenIndex: number) => {
+    dispatch({ type: 'TOGGLE_EXCLUDE', entryId: entry.id, index: tokenIndex });
+    if (!excluded.has(tokenIndex)) {
+      setBlanks((prev) => prev.filter((r) => r.start !== tokenIndex));
+      setRevealed((prev) => {
+        const next = new Set(prev);
+        next.delete(tokenIndex);
+        return next;
+      });
+      setActiveIndex(null);
+    }
   };
 
   const toggleRevealAll = () => {
@@ -100,7 +118,10 @@ function QuizSession() {
     const pinnedOf = e.pinned ?? [];
     return (
       blankCount(
-        blankCandidates(e.tokens, entryRanges, quizMode, pinnedOf, settings.quizRatio),
+        blankCandidates(e.tokens, entryRanges, quizMode, settings.quizRatio, {
+          pinned: pinnedOf,
+          excluded: e.excluded,
+        }),
         pinnedOf,
         settings.quizRatio,
       ) > 0
@@ -176,7 +197,12 @@ function QuizSession() {
                     return (
                       <Fragment key={tokenIndex}>
                         {gap}
-                        <WordToken variant="normal" onClick={() => addPinnedBlank(tokenIndex)} paddingLeft={0} paddingRight={0}>
+                        <WordToken
+                          variant={excluded.has(tokenIndex) ? 'excluded' : 'normal'}
+                          onClick={() => addPinnedBlank(tokenIndex)}
+                          paddingLeft={0}
+                          paddingRight={0}
+                        >
                           {token}
                         </WordToken>
                       </Fragment>
@@ -237,10 +263,26 @@ function QuizSession() {
               gloss={glossFor(activeIndex)}
               onSave={(text) => setGloss(activeIndex, text)}
             />
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button
+                className="secondary-btn"
+                style={{ flex: 1, padding: '8px 6px', fontSize: 12.5 }}
+                onClick={() => dispatch({ type: 'TOGGLE_PIN', entryId: entry.id, index: activeIndex })}
+              >
+                {pinned.has(activeIndex) ? '固定を解除' : 'この穴を固定'}
+              </button>
+              <button
+                className="secondary-btn"
+                style={{ flex: 1, padding: '8px 6px', fontSize: 12.5 }}
+                onClick={() => toggleExclude(activeIndex)}
+              >
+                もう出題しない
+              </button>
+            </div>
             <div style={{ fontSize: 12.5, color: pinned.has(activeIndex) ? 'var(--pin-text)' : 'var(--text-muted)' }}>
               {pinned.has(activeIndex)
                 ? '固定中: 割合を変えても毎回穴になります(もう一度タップで解除)'
-                : 'もう一度タップすると、この穴を固定できます'}
+                : '「もう出題しない」にすると、この語は自動の穴埋めから外れます'}
             </div>
           </div>
         ) : (
@@ -250,6 +292,8 @@ function QuizSession() {
             間違えた・覚えたい穴はもう一度タップで固定。
             <br />
             穴以外の語をタップすると、その語も固定の穴にできます。
+            <br />
+            出題したくない語は、表示してから「もう出題しない」。
           </div>
         )}
         <div style={{ display: 'flex', gap: 8 }}>

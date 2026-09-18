@@ -15,6 +15,8 @@ type Action =
   | { type: 'SET_GLOSS'; entryId: string; index: number; gloss: string | undefined }
   | { type: 'TOGGLE_PIN'; entryId: string; index: number }
   | { type: 'CLEAR_PINS'; entryId: string }
+  | { type: 'TOGGLE_EXCLUDE'; entryId: string; index: number }
+  | { type: 'CLEAR_EXCLUDED'; entryId: string }
   | { type: 'REPLACE_ALL'; data: AppData };
 
 function reducer(state: AppData, action: Action): AppData {
@@ -84,8 +86,30 @@ function reducer(state: AppData, action: Action): AppData {
             pinned: pinned.includes(action.index)
               ? pinned.filter((i) => i !== action.index)
               : [...pinned, action.index].sort((a, b) => a - b),
+            // 固定と除外は同時に指定できない
+            excluded: (e.excluded ?? []).filter((i) => i !== action.index),
           };
         }),
+      };
+    case 'TOGGLE_EXCLUDE':
+      return {
+        ...state,
+        entries: state.entries.map((e) => {
+          if (e.id !== action.entryId) return e;
+          const excluded = e.excluded ?? [];
+          return {
+            ...e,
+            excluded: excluded.includes(action.index)
+              ? excluded.filter((i) => i !== action.index)
+              : [...excluded, action.index].sort((a, b) => a - b),
+            pinned: (e.pinned ?? []).filter((i) => i !== action.index),
+          };
+        }),
+      };
+    case 'CLEAR_EXCLUDED':
+      return {
+        ...state,
+        entries: state.entries.map((e) => (e.id === action.entryId ? { ...e, excluded: [] } : e)),
       };
     case 'CLEAR_PINS':
       return {

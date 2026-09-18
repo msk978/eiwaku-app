@@ -51,7 +51,7 @@ export function parseImportFile(raw: string): ImportResult {
     return { ok: false, error: { kind: 'invalid-shape' } };
   }
 
-  const entries = d.entries as { id: unknown; tokens: unknown; title?: unknown; presetId?: unknown; glosses?: unknown; pinned?: unknown }[];
+  const entries = d.entries as { id: unknown; tokens: unknown; title?: unknown; presetId?: unknown; glosses?: unknown; pinned?: unknown; excluded?: unknown }[];
   for (const e of entries) {
     if (typeof e.id !== 'string' || !Array.isArray(e.tokens)) {
       return { ok: false, error: { kind: 'invalid-shape' } };
@@ -70,12 +70,14 @@ export function parseImportFile(raw: string): ImportResult {
     ) {
       return { ok: false, error: { kind: 'invalid-shape' } };
     }
-    if (
-      e.pinned !== undefined &&
-      (!Array.isArray(e.pinned) ||
-        e.pinned.some((i) => typeof i !== 'number' || i < 0 || i >= (e.tokens as unknown[]).length))
-    ) {
-      return { ok: false, error: { kind: 'invalid-shape' } };
+    for (const list of [e.pinned, e.excluded]) {
+      if (
+        list !== undefined &&
+        (!Array.isArray(list) ||
+          list.some((i) => typeof i !== 'number' || i < 0 || i >= (e.tokens as unknown[]).length))
+      ) {
+        return { ok: false, error: { kind: 'invalid-shape' } };
+      }
     }
   }
 

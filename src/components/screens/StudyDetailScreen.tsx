@@ -46,9 +46,13 @@ function StudyDetail() {
   };
 
   const wordCount = entry.tokens.filter((t) => /[A-Za-z0-9]/.test(t)).length;
-  const candidates = blankCandidates(entry.tokens, ranges, quizMode, entry.pinned ?? [], settings.quizRatio);
+  const candidates = blankCandidates(entry.tokens, ranges, quizMode, settings.quizRatio, {
+    pinned: entry.pinned,
+    excluded: entry.excluded,
+  });
   const markedWordCount = quizCandidates(entry.tokens, ranges, 'marked').length;
   const pinnedCount = entry.pinned?.length ?? 0;
+  const excludedCount = entry.excluded?.length ?? 0;
   const estimated = blankCount(candidates, entry.pinned ?? [], settings.quizRatio);
   const needsMarking = estimated === 0;
   const pinnedNote = pinnedCount > 0 ? `(固定${pinnedCount}語を含む)` : '';
@@ -109,6 +113,7 @@ function StudyDetail() {
             <span>{wordCount}語</span>
             <span>マーキング {markedWordCount}語</span>
             {pinnedCount > 0 && <span style={{ color: 'var(--pin-text)' }}>固定 {pinnedCount}語</span>}
+            {excludedCount > 0 && <span>除外 {excludedCount}語</span>}
             <span>最終学習: {formatRelativeDate(lastStudiedAt(sessions))}</span>
           </div>
         </div>
@@ -151,7 +156,9 @@ function StudyDetail() {
               {quizMode === 'allWords'
                 ? '本文のすべての単語から、指定した割合をランダムに穴埋めにします。'
                 : 'マーキングした単語のうち、指定した割合をランダムに穴埋めにします。'}
-              {settings.quizRatio < 1 && '冠詞・be動詞・and・however などの接続副詞・often などの頻度の副詞は、自動では穴になりません(100%のときは対象)。'}
+              {quizMode === 'allWords' &&
+                settings.quizRatio < 1 &&
+                '冠詞・be動詞・and・however などの接続副詞・often などの頻度の副詞は、自動では穴になりません(100%のときは対象)。'}
               ここで変更すると他の英文にも適用されます。
             </div>
           </div>
@@ -173,6 +180,11 @@ function StudyDetail() {
         <button className="secondary-btn" onClick={() => navigate(`/entries/${id}/mark`)}>
           {ranges.length === 0 ? 'マーキングへ' : 'マーキングを編集'}
         </button>
+        {excludedCount > 0 && (
+          <button className="secondary-btn" onClick={() => dispatch({ type: 'CLEAR_EXCLUDED', entryId: entry.id })}>
+            出題しない語をすべて戻す({excludedCount}語)
+          </button>
+        )}
         {pinnedCount > 0 && (
           <button className="secondary-btn" onClick={() => dispatch({ type: 'CLEAR_PINS', entryId: entry.id })}>
             固定した穴をすべて解除({pinnedCount}語)

@@ -7,7 +7,8 @@ export type WordTokenVariant =
   | 'blankHidden'
   | 'revealedPending'
   | 'blankPinned'
-  | 'revealedPinned';
+  | 'revealedPinned'
+  | 'excluded';
 
 const VARIANT_STYLE: Record<WordTokenVariant, React.CSSProperties> = {
   normal: {},
@@ -46,6 +47,10 @@ const VARIANT_STYLE: Record<WordTokenVariant, React.CSSProperties> = {
     background: 'var(--pin-soft)',
     borderRadius: '5px 5px 0 0',
     verticalAlign: 'middle',
+  },
+  excluded: {
+    color: 'var(--text-muted)',
+    borderBottom: '1px dotted var(--text-muted)',
   },
   revealedPinned: {
     color: 'var(--pin-text)',
