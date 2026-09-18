@@ -29,7 +29,7 @@ export function MarkingScreen() {
   };
 
   return (
-    <div className="app-shell">
+    <div className="app-shell app-shell--viewport">
       <div className="topbar">
         <BackButton to="/" />
         <div className="topbar-title" style={{ flex: 1 }}>穴埋めにする単語を選択</div>

@@ -39,6 +39,18 @@ button {
   flex-direction: column;
 }
 
+/* 本文だけをスクロールさせ、下部の操作バーを常に画面内に置く画面用 */
+.app-shell--viewport {
+  height: 100%;
+  height: 100dvh; /* モバイルのアドレスバー分を除いた実際の表示高 */
+  min-height: 0;
+}
+
+/* flex 子要素が内容サイズ未満に縮めるようにする(これが無いと本文がはみ出す) */
+.app-shell--viewport .screen-body {
+  min-height: 0;
+}
+
 .topbar {
   display: flex;
   align-items: center;

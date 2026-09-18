@@ -140,7 +140,7 @@ function QuizSession() {
   };
 
   return (
-    <div className="app-shell">
+    <div className="app-shell app-shell--viewport">
       <div className="topbar">
         <BackButton to={`/entries/${id}`} />
         <div className="topbar-title" style={{ fontSize: 16 }}>
