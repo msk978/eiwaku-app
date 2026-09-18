@@ -151,7 +151,7 @@ function StudyDetail() {
               {quizMode === 'allWords'
                 ? '本文のすべての単語から、指定した割合をランダムに穴埋めにします。'
                 : 'マーキングした単語のうち、指定した割合をランダムに穴埋めにします。'}
-              {settings.quizRatio < 1 && '冠詞・be動詞・and は自動では穴になりません(100%のときは対象)。'}
+              {settings.quizRatio < 1 && '冠詞・be動詞・and・however などの接続副詞・often などの頻度の副詞は、自動では穴になりません(100%のときは対象)。'}
               ここで変更すると他の英文にも適用されます。
             </div>
           </div>

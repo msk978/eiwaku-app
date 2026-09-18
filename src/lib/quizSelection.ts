@@ -87,15 +87,25 @@ const AUTO_SKIP_WORDS = new Set([
   'am', 'is', 'are', 'was', 'were', 'be', 'been', 'being',
   // 等位接続詞
   'and',
+  // 接続副詞
+  'accordingly', 'additionally', 'also', 'besides', 'consequently', 'conversely',
+  'finally', 'first', 'firstly', 'furthermore', 'hence', 'however', 'indeed',
+  'instead', 'lastly', 'likewise', 'meanwhile', 'moreover', 'nevertheless',
+  'nonetheless', 'otherwise', 'overall', 'second', 'secondly', 'similarly',
+  'still', 'subsequently', 'then', 'therefore', 'third', 'thirdly', 'thus',
+  // 頻度の副詞
+  'always', 'constantly', 'ever', 'frequently', 'generally', 'never', 'normally',
+  'occasionally', 'often', 'rarely', 'regularly', 'seldom', 'sometimes',
+  'typically', 'usually',
 ]);
 
-/** 自動の穴埋めでは避ける語(冠詞・be動詞・and) */
+/** 自動の穴埋めでは避ける語(冠詞・be動詞・and・接続副詞・頻度の副詞) */
 export function isAutoSkipWord(token: string): boolean {
   return AUTO_SKIP_WORDS.has(token.toLowerCase());
 }
 
 /**
- * 出題候補を作る。割合が100%未満のときは冠詞・be動詞・and を自動の穴にしない。
+ * 出題候補を作る。割合が100%未満のときは冠詞・be動詞・and・接続副詞・頻度の副詞を自動の穴にしない。
  * 手動で固定した穴はこれらの語でも残す。
  */
 export function blankCandidates(

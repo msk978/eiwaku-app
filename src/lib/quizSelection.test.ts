@@ -146,6 +146,16 @@ describe('blankCandidates', () => {
     expect(blankCandidates(tokens, [], 'allWords', [2], 0.5).map((r) => r.start)).toEqual([1, 2, 3, 6, 8]);
   });
 
+  it('leaves out linking adverbs and frequency adverbs', () => {
+    const adverbs = ['However', ',', 'people', 'often', 'travel', '.', 'Moreover', ',', 'they', 'rarely', 'rest', '.'];
+    expect(blankCandidates(adverbs, [], 'allWords', [], 0.5).map((r) => adverbs[r.start])).toEqual([
+      'people',
+      'travel',
+      'they',
+      'rest',
+    ]);
+  });
+
   it('applies the same rule to marked ranges', () => {
     expect(blankCandidates(tokens, [{ start: 2, end: 3 }], 'marked', [], 0.5).map((r) => r.start)).toEqual([3]);
   });
