@@ -97,11 +97,16 @@ const AUTO_SKIP_WORDS = new Set([
   'always', 'constantly', 'ever', 'frequently', 'generally', 'never', 'normally',
   'occasionally', 'often', 'rarely', 'regularly', 'seldom', 'sometimes',
   'typically', 'usually',
+  // 助動詞
+  'can', 'could', 'may', 'might', 'must', 'shall', 'should', 'will', 'would', 'ought',
+  "can't", 'cannot', "couldn't", "mightn't", "mustn't", "shan't", "shouldn't",
+  "won't", "wouldn't", "'ll", "'d",
 ]);
 
-/** 自動の穴埋めでは避ける語(冠詞・be動詞・and・接続副詞・頻度の副詞) */
+/** 自動の穴埋めでは避ける語(冠詞・be動詞・and・接続副詞・頻度の副詞・助動詞) */
 export function isAutoSkipWord(token: string): boolean {
-  return AUTO_SKIP_WORDS.has(token.toLowerCase());
+  // カーリーアポストロフィ(’)も同じ語として扱う
+  return AUTO_SKIP_WORDS.has(token.toLowerCase().replace(/’/g, "'"));
 }
 
 export interface BlankOptions {

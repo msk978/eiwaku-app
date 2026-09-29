@@ -156,6 +156,22 @@ describe('blankCandidates', () => {
     ]);
   });
 
+  it('leaves out modal verbs, including contracted ones', () => {
+    const modals = ['They', 'should', 'go', 'but', 'they', "won't", 'wait', '.'];
+    expect(blankCandidates(modals, [], 'allWords', 0.5).map((r) => modals[r.start])).toEqual([
+      'They',
+      'go',
+      'but',
+      'they',
+      'wait',
+    ]);
+  });
+
+  it('treats a curly apostrophe like a straight one', () => {
+    const curly = ['She', 'won’t', 'wait', '.'];
+    expect(blankCandidates(curly, [], 'allWords', 0.5).map((r) => curly[r.start])).toEqual(['She', 'wait']);
+  });
+
   it('keeps every marked word, even a be verb or an article', () => {
     expect(blankCandidates(tokens, [{ start: 0, end: 3 }], 'marked', 0.5).map((r) => r.start)).toEqual([
       0, 1, 2, 3,
