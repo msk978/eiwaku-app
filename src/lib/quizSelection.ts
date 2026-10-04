@@ -101,9 +101,16 @@ const AUTO_SKIP_WORDS = new Set([
   'can', 'could', 'may', 'might', 'must', 'shall', 'should', 'will', 'would', 'ought',
   "can't", 'cannot', "couldn't", "mightn't", "mustn't", "shan't", "shouldn't",
   "won't", "wouldn't", "'ll", "'d",
+  // 前置詞(句動詞の副詞小辞になりやすい up/down/out/off は対象外)
+  'about', 'above', 'across', 'after', 'against', 'along', 'among', 'around',
+  'as', 'at', 'before', 'behind', 'below', 'beneath', 'beside', 'between',
+  'beyond', 'by', 'despite', 'during', 'except', 'for', 'from', 'in', 'inside',
+  'into', 'near', 'of', 'on', 'onto', 'outside', 'over', 'per', 'since',
+  'through', 'throughout', 'till', 'to', 'toward', 'towards', 'under',
+  'underneath', 'until', 'upon', 'via', 'with', 'within', 'without',
 ]);
 
-/** 自動の穴埋めでは避ける語(冠詞・be動詞・and・接続副詞・頻度の副詞・助動詞) */
+/** 自動の穴埋めでは避ける語(冠詞・be動詞・助動詞・前置詞・and・接続副詞・頻度の副詞) */
 export function isAutoSkipWord(token: string): boolean {
   // カーリーアポストロフィ(’)も同じ語として扱う
   return AUTO_SKIP_WORDS.has(token.toLowerCase().replace(/’/g, "'"));

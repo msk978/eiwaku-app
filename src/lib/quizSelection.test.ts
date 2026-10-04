@@ -172,6 +172,18 @@ describe('blankCandidates', () => {
     expect(blankCandidates(curly, [], 'allWords', 0.5).map((r) => curly[r.start])).toEqual(['She', 'wait']);
   });
 
+  it('leaves out prepositions but keeps phrasal-verb particles', () => {
+    const phrase = ['She', 'looked', 'up', 'the', 'word', 'in', 'a', 'dictionary', 'at', 'home', '.'];
+    expect(blankCandidates(phrase, [], 'allWords', 0.5).map((r) => phrase[r.start])).toEqual([
+      'She',
+      'looked',
+      'up',
+      'word',
+      'dictionary',
+      'home',
+    ]);
+  });
+
   it('keeps every marked word, even a be verb or an article', () => {
     expect(blankCandidates(tokens, [{ start: 0, end: 3 }], 'marked', 0.5).map((r) => r.start)).toEqual([
       0, 1, 2, 3,
