@@ -108,9 +108,51 @@ const AUTO_SKIP_WORDS = new Set([
   'into', 'near', 'of', 'on', 'onto', 'outside', 'over', 'per', 'since',
   'through', 'throughout', 'till', 'to', 'toward', 'towards', 'under',
   'underneath', 'until', 'upon', 'via', 'with', 'within', 'without',
+  // 代名詞(人称・所有・再帰・指示・関係)
+  'i', 'me', 'my', 'mine', 'myself', 'you', 'your', 'yours', 'yourself', 'yourselves',
+  'he', 'him', 'his', 'himself', 'she', 'her', 'hers', 'herself', 'it', 'its', 'itself',
+  'we', 'us', 'our', 'ours', 'ourselves', 'they', 'them', 'their', 'theirs', 'themselves',
+  'oneself', 'this', 'these', 'those', 'who', 'whom', 'whose', 'which', 'what',
+  "i'm", "i've", "i'll", "i'd", "you're", "you've", "you'll", "you'd", "he's", "he'll", "he'd",
+  "she's", "she'll", "she'd", "it's", "it'll", "we're", "we've", "we'll", "we'd",
+  "they're", "they've", "they'll", "they'd", "that's", "what's", "who's",
+  // 接続詞(and 以外。for/as/since/until/before/after は前置詞に含めた)
+  'but', 'or', 'nor', 'so', 'yet', 'because', 'although', 'though', 'while', 'whereas',
+  'if', 'unless', 'when', 'whenever', 'where', 'wherever', 'whether', 'that', 'than',
+  'both', 'either', 'neither',
 ]);
 
-/** 自動の穴埋めでは避ける語(冠詞・be動詞・助動詞・前置詞・and・接続副詞・頻度の副詞) */
+/** 自分専用版のエッセイの型。どの題材にも出てくるので穴にしない */
+const TEMPLATE_PHRASES = [
+  'some might claim that',
+  'a good example of this can be observed in japan',
+  'additionally',
+  'therefore',
+  'however others assert that',
+  'however opponents',
+  'firstly',
+  'for instance',
+  'secondly',
+  'as can be seen in',
+].map((p) => p.split(' '));
+
+/** 本文中の、エッセイの型にあたる語のインデックス(句読点は飛ばして照合する) */
+export function templateTokenIndices(tokens: string[]): number[] {
+  const words = tokens
+    .map((t, i) => ({ w: t.toLowerCase(), i }))
+    .filter(({ w }) => isWordToken(w));
+  const result: number[] = [];
+  for (let k = 0; k < words.length; k++) {
+    for (const phrase of TEMPLATE_PHRASES) {
+      if (phrase.every((p, j) => words[k + j]?.w === p)) {
+        for (let j = 0; j < phrase.length; j++) result.push(words[k + j]!.i);
+      }
+    }
+  }
+  return result;
+}
+
+/** 自動の穴埋めでは避ける語(冠詞・be動詞・助動詞・前置詞・代名詞・接続詞・接続副詞・頻度の副詞) */
 export function isAutoSkipWord(token: string): boolean {
   // カーリーアポストロフィ(’)も同じ語として扱う
   return AUTO_SKIP_WORDS.has(token.toLowerCase().replace(/’/g, "'"));
@@ -121,6 +163,8 @@ export interface BlankOptions {
   pinned?: number[];
   /** 穴にしないトークン */
   excluded?: number[];
+  /** エッセイの型(Some might claim that など)を穴にしない */
+  skipTemplates?: boolean;
 }
 
 /**
@@ -138,7 +182,10 @@ export function blankCandidates(
   options: BlankOptions = {},
 ): MarkingRange[] {
   const pinnedSet = new Set(options.pinned ?? []);
-  const excludedSet = new Set(options.excluded ?? []);
+  const excludedSet = new Set([
+    ...(options.excluded ?? []),
+    ...(options.skipTemplates ? templateTokenIndices(tokens) : []),
+  ]);
   const skipFunctionWords = ratio < 1 && mode === 'allWords';
 
   return quizCandidates(tokens, ranges, mode).filter((r) => {

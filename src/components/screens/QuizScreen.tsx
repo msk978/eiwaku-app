@@ -14,6 +14,7 @@ import { BackButton } from '../common/BackButton';
 import { EntrySwitcher } from '../common/EntrySwitcher';
 import { GlossEditor } from '../common/GlossEditor';
 import { WordToken, type WordTokenVariant } from '../common/WordToken';
+import { IS_PERSONAL } from '../../lib/target';
 
 export function QuizScreen() {
   const { id } = useParams<{ id: string }>();
@@ -36,6 +37,7 @@ function QuizSession() {
           blankCandidates(entry.tokens, ranges, quizMode, settings.quizRatio, {
             pinned: entry.pinned,
             excluded: entry.excluded,
+            skipTemplates: IS_PERSONAL,
           }),
           entry.pinned ?? [],
           settings.quizRatio,
@@ -121,6 +123,7 @@ function QuizSession() {
         blankCandidates(e.tokens, entryRanges, quizMode, settings.quizRatio, {
           pinned: pinnedOf,
           excluded: e.excluded,
+          skipTemplates: IS_PERSONAL,
         }),
         pinnedOf,
         settings.quizRatio,

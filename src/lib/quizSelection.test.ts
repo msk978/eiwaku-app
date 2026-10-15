@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { tokenize } from './tokenize';
 import {
   blankCandidates,
   blankCount,
@@ -151,7 +152,6 @@ describe('blankCandidates', () => {
     expect(blankCandidates(adverbs, [], 'allWords', 0.5).map((r) => adverbs[r.start])).toEqual([
       'people',
       'travel',
-      'they',
       'rest',
     ]);
   });
@@ -159,23 +159,19 @@ describe('blankCandidates', () => {
   it('leaves out modal verbs, including contracted ones', () => {
     const modals = ['They', 'should', 'go', 'but', 'they', "won't", 'wait', '.'];
     expect(blankCandidates(modals, [], 'allWords', 0.5).map((r) => modals[r.start])).toEqual([
-      'They',
       'go',
-      'but',
-      'they',
       'wait',
     ]);
   });
 
   it('treats a curly apostrophe like a straight one', () => {
     const curly = ['She', 'won’t', 'wait', '.'];
-    expect(blankCandidates(curly, [], 'allWords', 0.5).map((r) => curly[r.start])).toEqual(['She', 'wait']);
+    expect(blankCandidates(curly, [], 'allWords', 0.5).map((r) => curly[r.start])).toEqual(['wait']);
   });
 
   it('leaves out prepositions but keeps phrasal-verb particles', () => {
     const phrase = ['She', 'looked', 'up', 'the', 'word', 'in', 'a', 'dictionary', 'at', 'home', '.'];
     expect(blankCandidates(phrase, [], 'allWords', 0.5).map((r) => phrase[r.start])).toEqual([
-      'She',
       'looked',
       'up',
       'word',
@@ -197,5 +193,26 @@ describe('blankCandidates', () => {
     expect(blankCandidates(tokens, [{ start: 0, end: 3 }], 'marked', 0.5, { excluded: [1] }).map((r) => r.start)).toEqual([
       0, 2, 3,
     ]);
+  });
+});
+
+describe('pronouns, conjunctions and essay templates', () => {
+  const words = (tokens: string[], rs: { start: number }[]) => rs.map((r) => tokens[r.start]);
+
+  it('leaves out pronouns and conjunctions under 100%', () => {
+    const tokens = tokenize("They said it's cheap , but I doubt that because their data is old .");
+    expect(words(tokens, blankCandidates(tokens, [], 'allWords', 0.5))).toEqual(['said', 'cheap', 'doubt', 'data', 'old']);
+  });
+
+  it('never blanks the essay template when asked, even at 100%', () => {
+    const tokens = tokenize('Some might claim that X helps. However, others assert that Y hurts. For instance, Z.');
+    const got = words(tokens, blankCandidates(tokens, [], 'allWords', 1, { skipTemplates: true }));
+    expect(got).toEqual(['X', 'helps', 'Y', 'hurts', 'Z']);
+  });
+
+  it('still blanks a pinned template word', () => {
+    const tokens = tokenize('Some might claim that X helps.');
+    const got = words(tokens, blankCandidates(tokens, [], 'allWords', 1, { skipTemplates: true, pinned: [2] }));
+    expect(got).toEqual(['claim', 'X', 'helps']);
   });
 });

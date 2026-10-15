@@ -15,6 +15,7 @@ import { BackButton } from '../common/BackButton';
 import { EntrySwitcher } from '../common/EntrySwitcher';
 import { RatioSlider } from '../common/RatioSlider';
 import { PencilIcon } from '../common/icons';
+import { IS_PERSONAL } from '../../lib/target';
 
 export function StudyDetailScreen() {
   const { id } = useParams<{ id: string }>();
@@ -49,6 +50,7 @@ function StudyDetail() {
   const candidates = blankCandidates(entry.tokens, ranges, quizMode, settings.quizRatio, {
     pinned: entry.pinned,
     excluded: entry.excluded,
+    skipTemplates: IS_PERSONAL,
   });
   const markedWordCount = quizCandidates(entry.tokens, ranges, 'marked').length;
   const pinnedCount = entry.pinned?.length ?? 0;
@@ -158,7 +160,7 @@ function StudyDetail() {
                 : 'マーキングした単語のうち、指定した割合をランダムに穴埋めにします。'}
               {quizMode === 'allWords' &&
                 settings.quizRatio < 1 &&
-                '冠詞・be動詞・助動詞・前置詞・and・however などの接続副詞・often などの頻度の副詞は、自動では穴になりません(100%のときは対象)。'}
+                '冠詞・be動詞・助動詞・前置詞・代名詞・接続詞・however などの接続副詞・often などの頻度の副詞は、自動では穴になりません(100%のときは対象)。'}
               ここで変更すると他の英文にも適用されます。
             </div>
           </div>
