@@ -8,6 +8,7 @@ import { BackButton } from '../common/BackButton';
 import { ConfirmDialog } from '../common/ConfirmDialog';
 import { TrashIcon } from '../common/icons';
 import type { Entry } from '../../types';
+import { IS_PERSONAL } from '../../lib/target';
 
 function importErrorMessage(kind: ImportError['kind']): string {
   switch (kind) {
@@ -32,13 +33,21 @@ export function SettingsScreen() {
   const [importError, setImportError] = useState<string | null>(null);
   const [pendingImportRaw, setPendingImportRaw] = useState<string | null>(null);
 
-  const handleExport = () => {
+  const handleExport = async () => {
     const file = buildExportFile(data);
-    const blob = new Blob([JSON.stringify(file, null, 2)], { type: 'application/json' });
+    const json = JSON.stringify(file, null, 2);
+    const filename = `eiwaku-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    // アーティファクトの枠内では通常のダウンロードが効かないので、専用の保存機能を使う
+    const downloads = IS_PERSONAL ? await window.claude?.use('downloads').catch(() => null) : null;
+    if (downloads) {
+      await downloads.save({ filename, data: json }).catch(() => undefined);
+      return;
+    }
+    const blob = new Blob([json], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `eiwaku-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    a.download = filename;
     a.click();
     URL.revokeObjectURL(url);
   };

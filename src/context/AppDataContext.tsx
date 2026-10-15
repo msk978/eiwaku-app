@@ -1,10 +1,12 @@
-import { createContext, useContext, useEffect, useMemo, useReducer, type ReactNode } from 'react';
-import type { AppData, Entry, MarkingRange, QuizMode, SessionRecord } from '../types';
+import { createContext, useContext, useEffect, useMemo, useReducer, useRef, useState, type ReactNode } from 'react';
+import type { AppData, Entry, MarkingRange, MarkingSet, QuizMode, SessionRecord } from '../types';
 import { loadData, saveData } from '../lib/storage';
+import { CloudSync, type RemoteChange, type SyncStatus } from '../lib/cloudSync';
+import { IS_PERSONAL } from '../lib/target';
 
 type Action =
   | { type: 'ADD_ENTRY'; entry: Entry }
-  | { type: 'ADD_ENTRIES'; entries: Entry[] }
+  | { type: 'ADD_ENTRIES'; entries: Entry[]; markings?: MarkingSet[] }
   | { type: 'DELETE_ENTRY'; entryId: string }
   | { type: 'SET_ENTRY_TITLE'; entryId: string; title: string | undefined }
   | { type: 'SET_MARKING_RANGES'; entryId: string; ranges: MarkingRange[] }
@@ -17,7 +19,8 @@ type Action =
   | { type: 'CLEAR_PINS'; entryId: string }
   | { type: 'TOGGLE_EXCLUDE'; entryId: string; index: number }
   | { type: 'CLEAR_EXCLUDED'; entryId: string }
-  | { type: 'REPLACE_ALL'; data: AppData };
+  | { type: 'REPLACE_ALL'; data: AppData }
+  | { type: 'APPLY_REMOTE'; change: RemoteChange };
 
 function reducer(state: AppData, action: Action): AppData {
   switch (action.type) {
@@ -31,7 +34,12 @@ function reducer(state: AppData, action: Action): AppData {
       return {
         ...state,
         entries: [...state.entries, ...action.entries],
-        markings: [...state.markings, ...action.entries.map((e) => ({ entryId: e.id, ranges: [] }))],
+        markings: [
+          ...state.markings,
+          ...action.entries.map(
+            (e) => action.markings?.find((m) => m.entryId === e.id) ?? { entryId: e.id, ranges: [] },
+          ),
+        ],
       };
     case 'DELETE_ENTRY':
       return {
@@ -118,6 +126,28 @@ function reducer(state: AppData, action: Action): AppData {
       };
     case 'REPLACE_ALL':
       return action.data;
+    case 'APPLY_REMOTE': {
+      const { settings, upserts, deletes } = action.change;
+      const changed = new Set([...deletes, ...upserts.map((d) => d.entry.id)]);
+      const kept = state.entries.filter((e) => !deletes.includes(e.id));
+      const entries = [
+        ...kept.map((e) => upserts.find((d) => d.entry.id === e.id)?.entry ?? e),
+        ...upserts.filter((d) => !kept.some((e) => e.id === d.entry.id)).map((d) => d.entry),
+      ].sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+      return {
+        ...state,
+        settings: settings ?? state.settings,
+        entries,
+        markings: [
+          ...state.markings.filter((m) => !changed.has(m.entryId)),
+          ...upserts.map((d) => ({ entryId: d.entry.id, ranges: d.ranges ?? [] })),
+        ],
+        sessions: [
+          ...state.sessions.filter((s) => !changed.has(s.entryId)),
+          ...upserts.flatMap((d) => d.sessions ?? []),
+        ].sort((a, b) => a.timestamp.localeCompare(b.timestamp)),
+      };
+    }
     default:
       return state;
   }
@@ -126,6 +156,8 @@ function reducer(state: AppData, action: Action): AppData {
 interface AppDataContextValue {
   data: AppData;
   dispatch: React.Dispatch<Action>;
+  /** 個人版の端末間同期の状態(公開版では常に offline) */
+  syncStatus: SyncStatus;
 }
 
 const AppDataContext = createContext<AppDataContextValue | null>(null);
@@ -133,13 +165,57 @@ const AppDataContext = createContext<AppDataContextValue | null>(null);
 export function AppDataProvider({ children }: { children: ReactNode }) {
   const [data, dispatch] = useReducer(reducer, undefined, loadData);
 
+  const syncStatus = useCloudSync(data, dispatch);
+
   useEffect(() => {
     saveData(data);
   }, [data]);
 
-  const value = useMemo(() => ({ data, dispatch }), [data]);
+  const value = useMemo(() => ({ data, dispatch, syncStatus }), [data, syncStatus]);
 
   return <AppDataContext.Provider value={value}>{children}</AppDataContext.Provider>;
+}
+
+/** 個人版だけ、claude.ai アーティファクトの db と同期する */
+function useCloudSync(data: AppData, dispatch: React.Dispatch<Action>): SyncStatus {
+  const [status, setStatus] = useState<SyncStatus>(IS_PERSONAL ? 'connecting' : 'offline');
+  const syncRef = useRef<CloudSync | null>(null);
+  const dataRef = useRef(data);
+  dataRef.current = data;
+
+  useEffect(() => {
+    if (!IS_PERSONAL) return;
+    let cancelled = false;
+    let sync: CloudSync | null = null;
+    (async () => {
+      const db = (await window.claude?.use('db').catch(() => null)) ?? null;
+      if (cancelled) return;
+      if (!db) {
+        setStatus('offline');
+        return;
+      }
+      sync = new CloudSync(db, dataRef.current, {
+        replaceAll: (next) => dispatch({ type: 'REPLACE_ALL', data: next }),
+        applyRemote: (change) => dispatch({ type: 'APPLY_REMOTE', change }),
+        status: setStatus,
+      });
+      syncRef.current = sync;
+      await sync.start();
+    })().catch(() => {
+      if (!cancelled) setStatus('error');
+    });
+    return () => {
+      cancelled = true;
+      sync?.stop();
+      syncRef.current = null;
+    };
+  }, [dispatch]);
+
+  useEffect(() => {
+    syncRef.current?.flush(data);
+  }, [data]);
+
+  return status;
 }
 
 export function useAppData(): AppDataContextValue {

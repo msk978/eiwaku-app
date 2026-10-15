@@ -1,4 +1,4 @@
-import { HashRouter, Route, Routes } from 'react-router-dom';
+import { HashRouter, MemoryRouter, Route, Routes } from 'react-router-dom';
 import { AppDataProvider } from './context/AppDataContext';
 import { HomeScreen } from './components/screens/HomeScreen';
 import { EntryCreateScreen } from './components/screens/EntryCreateScreen';
@@ -6,11 +6,15 @@ import { MarkingScreen } from './components/screens/MarkingScreen';
 import { StudyDetailScreen } from './components/screens/StudyDetailScreen';
 import { QuizScreen } from './components/screens/QuizScreen';
 import { SettingsScreen } from './components/screens/SettingsScreen';
+import { IS_PERSONAL } from './lib/target';
+
+// アーティファクトの枠内ではURLのハッシュを使わず、画面の移動をメモリ上で持つ
+const Router = IS_PERSONAL ? MemoryRouter : HashRouter;
 
 export function App() {
   return (
     <AppDataProvider>
-      <HashRouter>
+      <Router>
         <Routes>
           <Route path="/" element={<HomeScreen />} />
           <Route path="/new" element={<EntryCreateScreen />} />
@@ -19,7 +23,7 @@ export function App() {
           <Route path="/entries/:id/quiz" element={<QuizScreen />} />
           <Route path="/settings" element={<SettingsScreen />} />
         </Routes>
-      </HashRouter>
+      </Router>
     </AppDataProvider>
   );
 }

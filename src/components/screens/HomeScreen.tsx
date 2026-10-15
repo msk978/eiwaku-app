@@ -7,8 +7,10 @@ import { joinTokens } from '../../lib/joinTokens';
 import { formatRelativeDate } from '../../lib/relativeDate';
 import { filterAndSortEntries, type SortMode } from '../../lib/homeListView';
 import { sessionsForEntry } from '../../lib/stats';
-import { PRESET_TOPICS } from '../../lib/presetLibrary';
+import { getPresetTopics } from '../../lib/presetLibrary';
 import { presetEntriesToAdd } from '../../lib/presets';
+import { IS_PERSONAL } from '../../lib/target';
+import type { SyncStatus } from '../../lib/cloudSync';
 import { Fab } from '../common/Fab';
 import { EmptyState } from '../common/EmptyState';
 import { GearIcon } from '../common/icons';
@@ -21,7 +23,7 @@ const SORT_LABEL: Record<SortMode, string> = {
 export function HomeScreen() {
   const navigate = useNavigate();
   const { entries } = useEntries();
-  const { data, dispatch } = useAppData();
+  const { data, dispatch, syncStatus } = useAppData();
   const [query, setQuery] = useState('');
   const [sortMode, setSortMode] = useState<SortMode>('registered');
 
@@ -30,16 +32,18 @@ export function HomeScreen() {
     [entries, data.sessions, query, sortMode],
   );
 
+  // 内蔵の教材ライブラリは自分専用版だけに出す
+  const presetTopics = IS_PERSONAL ? getPresetTopics() : [];
   const addedPresetIds = new Set(entries.map((e) => e.presetId).filter(Boolean));
-  const missingPresets = PRESET_TOPICS.filter((t) => !addedPresetIds.has(t.presetId)).length;
-  const addPresets = () => dispatch({ type: 'ADD_ENTRIES', entries: presetEntriesToAdd(PRESET_TOPICS, entries) });
+  const missingPresets = presetTopics.filter((t) => !addedPresetIds.has(t.presetId)).length;
+  const addPresets = () => dispatch({ type: 'ADD_ENTRIES', ...presetEntriesToAdd(presetTopics, entries) });
   const libraryCard = missingPresets > 0 && (
     <div className="card" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
       <div style={{ flex: 1, fontSize: 13, lineHeight: 1.5 }}>
         <div style={{ fontWeight: 600 }}>教材ライブラリ</div>
         <div style={{ color: 'var(--text-muted)', fontSize: 12.5 }}>
-          {missingPresets === PRESET_TOPICS.length
-            ? `エッセイ題材 ${PRESET_TOPICS.length}本を追加できます`
+          {missingPresets === presetTopics.length
+            ? `エッセイ題材 ${presetTopics.length}本を追加できます(Idiomatic 300 の表現はマーキング済み)`
             : `未追加の題材が ${missingPresets}本あります`}
         </div>
       </div>
@@ -53,6 +57,7 @@ export function HomeScreen() {
     <div className="app-shell" style={{ position: 'relative' }}>
       <div className="topbar">
         <div className="topbar-title">穴埋め暗記</div>
+        {IS_PERSONAL && <SyncBadge status={syncStatus} />}
         <button className="icon-btn" style={{ marginLeft: 'auto' }} onClick={() => navigate('/settings')} aria-label="設定">
           <GearIcon />
         </button>
@@ -152,5 +157,22 @@ export function HomeScreen() {
 
       <Fab onClick={() => navigate('/new')} />
     </div>
+  );
+}
+
+const SYNC_LABEL: Record<SyncStatus, { text: string; color: string }> = {
+  connecting: { text: '同期中…', color: 'var(--text-muted)' },
+  synced: { text: '同期オン', color: 'var(--success)' },
+  offline: { text: 'この端末のみ', color: 'var(--text-muted)' },
+  error: { text: '同期エラー', color: 'var(--danger)' },
+};
+
+/** 自分専用版の、端末間同期の状態 */
+function SyncBadge({ status }: { status: SyncStatus }) {
+  const { text, color } = SYNC_LABEL[status];
+  return (
+    <span style={{ fontSize: 11.5, color, border: `1px solid ${color}`, borderRadius: 999, padding: '1px 8px', marginLeft: 8 }}>
+      {text}
+    </span>
   );
 }

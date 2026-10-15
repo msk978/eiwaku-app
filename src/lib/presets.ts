@@ -1,10 +1,11 @@
-import { tokenize } from './tokenize';
-import type { Entry } from '../types';
+import { isWordToken, tokenize } from './tokenize';
+import type { Entry, MarkingRange, MarkingSet } from '../types';
 
 export interface PresetTopic {
   /** 追加済みかどうかの判定に使う固定ID */
   presetId: string;
   title: string;
+  /** 本文。{{ }} で囲んだ部分は追加時にマーキング済みになる */
   text: string;
 }
 
@@ -32,17 +33,43 @@ export function parsePresetTopics(raw: string): PresetTopic[] {
   return topics;
 }
 
-/** まだ追加していない題材だけを、登録用のEntryにする */
-export function presetEntriesToAdd(topics: PresetTopic[], existing: Entry[], now = new Date()): Entry[] {
+/** {{ }} の印を外してトークン化し、印の付いた語をマーキング範囲にする */
+export function parseMarkedText(text: string): { tokens: string[]; ranges: MarkingRange[] } {
+  const tokens: string[] = [];
+  const ranges: MarkingRange[] = [];
+  text.split(/(\{\{.*?\}\})/s).forEach((part) => {
+    const marked = part.startsWith('{{') && part.endsWith('}}');
+    for (const token of tokenize(marked ? part.slice(2, -2) : part)) {
+      if (marked && isWordToken(token)) ranges.push({ start: tokens.length, end: tokens.length });
+      tokens.push(token);
+    }
+  });
+  return { tokens, ranges };
+}
+
+/** まだ追加していない題材だけを、登録用のEntryとマーキングにする */
+export function presetEntriesToAdd(
+  topics: PresetTopic[],
+  existing: Entry[],
+  now = new Date(),
+): { entries: Entry[]; markings: MarkingSet[] } {
   const added = new Set(existing.map((e) => e.presetId).filter(Boolean));
-  return topics
+  const entries: Entry[] = [];
+  const markings: MarkingSet[] = [];
+  topics
     .filter((t) => !added.has(t.presetId))
-    .map((t, i) => ({
-      id: crypto.randomUUID(),
-      // 登録順を保つため1ミリ秒ずつずらす
-      createdAt: new Date(now.getTime() + i).toISOString(),
-      tokens: tokenize(t.text),
-      title: t.title,
-      presetId: t.presetId,
-    }));
+    .forEach((t, i) => {
+      const { tokens, ranges } = parseMarkedText(t.text);
+      const id = crypto.randomUUID();
+      entries.push({
+        id,
+        // 登録順を保つため1ミリ秒ずつずらす
+        createdAt: new Date(now.getTime() + i).toISOString(),
+        tokens,
+        title: t.title,
+        presetId: t.presetId,
+      });
+      markings.push({ entryId: id, ranges });
+    });
+  return { entries, markings };
 }

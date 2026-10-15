@@ -35,5 +35,9 @@ export function loadData(): AppData {
 }
 
 export function saveData(data: AppData): void {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch {
+    // 保存できない環境(プライベートブラウズなど)では何もしない
+  }
 }
