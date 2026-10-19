@@ -1,7 +1,6 @@
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAppData } from '../../context/AppDataContext';
-import { useGlosses } from '../../hooks/useGlosses';
 import { useMarkings } from '../../hooks/useMarkings';
 import { useRequireEntry } from '../../hooks/useRequireEntry';
 import { useSessions } from '../../hooks/useSessions';
@@ -12,9 +11,13 @@ import { buildQuizPieces } from '../../lib/quizPieces';
 import { isWordToken } from '../../lib/tokenize';
 import { BackButton } from '../common/BackButton';
 import { EntrySwitcher } from '../common/EntrySwitcher';
-import { GlossEditor } from '../common/GlossEditor';
 import { WordToken, type WordTokenVariant } from '../common/WordToken';
 import { IS_PERSONAL } from '../../lib/target';
+import { getPresetTopics, getPresetTranslations } from '../../lib/presetLibrary';
+import { buildEntryTranslation } from '../../lib/translation';
+
+/** この時間だけ学習画面を開いていたら「学習した」と記録する */
+const STUDY_RECORD_MS = 60_000;
 
 export function QuizScreen() {
   const { id } = useParams<{ id: string }>();
@@ -47,10 +50,19 @@ function QuizSession() {
   const [blanks, setBlanks] = useState(drawBlanks);
   const [revealed, setRevealed] = useState<Set<number>>(() => new Set());
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
-  const { glossFor, setGloss } = useGlosses(
-    entry,
-    blanks.map((r) => r.start),
+  // 内蔵題材(自分専用版)だけ、全文和訳を英文に対応づけて出せる
+  const translation = useMemo(
+    () => (IS_PERSONAL && entry ? buildEntryTranslation(entry, getPresetTopics(), getPresetTranslations()) : null),
+    [entry],
   );
+
+  // 一定時間この画面にいたら学習した扱いにする(1回の表示につき1回だけ)
+  const totalRef = useRef(blanks.length);
+  totalRef.current = blanks.length;
+  useEffect(() => {
+    const timer = setTimeout(() => addSession(totalRef.current), STUDY_RECORD_MS);
+    return () => clearTimeout(timer);
+  }, [addSession]);
 
   useEffect(() => {
     if (entry && blanks.length === 0) {
@@ -66,6 +78,42 @@ function QuizSession() {
   const total = blanks.length;
   const pinnedInBlanks = blanks.filter((r) => pinned.has(r.start)).length;
   const allRevealed = revealed.size === total;
+  const showJp = !!translation && showGlossHints;
+  const sentenceAt = new Map(translation?.sentenceEnds.map((end, s) => [end, s]) ?? []);
+  // 今の穴が含まれる表現は、和訳の対応部分を強調する
+  const blankExprs = new Set(blanks.flatMap((r) => {
+    const e = translation?.exprOfToken.get(r.start);
+    return e === undefined ? [] : [e];
+  }));
+  const jpLine = (tokenIndex: number) => {
+    const s = sentenceAt.get(tokenIndex);
+    if (!showJp || s === undefined) return null;
+    return (
+      <span
+        style={{
+          display: 'block',
+          fontFamily: 'var(--font-ui)',
+          fontSize: 12.5,
+          lineHeight: 1.7,
+          color: 'var(--text-muted)',
+          margin: '0 0 10px',
+        }}
+      >
+        {translation!.sentences[s]!.map((seg, k) =>
+          seg.expr !== undefined && blankExprs.has(seg.expr) ? (
+            <mark
+              key={k}
+              style={{ background: 'var(--accent-soft)', color: 'var(--accent)', fontWeight: 600, borderRadius: 3, padding: '0 2px' }}
+            >
+              {seg.text}
+            </mark>
+          ) : (
+            <Fragment key={k}>{seg.text}</Fragment>
+          ),
+        )}
+      </span>
+    );
+  };
 
   const handleTap = (tokenIndex: number) => {
     setActiveIndex(tokenIndex);
@@ -102,12 +150,7 @@ function QuizSession() {
     setActiveIndex(null);
   };
 
-  const recordSession = () => {
-    if (revealed.size > 0) addSession(total);
-  };
-
   const handleRedraw = () => {
-    recordSession();
     setBlanks(drawBlanks());
     setRevealed(new Set());
     setActiveIndex(null);
@@ -133,12 +176,10 @@ function QuizSession() {
   const adjacent = adjacentEntries(playable, entry.id);
 
   const moveTo = (targetId: string) => {
-    recordSession();
     navigate(`/entries/${targetId}/quiz`, { replace: true });
   };
 
   const handleFinish = () => {
-    recordSession();
     navigate(`/entries/${id}`, { replace: true });
   };
 
@@ -152,6 +193,7 @@ function QuizSession() {
             固定 {pinnedInBlanks}
           </span>
         </div>
+        {translation && (
         <button
           onClick={() => setShowGlossHints(!showGlossHints)}
           aria-pressed={showGlossHints}
@@ -165,8 +207,9 @@ function QuizSession() {
             fontWeight: 600,
           }}
         >
-          和訳ヒント {showGlossHints ? 'ON' : 'OFF'}
+          和訳 {showGlossHints ? 'ON' : 'OFF'}
         </button>
+        )}
       </div>
       <EntrySwitcher {...adjacent} onMove={(e) => moveTo(e.id)} />
       {entry.title && (
@@ -196,7 +239,14 @@ function QuizSession() {
                   {entry.tokens.slice(piece.start, piece.end + 1).map((token, k) => {
                     const tokenIndex = piece.start + k;
                     const gap = k > 0 && isWordToken(token) ? ' ' : '';
-                    if (!isWordToken(token)) return <Fragment key={tokenIndex}>{gap}{token}</Fragment>;
+                    if (!isWordToken(token))
+                      return (
+                        <Fragment key={tokenIndex}>
+                          {gap}
+                          {token}
+                          {jpLine(tokenIndex)}
+                        </Fragment>
+                      );
                     return (
                       <Fragment key={tokenIndex}>
                         {gap}
@@ -229,18 +279,10 @@ function QuizSession() {
                 {isRevealed ? piece.label : ''}
               </WordToken>
             );
-            const hint = showGlossHints ? glossFor(tokenIndex).text : undefined;
             return (
               <Fragment key={i}>
                 {space}
-                {hint ? (
-                  <ruby style={{ rubyAlign: 'center' }}>
-                    {token}
-                    <rt style={{ fontFamily: 'var(--font-ui)', fontSize: 10, color: 'var(--text-muted)', lineHeight: 1 }}>{hint}</rt>
-                  </ruby>
-                ) : (
-                  token
-                )}
+                {token}
               </Fragment>
             );
           })}
@@ -260,12 +302,6 @@ function QuizSession() {
       >
         {activeIndex !== null && revealed.has(activeIndex) ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            <GlossEditor
-              key={activeIndex}
-              word={entry.tokens[activeIndex]!}
-              gloss={glossFor(activeIndex)}
-              onSave={(text) => setGloss(activeIndex, text)}
-            />
             <div style={{ display: 'flex', gap: 8 }}>
               <button
                 className="secondary-btn"

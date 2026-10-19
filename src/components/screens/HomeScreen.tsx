@@ -2,11 +2,9 @@ import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useEntries } from '../../hooks/useEntries';
 import { useAppData } from '../../context/AppDataContext';
-import { studyCount } from '../../lib/stats';
 import { joinTokens } from '../../lib/joinTokens';
 import { formatRelativeDate } from '../../lib/relativeDate';
 import { filterAndSortEntries, type SortMode } from '../../lib/homeListView';
-import { sessionsForEntry } from '../../lib/stats';
 import { getPresetTopics } from '../../lib/presetLibrary';
 import { presetEntriesToAdd } from '../../lib/presets';
 import { IS_PERSONAL } from '../../lib/target';
@@ -26,6 +24,15 @@ export function HomeScreen() {
   const { data, dispatch, syncStatus } = useAppData();
   const [query, setQuery] = useState('');
   const [sortMode, setSortMode] = useState<SortMode>('registered');
+
+  // いちばん最近学習した英文に「前回」の印を付け、続きから始められるようにする
+  const previousId = useMemo(() => {
+    const latest = data.sessions.reduce<{ entryId: string; timestamp: string } | null>(
+      (best, s) => (!best || s.timestamp > best.timestamp ? s : best),
+      null,
+    );
+    return latest?.entryId ?? null;
+  }, [data.sessions]);
 
   const rows = useMemo(
     () => filterAndSortEntries(entries, data.sessions, query, sortMode),
@@ -115,7 +122,6 @@ export function HomeScreen() {
             <EmptyState message={`「${query}」に一致する英文はありません`} />
           ) : (
             rows.map(({ entry, lastStudied }) => {
-              const sessions = sessionsForEntry(data.sessions, entry.id);
               const preview = joinTokens(entry.tokens.slice(0, 24));
               return (
                 <div
@@ -143,10 +149,24 @@ export function HomeScreen() {
                     {preview}
                     {entry.tokens.length > 24 ? '...' : ''}
                   </div>
-                  <div style={{ display: 'flex', gap: 14, fontSize: 12.5, color: 'var(--text-muted)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 14, fontSize: 12.5, color: 'var(--text-muted)' }}>
                     <span>{entry.tokens.filter((t) => /[A-Za-z0-9]/.test(t)).length}語</span>
-                    <span>学習 {studyCount(sessions)}回</span>
-                    <span>{formatRelativeDate(lastStudied)}</span>
+                    <span>{lastStudied ? `前回学習: ${formatRelativeDate(lastStudied)}` : '未学習'}</span>
+                    {entry.id === previousId && (
+                      <span
+                        style={{
+                          marginLeft: 'auto',
+                          fontSize: 11.5,
+                          fontWeight: 600,
+                          color: 'var(--pin-text)',
+                          background: 'var(--pin-soft)',
+                          borderRadius: 999,
+                          padding: '2px 9px',
+                        }}
+                      >
+                        前回ここ
+                      </span>
+                    )}
                   </div>
                 </div>
               );

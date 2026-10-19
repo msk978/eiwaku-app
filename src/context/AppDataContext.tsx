@@ -14,7 +14,6 @@ type Action =
   | { type: 'SET_QUIZ_RATIO'; ratio: number }
   | { type: 'SET_QUIZ_MODE'; mode: QuizMode }
   | { type: 'SET_SHOW_GLOSS_HINTS'; show: boolean }
-  | { type: 'SET_GLOSS'; entryId: string; index: number; gloss: string | undefined }
   | { type: 'TOGGLE_PIN'; entryId: string; index: number }
   | { type: 'CLEAR_PINS'; entryId: string }
   | { type: 'TOGGLE_EXCLUDE'; entryId: string; index: number }
@@ -72,17 +71,6 @@ function reducer(state: AppData, action: Action): AppData {
       return { ...state, settings: { ...state.settings, quizMode: action.mode } };
     case 'SET_SHOW_GLOSS_HINTS':
       return { ...state, settings: { ...state.settings, showGlossHints: action.show } };
-    case 'SET_GLOSS':
-      return {
-        ...state,
-        entries: state.entries.map((e) => {
-          if (e.id !== action.entryId) return e;
-          const glosses = { ...e.glosses };
-          if (action.gloss) glosses[action.index] = action.gloss;
-          else delete glosses[action.index];
-          return { ...e, glosses };
-        }),
-      };
     case 'TOGGLE_PIN':
       return {
         ...state,

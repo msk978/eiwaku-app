@@ -33,18 +33,36 @@ export function parsePresetTopics(raw: string): PresetTopic[] {
   return topics;
 }
 
-/** {{ }} の印を外してトークン化し、印の付いた語をマーキング範囲にする */
-export function parseMarkedText(text: string): { tokens: string[]; ranges: MarkingRange[] } {
+/**
+ * {{ }} の印を外してトークン化し、印の付いた語をマーキング範囲にする。
+ * {{+ }} は直前の表現の続き(give them an edge in の an edge in など)で、同じ表現として数える。
+ */
+export function parseMarkedText(text: string): {
+  tokens: string[];
+  ranges: MarkingRange[];
+  /** 表現ごとの、印の付いた語のトークンインデックス */
+  expressions: number[][];
+} {
   const tokens: string[] = [];
   const ranges: MarkingRange[] = [];
+  const expressions: number[][] = [];
   text.split(/(\{\{.*?\}\})/s).forEach((part) => {
     const marked = part.startsWith('{{') && part.endsWith('}}');
-    for (const token of tokenize(marked ? part.slice(2, -2) : part)) {
-      if (marked && isWordToken(token)) ranges.push({ start: tokens.length, end: tokens.length });
+    let body = marked ? part.slice(2, -2) : part;
+    if (marked) {
+      const continues = body.startsWith('+') && expressions.length > 0;
+      body = body.replace(/^\+/, '');
+      if (!continues) expressions.push([]);
+    }
+    for (const token of tokenize(body)) {
+      if (marked && isWordToken(token)) {
+        ranges.push({ start: tokens.length, end: tokens.length });
+        expressions[expressions.length - 1]!.push(tokens.length);
+      }
       tokens.push(token);
     }
   });
-  return { tokens, ranges };
+  return { tokens, ranges, expressions };
 }
 
 /** まだ追加していない題材だけを、登録用のEntryとマーキングにする */

@@ -32,6 +32,9 @@ export function SettingsScreen() {
   const [deleteTarget, setDeleteTarget] = useState<Entry | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
   const [pendingImportRaw, setPendingImportRaw] = useState<string | null>(null);
+  const [confirmPresetDelete, setConfirmPresetDelete] = useState(false);
+  // 公開版から外した教材ライブラリの題材(以前に追加したものが端末に残っている場合だけ出す)
+  const presetEntries = IS_PERSONAL ? [] : entries.filter((e) => e.presetId);
 
   const handleExport = async () => {
     const file = buildExportFile(data);
@@ -126,6 +129,24 @@ export function SettingsScreen() {
           )}
         </div>
 
+        {presetEntries.length > 0 && (
+          <div>
+            <div className="section-label">教材ライブラリ</div>
+            <div className="card" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <span style={{ flex: 1, fontSize: 13.5, lineHeight: 1.5 }}>
+                以前に「まとめて追加」した題材が {presetEntries.length}本 あります
+              </span>
+              <button
+                className="secondary-btn"
+                style={{ padding: '8px 14px', fontSize: 13, color: 'var(--danger)', flexShrink: 0 }}
+                onClick={() => setConfirmPresetDelete(true)}
+              >
+                まとめて削除
+              </button>
+            </div>
+          </div>
+        )}
+
         <div>
           <div className="section-label">英文の削除</div>
           {entries.length === 0 ? (
@@ -181,6 +202,20 @@ export function SettingsScreen() {
           onConfirm={() => {
             deleteEntry(deleteTarget.id);
             setDeleteTarget(null);
+          }}
+        />
+      )}
+
+      {confirmPresetDelete && (
+        <ConfirmDialog
+          title={`教材ライブラリの題材 ${presetEntries.length}本を削除しますか？`}
+          body="自分で登録した英文は残ります。削除した題材のマーキングと学習履歴も消え、元に戻せません。"
+          confirmLabel="削除する"
+          danger
+          onCancel={() => setConfirmPresetDelete(false)}
+          onConfirm={() => {
+            presetEntries.forEach((e) => deleteEntry(e.id));
+            setConfirmPresetDelete(false);
           }}
         />
       )}
