@@ -9,7 +9,7 @@ import { BackButton } from '../common/BackButton';
 import { TaskFigure } from '../common/TaskFigure';
 import { getPresetLineBreaks, getTask1Figure, getToeflPrompt } from '../../lib/presetLibrary';
 import { TaskPromptCard } from '../common/TaskPromptCard';
-import { IS_PERSONAL } from '../../lib/target';
+import { HAS_PRESETS } from '../../lib/target';
 
 export function MarkingScreen() {
   const { id } = useParams<{ id: string }>();
@@ -22,8 +22,8 @@ export function MarkingScreen() {
 
   if (!entry) return null;
 
-  const figure = IS_PERSONAL ? getTask1Figure(entry.presetId) : null;
-  const prompt = IS_PERSONAL ? getToeflPrompt(entry.presetId) : null;
+  const figure = HAS_PRESETS ? getTask1Figure(entry.presetId) : null;
+  const prompt = HAS_PRESETS ? getToeflPrompt(entry.presetId) : null;
   const markedWordCount = expandToWordRanges(entry.tokens, ranges).length;
 
   const onTap = (index: number) => {
@@ -52,7 +52,7 @@ export function MarkingScreen() {
           ranges={ranges}
           activeIndex={activeIndex}
           onTap={onTap}
-          lineBreaks={IS_PERSONAL ? getPresetLineBreaks(entry) : undefined}
+          lineBreaks={HAS_PRESETS ? getPresetLineBreaks(entry) : undefined}
         />
       </div>
 

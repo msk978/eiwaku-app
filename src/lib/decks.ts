@@ -1,11 +1,12 @@
 import type { Deck, Entry } from '../types';
 import { TASK1_PREFIX, TOEFL_PREFIX } from './presets';
+import { IS_EVERYONE } from './target';
 
-/** 自分専用版の既定のタブ。IELTS の Task 2・Task 1 と TOEFL の Email を分ける */
+/** 既定のタブ。IELTS の Task 2・Task 1 と TOEFL の Email を分ける(みんな向けの IELTS 版に TOEFL は無い) */
 export const DEFAULT_DECKS: Deck[] = [
   { id: 'ielts-task2', name: 'IELTS Task 2' },
   { id: 'ielts-task1', name: 'IELTS Task 1' },
-  { id: 'toefl-email', name: 'TOEFL Email' },
+  ...(IS_EVERYONE ? [] : [{ id: 'toefl-email', name: 'TOEFL Email' }]),
 ];
 
 export const TASK2_DECK_ID = 'ielts-task2';

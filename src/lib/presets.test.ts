@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { lineBreaks, parseMarkedText, parsePresetTopics, presetEntriesToAdd } from './presets';
+import { lineBreaks, parseMarkedText, parsePresetTopics, presetEntriesToAdd, TASK1_PREFIX } from './presets';
 import { getPresetTopics, getTask1Figure, getTask1Topics, getToeflPrompt, getToeflTopics } from './presetLibrary';
 import type { Entry } from '../types';
+import band6Task1Raw from '../data/band6/task1Topics.txt?raw';
+import band6Task2Raw from '../data/band6/task2Topics.txt?raw';
 
 describe('parsePresetTopics', () => {
   it('splits headings and bodies', () => {
@@ -124,6 +126,35 @@ describe('TOEFL email topics', () => {
     for (const t of getToeflTopics()) {
       expect(t.text, t.title).toMatch(/^Dear .+,\n\nHello, I hope you are doing well\. I am writing /);
       expect(t.text.endsWith('Best regards,\nMisaki'), t.title).toBe(true);
+    }
+  });
+});
+
+describe('band 6 model answers for the everyone build', () => {
+  const task1 = parsePresetTopics(band6Task1Raw, TASK1_PREFIX);
+  const task2 = parsePresetTopics(band6Task2Raw);
+
+  it('rewrites the same topics under the same titles', () => {
+    expect(task1.map((t) => t.title)).toEqual(getTask1Topics().map((t) => t.title));
+    expect(task2.map((t) => t.title)).toEqual(getPresetTopics().map((t) => t.title));
+  });
+
+  it('keeps the Task 1 template and the number-free overview', () => {
+    for (const t of task1) {
+      const paras = t.text.split(/\n\s*\n/);
+      expect(paras, t.title).toHaveLength(4);
+      expect(paras[1]!.startsWith('Overall, it is clear that'), t.title).toBe(true);
+      expect(/\d/.test(paras[1]!), t.title).toBe(false);
+      expect(paras[2]!.startsWith('Looking first at'), t.title).toBe(true);
+      expect(paras[3]!.startsWith('Turning to'), t.title).toBe(true);
+      expect(getTask1Figure(t.presetId)?.startsWith('<svg'), t.title).toBe(true);
+    }
+  });
+
+  it('keeps the Task 2 template', () => {
+    for (const t of task2) {
+      expect(t.text, t.title).toMatch(/^Some might claim that .+ A good example of this can be observed in Japan/s);
+      expect(t.text, t.title).toMatch(/\n\nHowever, (others assert that|opponents) .+ Firstly, .+ For instance, .+ Secondly, /s);
     }
   });
 });

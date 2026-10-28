@@ -15,7 +15,7 @@ import { BackButton } from '../common/BackButton';
 import { EntrySwitcher } from '../common/EntrySwitcher';
 import { RatioSlider } from '../common/RatioSlider';
 import { PencilIcon } from '../common/icons';
-import { IS_PERSONAL } from '../../lib/target';
+import { HAS_PRESETS } from '../../lib/target';
 import { useDecks } from '../../hooks/useDecks';
 
 export function StudyDetailScreen() {
@@ -52,7 +52,7 @@ function StudyDetail() {
   const candidates = blankCandidates(entry.tokens, ranges, quizMode, settings.quizRatio, {
     pinned: entry.pinned,
     excluded: entry.excluded,
-    skipTemplates: IS_PERSONAL,
+    skipTemplates: HAS_PRESETS,
   });
   const markedWordCount = quizCandidates(entry.tokens, ranges, 'marked').length;
   const pinnedCount = entry.pinned?.length ?? 0;

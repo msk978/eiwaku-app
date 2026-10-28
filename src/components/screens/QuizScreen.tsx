@@ -12,7 +12,7 @@ import { isWordToken } from '../../lib/tokenize';
 import { BackButton } from '../common/BackButton';
 import { EntrySwitcher } from '../common/EntrySwitcher';
 import { WordToken, type WordTokenVariant } from '../common/WordToken';
-import { IS_PERSONAL } from '../../lib/target';
+import { HAS_PRESETS } from '../../lib/target';
 import { getAllPresetTopics, getAllPresetTranslations, getPresetLineBreaks, getTask1Figure, getToeflPrompt } from '../../lib/presetLibrary';
 import { TaskPromptCard } from '../common/TaskPromptCard';
 import { ParagraphBreak } from '../common/ParagraphBreak';
@@ -45,7 +45,7 @@ function QuizSession() {
           blankCandidates(entry.tokens, ranges, quizMode, settings.quizRatio, {
             pinned: entry.pinned,
             excluded: entry.excluded,
-            skipTemplates: IS_PERSONAL,
+            skipTemplates: HAS_PRESETS,
           }),
           entry.pinned ?? [],
           settings.quizRatio,
@@ -57,7 +57,7 @@ function QuizSession() {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   // 内蔵題材(自分専用版)だけ、全文和訳を英文に対応づけて出せる
   const translation = useMemo(
-    () => (IS_PERSONAL && entry ? buildEntryTranslation(entry, getAllPresetTopics(), getAllPresetTranslations()) : null),
+    () => (HAS_PRESETS && entry ? buildEntryTranslation(entry, getAllPresetTopics(), getAllPresetTranslations()) : null),
     [entry],
   );
 
@@ -77,7 +77,7 @@ function QuizSession() {
 
   if (!entry || blanks.length === 0) return null;
 
-  const breaks = IS_PERSONAL ? getPresetLineBreaks(entry) : new Map<number, boolean>();
+  const breaks = HAS_PRESETS ? getPresetLineBreaks(entry) : new Map<number, boolean>();
   const pinned = new Set(entry.pinned ?? []);
   const excluded = new Set(entry.excluded ?? []);
   const pieces = buildQuizPieces(entry.tokens, blanks);
@@ -163,10 +163,10 @@ function QuizSession() {
   };
 
   // 現在の出題設定で穴を作れる題材だけを移動先にする
-  const figure = IS_PERSONAL ? getTask1Figure(entry.presetId) : null;
-  const prompt = IS_PERSONAL ? getToeflPrompt(entry.presetId) : null;
+  const figure = HAS_PRESETS ? getTask1Figure(entry.presetId) : null;
+  const prompt = HAS_PRESETS ? getToeflPrompt(entry.presetId) : null;
   // 自分専用版はどの題材も本文を広く取るため、タイトル行と操作バーを最小限にする
-  const compact = IS_PERSONAL;
+  const compact = HAS_PRESETS;
   const playable = sameDeck(data.entries, entry).filter((e) => {
     if (e.id === entry.id) return true;
     const entryRanges = data.markings.find((m) => m.entryId === e.id)?.ranges ?? [];
@@ -176,7 +176,7 @@ function QuizSession() {
         blankCandidates(e.tokens, entryRanges, quizMode, settings.quizRatio, {
           pinned: pinnedOf,
           excluded: e.excluded,
-          skipTemplates: IS_PERSONAL,
+          skipTemplates: HAS_PRESETS,
         }),
         pinnedOf,
         settings.quizRatio,

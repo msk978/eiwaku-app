@@ -1,7 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { getAllPresetTopics, getAllPresetTranslations } from './presetLibrary';
-import { parseMarkedText, presetEntriesToAdd } from './presets';
-import { buildEntryTranslation, parseJpLine, sentenceIndices } from './translation';
+import { parseMarkedText, parsePresetTopics, presetEntriesToAdd, TASK1_PREFIX, type PresetTopic } from './presets';
+import { buildEntryTranslation, parseJpLine, parseTranslations, sentenceIndices } from './translation';
+import band6Task1Raw from '../data/band6/task1Topics.txt?raw';
+import band6Task1TranslationsRaw from '../data/band6/task1Translations.txt?raw';
+import band6Task2Raw from '../data/band6/task2Topics.txt?raw';
+import band6Task2TranslationsRaw from '../data/band6/task2Translations.txt?raw';
 
 describe('parseJpLine', () => {
   it('numbers the marked parts in order, with continuations and explicit numbers', () => {
@@ -17,11 +21,8 @@ describe('parseJpLine', () => {
   });
 });
 
-describe('bundled translations', () => {
-  const topics = getAllPresetTopics();
-  const translations = getAllPresetTranslations();
-
-  it('has one line per English sentence and matches the expressions sentence by sentence', () => {
+/** 英文1文に和訳1行が対応し、各行の【 】がその英文の表現にちょうど対応しているか */
+function expectAligned(topics: PresetTopic[], translations: Map<string, string[]>) {
     for (const topic of topics) {
       const lines = translations.get(topic.presetId)!;
       const { tokens, expressions } = parseMarkedText(topic.text);
@@ -36,6 +37,21 @@ describe('bundled translations', () => {
         );
       });
     }
+}
+
+describe('band 6 model answers for the everyone build', () => {
+  it('keeps the translations aligned', () => {
+    expectAligned(parsePresetTopics(band6Task1Raw, TASK1_PREFIX), parseTranslations(band6Task1TranslationsRaw, TASK1_PREFIX));
+    expectAligned(parsePresetTopics(band6Task2Raw), parseTranslations(band6Task2TranslationsRaw));
+  });
+});
+
+describe('bundled translations', () => {
+  const topics = getAllPresetTopics();
+  const translations = getAllPresetTranslations();
+
+  it('has one line per English sentence and matches the expressions sentence by sentence', () => {
+    expectAligned(topics, translations);
   });
 
   it('links a freshly added preset entry to its translation', () => {

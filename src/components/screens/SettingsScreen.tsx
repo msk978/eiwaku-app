@@ -8,7 +8,7 @@ import { BackButton } from '../common/BackButton';
 import { ConfirmDialog } from '../common/ConfirmDialog';
 import { TrashIcon } from '../common/icons';
 import type { Entry } from '../../types';
-import { IS_PERSONAL } from '../../lib/target';
+import { HAS_PRESETS, IS_PERSONAL } from '../../lib/target';
 
 function importErrorMessage(kind: ImportError['kind']): string {
   switch (kind) {
@@ -34,7 +34,7 @@ export function SettingsScreen() {
   const [pendingImportRaw, setPendingImportRaw] = useState<string | null>(null);
   const [confirmPresetDelete, setConfirmPresetDelete] = useState(false);
   // 公開版から外した教材ライブラリの題材(以前に追加したものが端末に残っている場合だけ出す)
-  const presetEntries = IS_PERSONAL ? [] : entries.filter((e) => e.presetId);
+  const presetEntries = HAS_PRESETS ? [] : entries.filter((e) => e.presetId);
 
   const handleExport = async () => {
     const file = buildExportFile(data);

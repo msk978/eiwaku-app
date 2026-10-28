@@ -169,6 +169,11 @@ export function templateTokenIndices(tokens: string[]): number[] {
   return result;
 }
 
+/** 本文中の数値(8.3・2020・12,539 など)のインデックス。Task 1 の数字は覚える対象ではないので穴にしない */
+export function numberTokenIndices(tokens: string[]): number[] {
+  return tokens.flatMap((t, i) => (/\d/.test(t) ? [i] : []));
+}
+
 /** 自動の穴埋めでは避ける語(冠詞・be動詞・助動詞・前置詞・代名詞・接続詞・接続副詞・頻度の副詞) */
 export function isAutoSkipWord(token: string): boolean {
   // カーリーアポストロフィ(’)も同じ語として扱う
@@ -180,7 +185,7 @@ export interface BlankOptions {
   pinned?: number[];
   /** 穴にしないトークン */
   excluded?: number[];
-  /** エッセイの型(Some might claim that など)を穴にしない */
+  /** エッセイの型(Some might claim that など)と数値を穴にしない */
   skipTemplates?: boolean;
 }
 
@@ -201,7 +206,7 @@ export function blankCandidates(
   const pinnedSet = new Set(options.pinned ?? []);
   const excludedSet = new Set([
     ...(options.excluded ?? []),
-    ...(options.skipTemplates ? templateTokenIndices(tokens) : []),
+    ...(options.skipTemplates ? [...templateTokenIndices(tokens), ...numberTokenIndices(tokens)] : []),
   ]);
   const skipFunctionWords = ratio < 1 && mode === 'allWords';
 

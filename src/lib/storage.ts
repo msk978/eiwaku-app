@@ -1,6 +1,8 @@
 import type { AppData } from '../types';
+import { IS_EVERYONE } from './target';
 
-const STORAGE_KEY = 'eiwaku_app_data_v1';
+// みんな向けの IELTS 版は公開版と同じドメインに置くので、保存先を分けて混ざらないようにする
+const STORAGE_KEY = IS_EVERYONE ? 'eiwaku_ielts_data_v1' : 'eiwaku_app_data_v1';
 
 export const INITIAL_DATA: AppData = {
   schemaVersion: 1,

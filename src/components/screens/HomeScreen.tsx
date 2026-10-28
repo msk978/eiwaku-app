@@ -10,7 +10,7 @@ import { presetEntriesToAdd, type PresetTopic } from '../../lib/presets';
 import { deckIdOf, loadSelectedDeckId, saveSelectedDeckId, TASK1_DECK_ID, TASK2_DECK_ID, TOEFL_DECK_ID } from '../../lib/decks';
 import { useDecks } from '../../hooks/useDecks';
 import type { Deck } from '../../types';
-import { IS_PERSONAL } from '../../lib/target';
+import { HAS_PRESETS, IS_EVERYONE, IS_PERSONAL } from '../../lib/target';
 import type { SyncStatus } from '../../lib/cloudSync';
 import { Fab } from '../common/Fab';
 import { EmptyState } from '../common/EmptyState';
@@ -54,8 +54,8 @@ export function HomeScreen() {
     [deckEntries, data.sessions, query, sortMode],
   );
 
-  // 内蔵の教材ライブラリは自分専用版だけに出す。Task 2 と Task 1 はそれぞれのタブで追加する
-  const library = IS_PERSONAL ? libraryFor(currentDeck) : null;
+  // 内蔵の教材ライブラリは自分専用版とみんな向けの IELTS 版だけに出す。Task 2 と Task 1 はそれぞれのタブで追加する
+  const library = HAS_PRESETS ? libraryFor(currentDeck) : null;
   const presetTopics = library?.topics ?? [];
   const addedPresetIds = new Set(entries.map((e) => e.presetId).filter(Boolean));
   const missingPresets = presetTopics.filter((t) => !addedPresetIds.has(t.presetId)).length;
@@ -237,12 +237,16 @@ function libraryFor(deckId: string): Library | null {
   if (deckId === TASK2_DECK_ID)
     return {
       topics: getPresetTopics(),
-      description: (n) => `エッセイ題材 ${n}本を追加できます(Idiomatic 300 の表現はマーキング済み)`,
+      description: (n) =>
+        IS_EVERYONE
+          ? `バンド6.0〜6.5のモデルエッセイ ${n}本を追加できます(使える表現はマーキング済み)`
+          : `エッセイ題材 ${n}本を追加できます(Idiomatic 300 の表現はマーキング済み)`,
     };
   if (deckId === TASK1_DECK_ID)
     return {
       topics: getTask1Topics(),
-      description: (n) => `図つきのモデルアンサー ${n}本を追加できます(増減・比較の表現はマーキング済み)`,
+      description: (n) =>
+        `図つきの${IS_EVERYONE ? 'バンド6.0〜6.5の' : ''}モデルアンサー ${n}本を追加できます(増減・比較の表現はマーキング済み)`,
     };
   if (deckId === TOEFL_DECK_ID)
     return {

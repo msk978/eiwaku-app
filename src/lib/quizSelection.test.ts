@@ -210,6 +210,12 @@ describe('pronouns, conjunctions and essay templates', () => {
     expect(got).toEqual(['X', 'helps', 'Y', 'hurts', 'Z']);
   });
 
+  it('keeps Task 1 figures out of the blanks along with the template', () => {
+    const tokens = tokenize('It rose from 8.3 to 12,539 in 2020, which was high.');
+    const got = words(tokens, blankCandidates(tokens, [], 'allWords', 1, { skipTemplates: true }));
+    expect(got).toEqual(['It', 'rose', 'from', 'to', 'in', 'which', 'was', 'high']);
+  });
+
   it('still blanks a pinned template word', () => {
     const tokens = tokenize('Some might claim that X helps.');
     const got = words(tokens, blankCandidates(tokens, [], 'allWords', 1, { skipTemplates: true, pinned: [2] }));

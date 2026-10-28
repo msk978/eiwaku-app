@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useEntries } from '../../hooks/useEntries';
 import { BackButton } from '../common/BackButton';
 import { loadSelectedDeckId } from '../../lib/decks';
-import { IS_PERSONAL } from '../../lib/target';
+import { HAS_PRESETS } from '../../lib/target';
 
 export function EntryCreateScreen() {
   const navigate = useNavigate();
@@ -32,7 +32,7 @@ export function EntryCreateScreen() {
   const handleSave = () => {
     if (!text.trim()) return;
     // 自分専用版では、ホームで開いていたタブに入れる
-    const entry = addEntry(text, title, IS_PERSONAL ? (loadSelectedDeckId() ?? undefined) : undefined);
+    const entry = addEntry(text, title, HAS_PRESETS ? (loadSelectedDeckId() ?? undefined) : undefined);
     navigate(`/entries/${entry.id}/mark`, { replace: true });
   };
 

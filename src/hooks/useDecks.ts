@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from 'react';
 import { useAppData } from '../context/AppDataContext';
 import { DEFAULT_DECKS, deckIdOf, withNewDefaultDecks } from '../lib/decks';
-import { IS_PERSONAL } from '../lib/target';
+import { HAS_PRESETS } from '../lib/target';
 import type { Deck, Entry } from '../types';
 
 /** ホームのタブ(自分専用版だけ。公開版ではタブを使わず全件を1つの一覧にする) */
@@ -22,12 +22,12 @@ export function useDecks() {
   /** 同じタブに入っている英文だけにする(前後の移動をタブ内にとどめる) */
   const sameDeck = useCallback(
     (entries: Entry[], current: Entry) => {
-      if (!IS_PERSONAL) return entries;
+      if (!HAS_PRESETS) return entries;
       const deckId = deckIdOf(current, decks);
       return entries.filter((e) => deckIdOf(e, decks) === deckId);
     },
     [decks],
   );
 
-  return { enabled: IS_PERSONAL, decks, setDecks, sameDeck };
+  return { enabled: HAS_PRESETS, decks, setDecks, sameDeck };
 }

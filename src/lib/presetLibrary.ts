@@ -5,6 +5,10 @@ import task1TranslationsRaw from '../data/task1Translations.txt?raw';
 import toeflRaw from '../data/toeflTopics.txt?raw';
 import toeflTranslationsRaw from '../data/toeflTranslations.txt?raw';
 import toeflPromptsRaw from '../data/toeflPrompts.txt?raw';
+import band6Task2Raw from '../data/band6/task2Topics.txt?raw';
+import band6Task2TranslationsRaw from '../data/band6/task2Translations.txt?raw';
+import band6Task1Raw from '../data/band6/task1Topics.txt?raw';
+import band6Task1TranslationsRaw from '../data/band6/task1Translations.txt?raw';
 import { lineBreaks, parseMarkedText, parsePresetTopics, TASK1_PREFIX, TOEFL_PREFIX, type PresetTopic } from './presets';
 import type { Entry } from '../types';
 import { parseTranslations } from './translation';
@@ -14,6 +18,10 @@ const task1Figures = import.meta.glob<string>('../data/task1Figures/*.svg', {
   import: 'default',
   eager: true,
 });
+
+// みんな向けの IELTS 版は、同じ題材・同じ型のまま、バンド6.0〜6.5の書き方にしたモデルアンサーを使う
+// (VITE_TARGET を直接比べ、使わない側の本文がバンドルに入らないようにする)
+const BAND6 = import.meta.env.VITE_TARGET === 'everyone';
 
 let topics: PresetTopic[] | null = null;
 let translations: Map<string, string[]> | null = null;
@@ -25,35 +33,35 @@ let toeflPrompts: Map<string, TaskPrompt> | null = null;
 
 /** 個人版だけで使う内蔵の題材(公開版のバンドルに入らないよう、呼ばれたときに読む) */
 export function getPresetTopics(): PresetTopic[] {
-  topics ??= parsePresetTopics(raw);
+  topics ??= parsePresetTopics(BAND6 ? band6Task2Raw : raw);
   return topics;
 }
 
 /** 内蔵の題材の全文和訳(キーは presetId) */
 export function getPresetTranslations(): Map<string, string[]> {
-  translations ??= parseTranslations(translationsRaw);
+  translations ??= parseTranslations(BAND6 ? band6Task2TranslationsRaw : translationsRaw);
   return translations;
 }
 
 /** IELTS Task 1 のモデルアンサー(図と一緒に出す) */
 export function getTask1Topics(): PresetTopic[] {
-  task1Topics ??= parsePresetTopics(task1Raw, TASK1_PREFIX);
+  task1Topics ??= parsePresetTopics(BAND6 ? band6Task1Raw : task1Raw, TASK1_PREFIX);
   return task1Topics;
 }
 
 export function getTask1Translations(): Map<string, string[]> {
-  task1Translations ??= parseTranslations(task1TranslationsRaw, TASK1_PREFIX);
+  task1Translations ??= parseTranslations(BAND6 ? band6Task1TranslationsRaw : task1TranslationsRaw, TASK1_PREFIX);
   return task1Translations;
 }
 
-/** TOEFL Writing の Email のモデルアンサー(問題文と一緒に出す) */
+/** TOEFL Writing の Email のモデルアンサー(問題文と一緒に出す)。みんな向けの IELTS 版には入れない */
 export function getToeflTopics(): PresetTopic[] {
-  toeflTopics ??= parsePresetTopics(toeflRaw, TOEFL_PREFIX);
+  toeflTopics ??= BAND6 ? [] : parsePresetTopics(toeflRaw, TOEFL_PREFIX);
   return toeflTopics;
 }
 
 export function getToeflTranslations(): Map<string, string[]> {
-  toeflTranslations ??= parseTranslations(toeflTranslationsRaw, TOEFL_PREFIX);
+  toeflTranslations ??= BAND6 ? new Map() : parseTranslations(toeflTranslationsRaw, TOEFL_PREFIX);
   return toeflTranslations;
 }
 
@@ -103,7 +111,7 @@ export function parseTaskPrompts(raw: string, idPrefix: string): Map<string, Tas
 /** TOEFL の題材の問題文。問題文の無い題材なら null */
 export function getToeflPrompt(presetId: string | undefined): TaskPrompt | null {
   if (!presetId?.startsWith(TOEFL_PREFIX)) return null;
-  toeflPrompts ??= parseTaskPrompts(toeflPromptsRaw, TOEFL_PREFIX);
+  toeflPrompts ??= BAND6 ? new Map() : parseTaskPrompts(toeflPromptsRaw, TOEFL_PREFIX);
   return toeflPrompts.get(presetId) ?? null;
 }
 
