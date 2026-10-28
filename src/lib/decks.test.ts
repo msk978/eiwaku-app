@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { DEFAULT_DECKS, deckIdOf } from './decks';
+import { DEFAULT_DECKS, deckIdOf, withNewDefaultDecks } from './decks';
 import type { Entry } from '../types';
 
 const entry = (over: Partial<Entry>): Entry => ({ id: 'x', createdAt: '2026-01-01T00:00:00Z', tokens: [], ...over });
@@ -17,5 +17,21 @@ describe('deckIdOf', () => {
 
   it('falls back to the first tab when the stored tab was deleted', () => {
     expect(deckIdOf(entry({ deckId: 'gone' }), DEFAULT_DECKS)).toBe('ielts-task2');
+  });
+});
+
+describe('withNewDefaultDecks', () => {
+  it('adds default tabs that did not exist when the tabs were saved', () => {
+    const saved = [{ id: 'ielts-task2', name: 'Essay' }, { id: 'ielts-task1', name: 'Report' }];
+    expect(withNewDefaultDecks(saved, ['ielts-task2', 'ielts-task1']).map((d) => d.id)).toEqual([
+      'ielts-task2',
+      'ielts-task1',
+      'toefl-email',
+    ]);
+  });
+
+  it('does not bring back a default tab the user deleted', () => {
+    const saved = [{ id: 'ielts-task2', name: 'Essay' }];
+    expect(withNewDefaultDecks(saved, ['ielts-task2', 'ielts-task1', 'toefl-email'])).toBe(saved);
   });
 });

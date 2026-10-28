@@ -7,7 +7,8 @@ import { expandToWordRanges } from '../../lib/quizSelection';
 import { MarkingParagraph } from '../common/MarkingParagraph';
 import { BackButton } from '../common/BackButton';
 import { TaskFigure } from '../common/TaskFigure';
-import { getPresetParagraphEnds, getTask1Figure } from '../../lib/presetLibrary';
+import { getPresetLineBreaks, getTask1Figure, getToeflPrompt } from '../../lib/presetLibrary';
+import { TaskPromptCard } from '../common/TaskPromptCard';
 import { IS_PERSONAL } from '../../lib/target';
 
 export function MarkingScreen() {
@@ -22,6 +23,7 @@ export function MarkingScreen() {
   if (!entry) return null;
 
   const figure = IS_PERSONAL ? getTask1Figure(entry.presetId) : null;
+  const prompt = IS_PERSONAL ? getToeflPrompt(entry.presetId) : null;
   const markedWordCount = expandToWordRanges(entry.tokens, ranges).length;
 
   const onTap = (index: number) => {
@@ -42,6 +44,7 @@ export function MarkingScreen() {
         </button>
       </div>
       {figure && <TaskFigure svg={figure} />}
+      {prompt && <TaskPromptCard prompt={prompt} />}
 
       <div className="screen-body" style={{ flex: 1 }}>
         <MarkingParagraph
@@ -49,7 +52,7 @@ export function MarkingScreen() {
           ranges={ranges}
           activeIndex={activeIndex}
           onTap={onTap}
-          paragraphEnds={IS_PERSONAL ? getPresetParagraphEnds(entry) : undefined}
+          lineBreaks={IS_PERSONAL ? getPresetLineBreaks(entry) : undefined}
         />
       </div>
 

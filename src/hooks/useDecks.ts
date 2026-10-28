@@ -1,13 +1,21 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useAppData } from '../context/AppDataContext';
-import { DEFAULT_DECKS, deckIdOf } from '../lib/decks';
+import { DEFAULT_DECKS, deckIdOf, withNewDefaultDecks } from '../lib/decks';
 import { IS_PERSONAL } from '../lib/target';
 import type { Deck, Entry } from '../types';
 
 /** ホームのタブ(自分専用版だけ。公開版ではタブを使わず全件を1つの一覧にする) */
 export function useDecks() {
   const { data, dispatch } = useAppData();
-  const decks = data.settings.decks?.length ? data.settings.decks : DEFAULT_DECKS;
+  const stored = data.settings.decks;
+  // 保存済みのタブにも、後から増えた既定のタブ(TOEFL など)は足す。知っていた既定のタブを消していたら戻さない
+  const decks = useMemo(
+    () =>
+      stored?.length
+        ? withNewDefaultDecks(stored, data.settings.knownDeckIds ?? ['ielts-task2', 'ielts-task1'])
+        : DEFAULT_DECKS,
+    [stored, data.settings.knownDeckIds],
+  );
 
   const setDecks = useCallback((next: Deck[]) => dispatch({ type: 'SET_DECKS', decks: next }), [dispatch]);
 

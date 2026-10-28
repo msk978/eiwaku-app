@@ -5,9 +5,9 @@ import { useAppData } from '../../context/AppDataContext';
 import { joinTokens } from '../../lib/joinTokens';
 import { formatRelativeDate } from '../../lib/relativeDate';
 import { filterAndSortEntries, type SortMode } from '../../lib/homeListView';
-import { getPresetTopics, getTask1Topics } from '../../lib/presetLibrary';
+import { getPresetTopics, getTask1Topics, getToeflTopics } from '../../lib/presetLibrary';
 import { presetEntriesToAdd, type PresetTopic } from '../../lib/presets';
-import { deckIdOf, loadSelectedDeckId, saveSelectedDeckId, TASK1_DECK_ID, TASK2_DECK_ID } from '../../lib/decks';
+import { deckIdOf, loadSelectedDeckId, saveSelectedDeckId, TASK1_DECK_ID, TASK2_DECK_ID, TOEFL_DECK_ID } from '../../lib/decks';
 import { useDecks } from '../../hooks/useDecks';
 import type { Deck } from '../../types';
 import { IS_PERSONAL } from '../../lib/target';
@@ -243,6 +243,11 @@ function libraryFor(deckId: string): Library | null {
     return {
       topics: getTask1Topics(),
       description: (n) => `図つきのモデルアンサー ${n}本を追加できます(増減・比較の表現はマーキング済み)`,
+    };
+  if (deckId === TOEFL_DECK_ID)
+    return {
+      topics: getToeflTopics(),
+      description: (n) => `問題文つきのメール ${n}本を追加できます(使える表現はマーキング済み)`,
     };
   return null;
 }

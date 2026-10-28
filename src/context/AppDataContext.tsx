@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useReducer, useRef, useState, type ReactNode } from 'react';
+import { DEFAULT_DECKS } from '../lib/decks';
 import type { AppData, Deck, Entry, MarkingRange, MarkingSet, QuizMode, SessionRecord } from '../types';
 import { loadData, saveData } from '../lib/storage';
 import { CloudSync, type RemoteChange, type SyncStatus } from '../lib/cloudSync';
@@ -73,7 +74,10 @@ function reducer(state: AppData, action: Action): AppData {
     case 'SET_SHOW_GLOSS_HINTS':
       return { ...state, settings: { ...state.settings, showGlossHints: action.show } };
     case 'SET_DECKS':
-      return { ...state, settings: { ...state.settings, decks: action.decks } };
+      return {
+        ...state,
+        settings: { ...state.settings, decks: action.decks, knownDeckIds: DEFAULT_DECKS.map((d) => d.id) },
+      };
     case 'TOGGLE_PIN':
       return {
         ...state,

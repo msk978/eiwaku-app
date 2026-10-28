@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { paragraphEnds, parseMarkedText, parsePresetTopics, presetEntriesToAdd } from './presets';
-import { getPresetTopics, getTask1Figure, getTask1Topics } from './presetLibrary';
+import { lineBreaks, parseMarkedText, parsePresetTopics, presetEntriesToAdd } from './presets';
+import { getPresetTopics, getTask1Figure, getTask1Topics, getToeflPrompt, getToeflTopics } from './presetLibrary';
 import type { Entry } from '../types';
 
 describe('parsePresetTopics', () => {
@@ -92,12 +92,38 @@ describe('presetEntriesToAdd', () => {
   });
 });
 
-describe('paragraphEnds', () => {
-  it('returns the last token index of every paragraph but the last', () => {
-    expect(paragraphEnds('One {{two}}.\n\nThree four.\n\nFive.')).toEqual([2, 5]);
+describe('lineBreaks', () => {
+  it('marks paragraph breaks and plain line breaks, but not the end of the text', () => {
+    expect(lineBreaks('One {{two}}.\n\nThree four.\nFive.')).toEqual(
+      new Map([
+        [2, true],
+        [5, false],
+      ]),
+    );
   });
 
   it('finds the four Task 1 paragraphs', () => {
-    for (const t of getTask1Topics()) expect(paragraphEnds(t.text), t.title).toHaveLength(3);
+    for (const t of getTask1Topics()) {
+      expect([...lineBreaks(t.text).values()], t.title).toEqual([true, true, true]);
+    }
+  });
+});
+
+describe('TOEFL email topics', () => {
+  it('bundles 10 emails, each with a prompt of three requirements', () => {
+    const topics = getToeflTopics();
+    expect(topics).toHaveLength(10);
+    for (const t of topics) {
+      const prompt = getToeflPrompt(t.presetId);
+      expect(prompt?.requirements, t.title).toHaveLength(3);
+      expect(prompt?.headers[0], t.title).toMatch(/^To:/);
+    }
+  });
+
+  it('follows the email template from greeting to sign-off', () => {
+    for (const t of getToeflTopics()) {
+      expect(t.text, t.title).toMatch(/^Dear .+,\n\nHello, I hope you are doing well\. I am writing /);
+      expect(t.text.endsWith('Best regards,\nMisaki'), t.title).toBe(true);
+    }
   });
 });

@@ -47,6 +47,8 @@ export interface Settings {
   showGlossHints?: boolean;
   /** 自分専用版のタブ。未設定なら既定のタブを使う */
   decks?: Deck[];
+  /** タブを保存した時点で知っていた既定のタブ。後から増えた既定のタブだけを足すのに使う */
+  knownDeckIds?: string[];
 }
 
 export interface AppData {

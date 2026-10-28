@@ -12,6 +12,9 @@ export interface PresetTopic {
 /** IELTS Task 1 の題材の presetId の接頭辞 */
 export const TASK1_PREFIX = 'task1-';
 
+/** TOEFL Writing(Email)の題材の presetId の接頭辞 */
+export const TOEFL_PREFIX = 'toefl-';
+
 const HEADING_RE = /^\*\*(\d+)\.\s*(.+?)\*\*\s*$/;
 
 /** 「**番号. タイトル**」の見出しと本文が並んだテキストを題材の一覧にする */
@@ -68,16 +71,25 @@ export function parseMarkedText(text: string): {
   return { tokens, ranges, expressions };
 }
 
-/** 段落(空行区切り)ごとの最後のトークンのインデックス。最後の段落は含めない */
-export function paragraphEnds(text: string): number[] {
-  const ends: number[] = [];
+/**
+ * 本文の改行位置。キーは行の最後のトークンのインデックスで、値は段落の切れ目(空行)なら true、
+ * ただの改行(メールの「Best regards,」の後など)なら false。最後の行は含めない。
+ */
+export function lineBreaks(text: string): Map<number, boolean> {
+  const breaks = new Map<number, boolean>();
   let count = 0;
-  for (const para of text.split(/\n\s*\n/)) {
-    if (!para.trim()) continue;
-    count += parseMarkedText(para).tokens.length;
-    ends.push(count - 1);
+  let last: number | null = null;
+  for (const line of text.split('\n')) {
+    if (!line.trim()) {
+      if (last !== null) breaks.set(last, true);
+      continue;
+    }
+    count += parseMarkedText(line).tokens.length;
+    last = count - 1;
+    breaks.set(last, false);
   }
-  return ends.slice(0, -1);
+  if (last !== null) breaks.delete(last);
+  return breaks;
 }
 
 /** まだ追加していない題材だけを、登録用のEntryとマーキングにする */

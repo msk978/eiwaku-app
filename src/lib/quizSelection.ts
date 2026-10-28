@@ -139,6 +139,18 @@ const TEMPLATE_PHRASES = [
   'looking first at',
   'turning to',
   'meanwhile',
+  // TOEFL の Email の型
+  'dear',
+  'hello i hope you are doing well',
+  'i am writing to',
+  'i am writing about',
+  'i am writing regarding',
+  'i would appreciate it if you could',
+  'if possible could you',
+  'thank you for your time and consideration',
+  'thank you for your consideration',
+  'best regards',
+  'misaki',
 ].map((p) => p.split(' '));
 
 /** 本文中の、エッセイの型にあたる語のインデックス(句読点は飛ばして照合する) */

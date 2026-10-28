@@ -10,11 +10,11 @@ interface MarkingParagraphProps {
   ranges: MarkingRange[];
   activeIndex: number | null;
   onTap: (index: number) => void;
-  /** 段落の最後のトークンのインデックス(この後で改行する) */
-  paragraphEnds?: Set<number>;
+  /** 行の最後のトークンのインデックス → 段落の切れ目なら true(この後で改行する) */
+  lineBreaks?: Map<number, boolean>;
 }
 
-export function MarkingParagraph({ tokens, ranges, activeIndex, onTap, paragraphEnds }: MarkingParagraphProps) {
+export function MarkingParagraph({ tokens, ranges, activeIndex, onTap, lineBreaks }: MarkingParagraphProps) {
   return (
     <div
       style={{
@@ -39,7 +39,7 @@ export function MarkingParagraph({ tokens, ranges, activeIndex, onTap, paragraph
             >
               {token}
             </WordToken>
-            {paragraphEnds?.has(i) && <ParagraphBreak />}
+            {lineBreaks?.has(i) && <ParagraphBreak paragraph={lineBreaks.get(i)} />}
           </Fragment>
         );
       })}
