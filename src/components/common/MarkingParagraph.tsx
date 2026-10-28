@@ -3,15 +3,18 @@ import { isMarked } from '../../lib/markingLogic';
 import { isWordToken } from '../../lib/tokenize';
 import type { MarkingRange } from '../../types';
 import { WordToken } from './WordToken';
+import { ParagraphBreak } from './ParagraphBreak';
 
 interface MarkingParagraphProps {
   tokens: string[];
   ranges: MarkingRange[];
   activeIndex: number | null;
   onTap: (index: number) => void;
+  /** 段落の最後のトークンのインデックス(この後で改行する) */
+  paragraphEnds?: Set<number>;
 }
 
-export function MarkingParagraph({ tokens, ranges, activeIndex, onTap }: MarkingParagraphProps) {
+export function MarkingParagraph({ tokens, ranges, activeIndex, onTap, paragraphEnds }: MarkingParagraphProps) {
   return (
     <div
       style={{
@@ -36,6 +39,7 @@ export function MarkingParagraph({ tokens, ranges, activeIndex, onTap }: Marking
             >
               {token}
             </WordToken>
+            {paragraphEnds?.has(i) && <ParagraphBreak />}
           </Fragment>
         );
       })}

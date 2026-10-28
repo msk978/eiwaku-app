@@ -2,7 +2,8 @@ import raw from '../data/presetTopics.txt?raw';
 import translationsRaw from '../data/presetTranslations.txt?raw';
 import task1Raw from '../data/task1Topics.txt?raw';
 import task1TranslationsRaw from '../data/task1Translations.txt?raw';
-import { parsePresetTopics, TASK1_PREFIX, type PresetTopic } from './presets';
+import { paragraphEnds, parseMarkedText, parsePresetTopics, TASK1_PREFIX, type PresetTopic } from './presets';
+import type { Entry } from '../types';
 import { parseTranslations } from './translation';
 
 const task1Figures = import.meta.glob<string>('../data/task1Figures/*.svg', {
@@ -52,4 +53,16 @@ export function getAllPresetTranslations(): Map<string, string[]> {
 export function getTask1Figure(presetId: string | undefined): string | null {
   if (!presetId?.startsWith(TASK1_PREFIX)) return null;
   return task1Figures[`../data/task1Figures/${presetId.slice(TASK1_PREFIX.length)}.svg`] ?? null;
+}
+
+/**
+ * 内蔵題材から追加した英文の段落の切れ目(段落の最後のトークンのインデックス)。
+ * 登録時にはトークンしか保存していないので、元の題材から割り出す。本文を編集していたら出さない。
+ */
+export function getPresetParagraphEnds(entry: Entry): Set<number> {
+  const topic = entry.presetId ? getAllPresetTopics().find((t) => t.presetId === entry.presetId) : undefined;
+  if (!topic) return new Set();
+  const ends = paragraphEnds(topic.text);
+  const total = parseMarkedText(topic.text).tokens.length;
+  return total === entry.tokens.length ? new Set(ends) : new Set();
 }

@@ -68,6 +68,18 @@ export function parseMarkedText(text: string): {
   return { tokens, ranges, expressions };
 }
 
+/** 段落(空行区切り)ごとの最後のトークンのインデックス。最後の段落は含めない */
+export function paragraphEnds(text: string): number[] {
+  const ends: number[] = [];
+  let count = 0;
+  for (const para of text.split(/\n\s*\n/)) {
+    if (!para.trim()) continue;
+    count += parseMarkedText(para).tokens.length;
+    ends.push(count - 1);
+  }
+  return ends.slice(0, -1);
+}
+
 /** まだ追加していない題材だけを、登録用のEntryとマーキングにする */
 export function presetEntriesToAdd(
   topics: PresetTopic[],

@@ -7,7 +7,7 @@ import { expandToWordRanges } from '../../lib/quizSelection';
 import { MarkingParagraph } from '../common/MarkingParagraph';
 import { BackButton } from '../common/BackButton';
 import { TaskFigure } from '../common/TaskFigure';
-import { getTask1Figure } from '../../lib/presetLibrary';
+import { getPresetParagraphEnds, getTask1Figure } from '../../lib/presetLibrary';
 import { IS_PERSONAL } from '../../lib/target';
 
 export function MarkingScreen() {
@@ -44,7 +44,13 @@ export function MarkingScreen() {
       {figure && <TaskFigure svg={figure} />}
 
       <div className="screen-body" style={{ flex: 1 }}>
-        <MarkingParagraph tokens={entry.tokens} ranges={ranges} activeIndex={activeIndex} onTap={onTap} />
+        <MarkingParagraph
+          tokens={entry.tokens}
+          ranges={ranges}
+          activeIndex={activeIndex}
+          onTap={onTap}
+          paragraphEnds={IS_PERSONAL ? getPresetParagraphEnds(entry) : undefined}
+        />
       </div>
 
       <div

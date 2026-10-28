@@ -13,7 +13,8 @@ import { BackButton } from '../common/BackButton';
 import { EntrySwitcher } from '../common/EntrySwitcher';
 import { WordToken, type WordTokenVariant } from '../common/WordToken';
 import { IS_PERSONAL } from '../../lib/target';
-import { getAllPresetTopics, getAllPresetTranslations, getTask1Figure } from '../../lib/presetLibrary';
+import { getAllPresetTopics, getAllPresetTranslations, getPresetParagraphEnds, getTask1Figure } from '../../lib/presetLibrary';
+import { ParagraphBreak } from '../common/ParagraphBreak';
 import { useDecks } from '../../hooks/useDecks';
 import { TaskFigure } from '../common/TaskFigure';
 import { buildEntryTranslation } from '../../lib/translation';
@@ -75,6 +76,7 @@ function QuizSession() {
 
   if (!entry || blanks.length === 0) return null;
 
+  const paraEnds = IS_PERSONAL ? getPresetParagraphEnds(entry) : new Set<number>();
   const pinned = new Set(entry.pinned ?? []);
   const excluded = new Set(entry.excluded ?? []);
   const pieces = buildQuizPieces(entry.tokens, blanks);
@@ -250,6 +252,7 @@ function QuizSession() {
                           {gap}
                           {token}
                           {jpLine(tokenIndex)}
+                          {paraEnds.has(tokenIndex) && <ParagraphBreak />}
                         </Fragment>
                       );
                     return (

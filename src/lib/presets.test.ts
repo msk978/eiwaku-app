@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { parseMarkedText, parsePresetTopics, presetEntriesToAdd } from './presets';
+import { paragraphEnds, parseMarkedText, parsePresetTopics, presetEntriesToAdd } from './presets';
 import { getPresetTopics, getTask1Figure, getTask1Topics } from './presetLibrary';
 import type { Entry } from '../types';
 
@@ -89,5 +89,15 @@ describe('presetEntriesToAdd', () => {
     expect(entries.map((e) => e.presetId)).toEqual(['topic-2']);
     expect(entries[0]!.tokens).toEqual(['Two', 'words', '.']);
     expect(markings).toEqual([{ entryId: entries[0]!.id, ranges: [{ start: 1, end: 1 }] }]);
+  });
+});
+
+describe('paragraphEnds', () => {
+  it('returns the last token index of every paragraph but the last', () => {
+    expect(paragraphEnds('One {{two}}.\n\nThree four.\n\nFive.')).toEqual([2, 5]);
+  });
+
+  it('finds the four Task 1 paragraphs', () => {
+    for (const t of getTask1Topics()) expect(paragraphEnds(t.text), t.title).toHaveLength(3);
   });
 });
