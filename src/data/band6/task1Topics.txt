@@ -4,9 +4,9 @@ The table shows how patients rated five services at three health centres on a sc
 
 Overall, it is clear that while the Peveril Centre {{got the highest scores}} in every category, the Longston Centre {{had the lowest ratings}}. Meanwhile, {{the biggest difference}} was in response to concerns, but doctors' service {{got similar scores}} at all three centres.
 
-Looking first at the Peveril Centre, its average score was 8.3, which was {{the highest of the three}}. In particular, response to concerns and booking appointments {{got very high scores}}, at 9.6 and 9.2 {{respectively}}. In contrast, the average score of the Longston Centre was {{only}} 5.7, and its score for response to concerns was 4.1, which was {{less than half}} of Peveril's score.
+Looking first at the Peveril Centre, its average score was 8.3, which was {{the highest of the three}}. Response to concerns and booking appointments {{got very high scores}}, at 9.6 and 9.2 {{respectively}}. In contrast, Longston's average was {{only}} 5.7, and its score for response to concerns was 4.1, {{less than half}} of Peveril's score.
 
-Turning to doctors' service, the scores were {{almost the same}} at the three centres, {{between}} 8 {{+and}} 8.7. Care of children {{was rated at}} 6.3, 7.5 and 7.3 at Longston, Peveril and Marchbank {{respectively}}. On the other hand, pharmacy {{had the lowest scores}} at every centre, at 5.1, 6.3 and 5.8. The Marchbank Centre {{was in the middle}}, with an average score of 7.2.
+Turning to doctors' service, the scores were {{almost the same}} at all centres, {{between}} 8 {{+and}} 8.7. Care of children {{was rated at}} 6.3, 7.5 and 7.3 at Longston, Peveril and Marchbank {{respectively}}. On the other hand, pharmacy {{had the lowest scores}} at every centre, at 5.1, 6.3 and 5.8. The Marchbank Centre {{was in the middle}}, with an average score of 7.2.
 
 **2. 表｜カナダの世帯構成**
 
@@ -16,7 +16,7 @@ Overall, it is clear that while couples with dependent children {{decreased the 
 
 Looking first at couples with dependent children, this group {{was the largest}} in 1984, with 52%. However, it {{went down steadily}} and {{reached}} 36% in 2020. Even so, it was still {{the most common type}} of household. In contrast, lone-parent households {{tripled}} from 4% to 12%. Similarly, the percentage of people living alone {{more than doubled}} from 5% to 12%, and it {{did not change}} after 2014.
 
-Turning to couples without children, this group {{rose slightly}}, {{from}} 19% {{+to}} 25%. On the other hand, couples with non-dependent children {{stayed at}} around 10%, although the figure {{dropped a little}} to 9% in 2014.
+Turning to couples without children, this group {{rose slightly}}, {{from}} 19% {{+to}} 25%, and it became the second largest group in 2020. On the other hand, couples with non-dependent children {{stayed at}} around 10%, although the figure {{dropped a little}} to 9% in 2014 and did not change after that.
 
 **3. 折れ線｜金属価格の月ごとの変化**
 
@@ -40,9 +40,9 @@ Turning to Mari Bakeshop, it {{had the highest income}} at the beginning, and it
 
 **5. 棒｜旅行者の余暇の過ごし方**
 
-The bar chart shows the average number of hours per day that tourists from four countries spent on three activities on holiday in Greece in August 2019.
+The bar chart shows how many hours per day tourists from four countries spent on three holiday activities in Greece in August 2019.
 
-Overall, it is clear that while Chinese tourists {{spent the most time}} reading books, visiting places {{was the least popular activity}} for all four nationalities. Meanwhile, the time spent at the beach {{was very different}} for each nationality.
+Overall, it is clear that while Chinese tourists {{spent the most time}} reading books, visiting places {{was the least popular activity}} for all nationalities. Meanwhile, the time spent at the beach {{was very different}} by nationality.
 
 Looking first at Chinese tourists, they spent 8 hours a day reading books, which was {{the highest figure}}. However, they spent only 3 hours at the beach and 1 hour visiting places. Brazilian tourists, on the other hand, {{liked}} the beach the most and spent 7 hours there, {{followed by}} Turkish and American tourists at 5 and 4 hours {{respectively}}.
 
@@ -52,11 +52,11 @@ Turning to the other activities, the other nationalities spent {{a similar amoun
 
 The bar chart shows the percentage of Canadian workers in five main industries in 1850 and 2020.
 
-Overall, it is clear that while the services sector {{grew the most}}, manufacturing and agriculture {{decreased a lot}}. Meanwhile, construction and energy {{changed only a little}}.
+Overall, it is clear that while the services sector {{grew the most}}, manufacturing and agriculture {{decreased a lot}}. Meanwhile, construction and energy {{changed only a little}} over the period.
 
-Looking first at services, this sector {{made up}} 33% of workers in 1850, which was a little lower than manufacturing. However, it {{increased greatly}} to 79% in 2020 and {{became the largest}} sector. In contrast, manufacturing {{fell}} from 36% to only 9%. Similarly, agriculture and fishing {{dropped}} from 22% in 1850 to just 1%.
+Looking first at services, this sector {{made up}} 33% of workers in 1850, which was a little lower than manufacturing. However, it {{increased greatly}} to 79% in 2020 and {{became the largest}} sector by far, employing almost four out of five workers. In contrast, manufacturing, which was the largest sector in 1850, {{fell}} from 36% to only 9%. Similarly, agriculture and fishing {{dropped}} from 22% in 1850 to just 1%.
 
-Turning to construction and energy, both sectors {{were small}} in both years. Construction {{rose slightly}}, {{from}} 5% {{+to}} 8%. On the other hand, the figure for energy and water {{went down}} from 3% to 1%, and it was {{the same as}} agriculture in 2020.
+Turning to construction and energy, both sectors {{were small}} in both years, at less than 10%. Construction {{rose slightly}}, {{from}} 5% {{+to}} 8%. On the other hand, the figure for energy and water {{went down}} from 3% to 1%, and it was {{the same as}} agriculture in 2020, at the bottom of the chart.
 
 **7. 円｜エネルギー容量の内訳**
 
@@ -94,19 +94,19 @@ The maps show the changes in the city of Nelson between 2000 and now.
 
 Overall, it is clear that while the city {{has changed a lot}} with better transport and more shops, the university, the city centre and the port {{are still in the same place}}. Meanwhile, the area {{has become easier to walk around}}.
 
-Looking first at transport, the old train station in the west {{has been knocked down}}, and a new one {{has been built}} just north of the city centre. It {{is connected to}} the university by a tramline. In addition, the road in the south of the city {{has been changed into}} a street only for people on foot, and a bike rental service {{has been introduced}} in the city centre. Also, the trees to the east of the university {{have been cut down}} to build a new shopping centre, and a hall of residence has been built to the west.
+Looking first at transport, the old station in the west {{has been knocked down}}, and a new one {{has been built}} north of the city centre. It {{is connected to}} the university by a tramline. In addition, the southern road {{has been changed into}} a pedestrian street, and a bike rental service {{has been introduced}}. Also, the trees east of the university {{have been cut down}} for a new shopping centre.
 
-Turning to the other areas, the old market in the west {{has been replaced by}} a new shop, and a new covered market {{has opened}} on the east side of the city centre. On the other hand, the port {{has not changed}}, but a restaurant and some bars and clubs {{have been added}} {{on both sides of}} it.
+Turning to the other areas, the old market in the west {{has been replaced by}} a new shop, and a new covered market {{has opened}} east of the city centre. On the other hand, the port {{has not changed}}, but a restaurant and some bars {{have been added}} {{on both sides of}} it.
 
 **11. 図解｜ハチミツができるまで**
 
 The diagram shows how bees make honey.
 
-Overall, it is clear that there are seven main stages in this natural process, {{starting with}} bees leaving the hive and {{ending with}} the production of honey. Meanwhile, the process {{happens}} both outside and inside the hive.
+Overall, it is clear that there are seven main stages in this natural process, {{starting with}} bees leaving the hive and {{ending with}} the production of honey. Meanwhile, the first three stages {{happen}} outside the hive, while the last four take place inside it.
 
-Looking first at the early stages, bees {{fly out of}} the hive {{to look for}} flowers. When they {{find}} the flowers, they {{collect}} nectar from them. After that, the bees {{go back to}} the hive and {{put}} the nectar {{+into}} the honeycomb cells.
+Looking first at the early stages, bees {{fly out of}} the hive {{to look for}} flowers. When they {{find}} the flowers, they {{collect}} nectar from them, which is the third stage. After that, the bees {{go back to}} the hive and {{put}} the nectar {{+into}} the honeycomb cells, so the work inside the hive begins.
 
-Turning to the final stages, the bees {{move their wings}} to send air over the cells. This air {{makes}} the water in the nectar {{+evaporate}}. As a result, the nectar slowly {{becomes thicker}} and finally {{turns into}} honey, which {{is the end of}} the process.
+Turning to the final stages, the bees {{move their wings}} quickly to send air over the cells, which is the fifth stage. This moving air {{makes}} the water in the nectar {{+evaporate}} slowly. As a result, the nectar slowly {{becomes thicker}} and finally {{turns into}} honey, which {{is the end of}} the whole process.
 
 **12. 図解｜冷凍フィッシュパイの製造**
 

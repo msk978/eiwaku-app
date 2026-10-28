@@ -78,7 +78,7 @@ export function HomeScreen() {
   return (
     <div className="app-shell" style={{ position: 'relative' }}>
       <div className="topbar">
-        <div className="topbar-title">穴埋め暗記</div>
+        <div className="topbar-title">{import.meta.env.VITE_APP_TITLE}</div>
         {IS_PERSONAL && <SyncBadge status={syncStatus} />}
         <button className="icon-btn" style={{ marginLeft: 'auto' }} onClick={() => navigate('/settings')} aria-label="設定">
           <GearIcon />
