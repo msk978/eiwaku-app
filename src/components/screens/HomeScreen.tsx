@@ -5,13 +5,16 @@ import { useAppData } from '../../context/AppDataContext';
 import { joinTokens } from '../../lib/joinTokens';
 import { formatRelativeDate } from '../../lib/relativeDate';
 import { filterAndSortEntries, type SortMode } from '../../lib/homeListView';
-import { getPresetTopics } from '../../lib/presetLibrary';
-import { presetEntriesToAdd } from '../../lib/presets';
+import { getPresetTopics, getTask1Topics } from '../../lib/presetLibrary';
+import { presetEntriesToAdd, type PresetTopic } from '../../lib/presets';
+import { deckIdOf, loadSelectedDeckId, saveSelectedDeckId, TASK1_DECK_ID, TASK2_DECK_ID } from '../../lib/decks';
+import { useDecks } from '../../hooks/useDecks';
+import type { Deck } from '../../types';
 import { IS_PERSONAL } from '../../lib/target';
 import type { SyncStatus } from '../../lib/cloudSync';
 import { Fab } from '../common/Fab';
 import { EmptyState } from '../common/EmptyState';
-import { GearIcon } from '../common/icons';
+import { GearIcon, PencilIcon } from '../common/icons';
 
 const SORT_LABEL: Record<SortMode, string> = {
   registered: '登録順',
@@ -24,6 +27,18 @@ export function HomeScreen() {
   const { data, dispatch, syncStatus } = useAppData();
   const [query, setQuery] = useState('');
   const [sortMode, setSortMode] = useState<SortMode>('registered');
+  const { enabled: decksEnabled, decks, setDecks } = useDecks();
+  const [selectedDeck, setSelectedDeck] = useState(loadSelectedDeckId);
+  const [editingDecks, setEditingDecks] = useState(false);
+  const currentDeck = decks.find((d) => d.id === selectedDeck)?.id ?? decks[0]!.id;
+  const selectDeck = (deckId: string) => {
+    setSelectedDeck(deckId);
+    saveSelectedDeckId(deckId);
+  };
+  const deckEntries = useMemo(
+    () => (decksEnabled ? entries.filter((e) => deckIdOf(e, decks) === currentDeck) : entries),
+    [decksEnabled, entries, decks, currentDeck],
+  );
 
   // いちばん最近学習した英文に「前回」の印を付け、続きから始められるようにする
   const previousId = useMemo(() => {
@@ -35,23 +50,23 @@ export function HomeScreen() {
   }, [data.sessions]);
 
   const rows = useMemo(
-    () => filterAndSortEntries(entries, data.sessions, query, sortMode),
-    [entries, data.sessions, query, sortMode],
+    () => filterAndSortEntries(deckEntries, data.sessions, query, sortMode),
+    [deckEntries, data.sessions, query, sortMode],
   );
 
-  // 内蔵の教材ライブラリは自分専用版だけに出す
-  const presetTopics = IS_PERSONAL ? getPresetTopics() : [];
+  // 内蔵の教材ライブラリは自分専用版だけに出す。Task 2 と Task 1 はそれぞれのタブで追加する
+  const library = IS_PERSONAL ? libraryFor(currentDeck) : null;
+  const presetTopics = library?.topics ?? [];
   const addedPresetIds = new Set(entries.map((e) => e.presetId).filter(Boolean));
   const missingPresets = presetTopics.filter((t) => !addedPresetIds.has(t.presetId)).length;
-  const addPresets = () => dispatch({ type: 'ADD_ENTRIES', ...presetEntriesToAdd(presetTopics, entries) });
-  const libraryCard = missingPresets > 0 && (
+  const addPresets = () =>
+    dispatch({ type: 'ADD_ENTRIES', ...presetEntriesToAdd(presetTopics, entries, new Date(), currentDeck) });
+  const libraryCard = library && missingPresets > 0 && (
     <div className="card" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
       <div style={{ flex: 1, fontSize: 13, lineHeight: 1.5 }}>
         <div style={{ fontWeight: 600 }}>教材ライブラリ</div>
         <div style={{ color: 'var(--text-muted)', fontSize: 12.5 }}>
-          {missingPresets === presetTopics.length
-            ? `エッセイ題材 ${presetTopics.length}本を追加できます(Idiomatic 300 の表現はマーキング済み)`
-            : `未追加の題材が ${missingPresets}本あります`}
+          {missingPresets === presetTopics.length ? library.description(presetTopics.length) : `未追加の題材が ${missingPresets}本あります`}
         </div>
       </div>
       <button className="primary-btn" style={{ padding: '9px 16px', fontSize: 13.5, flexShrink: 0 }} onClick={addPresets}>
@@ -70,7 +85,22 @@ export function HomeScreen() {
         </button>
       </div>
 
-      {entries.length === 0 ? (
+      {decksEnabled &&
+        (editingDecks ? (
+          <DeckEditor
+            decks={decks}
+            countOf={(deckId) => entries.filter((e) => deckIdOf(e, decks) === deckId).length}
+            onSave={(next) => {
+              setDecks(next);
+              setEditingDecks(false);
+            }}
+            onCancel={() => setEditingDecks(false)}
+          />
+        ) : (
+          <DeckTabs decks={decks} current={currentDeck} onSelect={selectDeck} onEdit={() => setEditingDecks(true)} />
+        ))}
+
+      {deckEntries.length === 0 ? (
         <>
           <div className="screen-body" style={{ flex: 'none', paddingBottom: 0 }}>
             {libraryCard}
@@ -194,5 +224,142 @@ function SyncBadge({ status }: { status: SyncStatus }) {
     <span style={{ fontSize: 11.5, color, border: `1px solid ${color}`, borderRadius: 999, padding: '1px 8px', marginLeft: 8 }}>
       {text}
     </span>
+  );
+}
+
+interface Library {
+  topics: PresetTopic[];
+  description: (count: number) => string;
+}
+
+/** タブごとの内蔵の教材ライブラリ */
+function libraryFor(deckId: string): Library | null {
+  if (deckId === TASK2_DECK_ID)
+    return {
+      topics: getPresetTopics(),
+      description: (n) => `エッセイ題材 ${n}本を追加できます(Idiomatic 300 の表現はマーキング済み)`,
+    };
+  if (deckId === TASK1_DECK_ID)
+    return {
+      topics: getTask1Topics(),
+      description: (n) => `図つきのモデルアンサー ${n}本を追加できます(増減・比較の表現はマーキング済み)`,
+    };
+  return null;
+}
+
+/** 自分専用版のタブ。英文を種類ごとに分ける */
+function DeckTabs({
+  decks,
+  current,
+  onSelect,
+  onEdit,
+}: {
+  decks: Deck[];
+  current: string;
+  onSelect: (deckId: string) => void;
+  onEdit: () => void;
+}) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0 20px 10px', flexShrink: 0 }}>
+      <div role="tablist" style={{ display: 'flex', gap: 6, overflowX: 'auto', flex: 1 }}>
+        {decks.map((deck) => {
+          const active = deck.id === current;
+          return (
+            <button
+              key={deck.id}
+              role="tab"
+              aria-selected={active}
+              onClick={() => onSelect(deck.id)}
+              style={{
+                flexShrink: 0,
+                border: '1.5px solid ' + (active ? 'var(--accent)' : 'var(--border)'),
+                background: active ? 'var(--accent)' : 'var(--surface)',
+                color: active ? '#fff' : 'var(--text-muted)',
+                borderRadius: 999,
+                padding: '7px 14px',
+                fontSize: 13,
+                fontWeight: 600,
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {deck.name}
+            </button>
+          );
+        })}
+      </div>
+      <button className="icon-btn" style={{ width: 34, height: 34 }} onClick={onEdit} aria-label="タブを編集">
+        <PencilIcon />
+      </button>
+    </div>
+  );
+}
+
+/** タブの名前の変更・追加・削除(英文が入っているタブは消せない) */
+function DeckEditor({
+  decks,
+  countOf,
+  onSave,
+  onCancel,
+}: {
+  decks: Deck[];
+  countOf: (deckId: string) => number;
+  onSave: (decks: Deck[]) => void;
+  onCancel: () => void;
+}) {
+  const [draft, setDraft] = useState(decks);
+  const inputStyle = {
+    flex: 1,
+    background: 'var(--bg)',
+    border: '1px solid var(--border)',
+    borderRadius: 8,
+    padding: '7px 10px',
+    fontSize: 14,
+    color: 'var(--text)',
+  };
+  const save = () => onSave(draft.map((d, i) => ({ ...d, name: d.name.trim() || `タブ${i + 1}` })));
+
+  return (
+    <div className="card" style={{ margin: '0 20px 10px', display: 'flex', flexDirection: 'column', gap: 10, flexShrink: 0 }}>
+      <div style={{ fontSize: 13, fontWeight: 600 }}>タブを編集</div>
+      {draft.map((deck, i) => {
+        const count = countOf(deck.id);
+        return (
+          <div key={deck.id} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <input
+              type="text"
+              value={deck.name}
+              aria-label={`タブ${i + 1}の名前`}
+              onChange={(e) => setDraft(draft.map((d) => (d.id === deck.id ? { ...d, name: e.target.value } : d)))}
+              style={inputStyle}
+            />
+            <button
+              className="secondary-btn"
+              style={{ padding: '7px 10px', fontSize: 12.5 }}
+              disabled={count > 0 || draft.length <= 1}
+              title={count > 0 ? `英文が${count}本入っているので削除できません` : undefined}
+              onClick={() => setDraft(draft.filter((d) => d.id !== deck.id))}
+            >
+              削除
+            </button>
+          </div>
+        );
+      })}
+      <button
+        className="secondary-btn"
+        style={{ padding: '8px', fontSize: 13 }}
+        onClick={() => setDraft([...draft, { id: crypto.randomUUID(), name: `タブ${draft.length + 1}` }])}
+      >
+        ＋ タブを追加
+      </button>
+      <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>英文が入っているタブは削除できません。</div>
+      <div style={{ display: 'flex', gap: 8 }}>
+        <button className="secondary-btn" style={{ flex: 1, padding: '9px' }} onClick={onCancel}>
+          キャンセル
+        </button>
+        <button className="primary-btn" style={{ flex: 1, padding: '9px' }} onClick={save}>
+          保存
+        </button>
+      </div>
+    </div>
   );
 }

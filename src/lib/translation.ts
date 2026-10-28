@@ -38,14 +38,14 @@ export function jpExpressionCount(line: string): number {
 }
 
 /** 「**番号**」の見出しと、1文1行の和訳が並んだテキストを読む。キーは presetId */
-export function parseTranslations(raw: string): Map<string, string[]> {
+export function parseTranslations(raw: string, idPrefix = 'topic-'): Map<string, string[]> {
   const map = new Map<string, string[]>();
   let current: string[] | null = null;
   for (const line of raw.split(/\r?\n/)) {
     const heading = /^\*\*(\d+)\*\*\s*$/.exec(line);
     if (heading) {
       current = [];
-      map.set(`topic-${heading[1]}`, current);
+      map.set(`${idPrefix}${heading[1]}`, current);
     } else if (current && line.trim()) {
       current.push(line.trim());
     }

@@ -16,6 +16,7 @@ import { EntrySwitcher } from '../common/EntrySwitcher';
 import { RatioSlider } from '../common/RatioSlider';
 import { PencilIcon } from '../common/icons';
 import { IS_PERSONAL } from '../../lib/target';
+import { useDecks } from '../../hooks/useDecks';
 
 export function StudyDetailScreen() {
   const { id } = useParams<{ id: string }>();
@@ -33,6 +34,7 @@ function StudyDetail() {
   const { settings, quizMode, setQuizRatio, setQuizMode } = useSettings();
   const [editingTitle, setEditingTitle] = useState(false);
   const [titleDraft, setTitleDraft] = useState('');
+  const { sameDeck } = useDecks();
 
   if (!entry) return null;
 
@@ -66,7 +68,7 @@ function StudyDetail() {
         <div className="topbar-title">学習を始める</div>
       </div>
       <EntrySwitcher
-        {...adjacentEntries(entries, entry.id)}
+        {...adjacentEntries(sameDeck(entries, entry), entry.id)}
         onMove={(e) => navigate(`/entries/${e.id}`, { replace: true })}
       />
       <div className="screen-body">

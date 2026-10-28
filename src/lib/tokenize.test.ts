@@ -26,8 +26,10 @@ describe('tokenize', () => {
     expect(tokenize('wait—no')).toEqual(['wait', '—', 'no']);
   });
 
-  it('keeps digits and separates comma-grouped numbers', () => {
-    expect(tokenize('1,000 dollars')).toEqual(['1', ',', '000', 'dollars']);
+  it('keeps comma-grouped and decimal numbers as a single token', () => {
+    expect(tokenize('1,000 dollars')).toEqual(['1,000', 'dollars']);
+    expect(tokenize('stood at 8.3.')).toEqual(['stood', 'at', '8.3', '.']);
+    expect(tokenize('rose to 53%, then')).toEqual(['rose', 'to', '53', '%', ',', 'then']);
   });
 
   it('returns an empty array for an empty string', () => {

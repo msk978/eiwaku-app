@@ -134,6 +134,11 @@ const TEMPLATE_PHRASES = [
   'for instance',
   'secondly',
   'as can be seen in',
+  // Task 1 の型
+  'overall it is clear that',
+  'looking first at',
+  'turning to',
+  'meanwhile',
 ].map((p) => p.split(' '));
 
 /** 本文中の、エッセイの型にあたる語のインデックス(句読点は飛ばして照合する) */

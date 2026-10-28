@@ -13,7 +13,9 @@ import { BackButton } from '../common/BackButton';
 import { EntrySwitcher } from '../common/EntrySwitcher';
 import { WordToken, type WordTokenVariant } from '../common/WordToken';
 import { IS_PERSONAL } from '../../lib/target';
-import { getPresetTopics, getPresetTranslations } from '../../lib/presetLibrary';
+import { getAllPresetTopics, getAllPresetTranslations, getTask1Figure } from '../../lib/presetLibrary';
+import { useDecks } from '../../hooks/useDecks';
+import { TaskFigure } from '../common/TaskFigure';
 import { buildEntryTranslation } from '../../lib/translation';
 
 /** この時間だけ学習画面を開いていたら「学習した」と記録する */
@@ -33,6 +35,7 @@ function QuizSession() {
   const { ranges } = useMarkings(id ?? '');
   const { settings, quizMode, showGlossHints, setShowGlossHints } = useSettings();
   const { addSession } = useSessions(id ?? '');
+  const { sameDeck } = useDecks();
 
   const drawBlanks = () =>
     entry
@@ -52,7 +55,7 @@ function QuizSession() {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   // 内蔵題材(自分専用版)だけ、全文和訳を英文に対応づけて出せる
   const translation = useMemo(
-    () => (IS_PERSONAL && entry ? buildEntryTranslation(entry, getPresetTopics(), getPresetTranslations()) : null),
+    () => (IS_PERSONAL && entry ? buildEntryTranslation(entry, getAllPresetTopics(), getAllPresetTranslations()) : null),
     [entry],
   );
 
@@ -157,7 +160,8 @@ function QuizSession() {
   };
 
   // 現在の出題設定で穴を作れる題材だけを移動先にする
-  const playable = data.entries.filter((e) => {
+  const figure = IS_PERSONAL ? getTask1Figure(entry.presetId) : null;
+  const playable = sameDeck(data.entries, entry).filter((e) => {
     if (e.id === entry.id) return true;
     const entryRanges = data.markings.find((m) => m.entryId === e.id)?.ranges ?? [];
     const pinnedOf = e.pinned ?? [];
@@ -211,11 +215,12 @@ function QuizSession() {
         </button>
         )}
       </div>
-      <EntrySwitcher {...adjacent} onMove={(e) => moveTo(e.id)} />
-      {entry.title && (
+      {figure && <TaskFigure svg={figure} />}
+      <EntrySwitcher {...adjacent} onMove={(e) => moveTo(e.id)} compactTitle={figure ? (entry.title ?? '') : undefined} />
+      {entry.title && !figure && (
         <div style={{ margin: '-4px 20px 10px', fontSize: 13, fontWeight: 600, textAlign: 'center' }}>{entry.title}</div>
       )}
-      <div style={{ height: 4, background: 'var(--border)', borderRadius: 2, margin: '0 20px 14px' }}>
+      <div style={{ height: 4, background: 'var(--border)', borderRadius: 2, margin: figure ? '0 20px 6px' : '0 20px 14px', flexShrink: 0 }}>
         <div
           style={{
             height: '100%',
@@ -294,7 +299,8 @@ function QuizSession() {
           flexShrink: 0,
           background: 'var(--surface)',
           borderTop: '1px solid var(--border)',
-          padding: '14px 18px 22px',
+          // 図のある題材は本文の表示を広く取るため、操作バーを薄くする
+          padding: figure ? '10px 14px 14px' : '14px 18px 22px',
           display: 'flex',
           flexDirection: 'column',
           gap: 12,
@@ -324,7 +330,7 @@ function QuizSession() {
                 : '「もう出題しない」にすると、この語は自動の穴埋めから外れます'}
             </div>
           </div>
-        ) : (
+        ) : figure ? null : (
           <div style={{ fontSize: 13, color: 'var(--text-muted)', textAlign: 'center', lineHeight: 1.6 }}>
             好きな空欄をタップして答えを表示。
             <br />
@@ -336,13 +342,13 @@ function QuizSession() {
           </div>
         )}
         <div style={{ display: 'flex', gap: 8 }}>
-          <button className="secondary-btn" style={{ flex: 1, padding: '11px 6px', fontSize: 13.5 }} onClick={toggleRevealAll}>
+          <button className="secondary-btn" style={{ flex: 1, padding: figure ? '8px 6px' : '11px 6px', fontSize: 13.5 }} onClick={toggleRevealAll}>
             {allRevealed ? 'すべて隠す' : 'すべて表示'}
           </button>
-          <button className="secondary-btn" style={{ flex: 1, padding: '11px 6px', fontSize: 13.5 }} onClick={handleRedraw}>
+          <button className="secondary-btn" style={{ flex: 1, padding: figure ? '8px 6px' : '11px 6px', fontSize: 13.5 }} onClick={handleRedraw}>
             穴を引き直す
           </button>
-          <button className="primary-btn" style={{ flex: 1, padding: '11px 6px', fontSize: 13.5 }} onClick={handleFinish}>
+          <button className="primary-btn" style={{ flex: 1, padding: figure ? '8px 6px' : '11px 6px', fontSize: 13.5 }} onClick={handleFinish}>
             終了
           </button>
         </div>

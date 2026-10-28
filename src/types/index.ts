@@ -11,6 +11,14 @@ export interface Entry {
   excluded?: number[];
   /** 内蔵の教材ライブラリから追加した題材のID */
   presetId?: string;
+  /** 入っているタブ(自分専用版)。無ければ presetId などから決める */
+  deckId?: string;
+}
+
+/** ホームのタブ(自分専用版)。名前は自由に変えられる */
+export interface Deck {
+  id: string;
+  name: string;
 }
 
 export interface MarkingRange {
@@ -37,6 +45,8 @@ export interface Settings {
   quizRatio: number;
   quizMode?: QuizMode;
   showGlossHints?: boolean;
+  /** 自分専用版のタブ。未設定なら既定のタブを使う */
+  decks?: Deck[];
 }
 
 export interface AppData {

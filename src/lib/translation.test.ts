@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { getPresetTopics, getPresetTranslations } from './presetLibrary';
+import { getAllPresetTopics, getAllPresetTranslations } from './presetLibrary';
 import { parseMarkedText, presetEntriesToAdd } from './presets';
 import { buildEntryTranslation, parseJpLine, sentenceIndices } from './translation';
 
@@ -18,8 +18,8 @@ describe('parseJpLine', () => {
 });
 
 describe('bundled translations', () => {
-  const topics = getPresetTopics();
-  const translations = getPresetTranslations();
+  const topics = getAllPresetTopics();
+  const translations = getAllPresetTranslations();
 
   it('has one line per English sentence and matches the expressions sentence by sentence', () => {
     for (const topic of topics) {

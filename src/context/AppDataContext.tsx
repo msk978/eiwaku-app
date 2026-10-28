@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useReducer, useRef, useState, type ReactNode } from 'react';
-import type { AppData, Entry, MarkingRange, MarkingSet, QuizMode, SessionRecord } from '../types';
+import type { AppData, Deck, Entry, MarkingRange, MarkingSet, QuizMode, SessionRecord } from '../types';
 import { loadData, saveData } from '../lib/storage';
 import { CloudSync, type RemoteChange, type SyncStatus } from '../lib/cloudSync';
 import { IS_PERSONAL } from '../lib/target';
@@ -14,6 +14,7 @@ type Action =
   | { type: 'SET_QUIZ_RATIO'; ratio: number }
   | { type: 'SET_QUIZ_MODE'; mode: QuizMode }
   | { type: 'SET_SHOW_GLOSS_HINTS'; show: boolean }
+  | { type: 'SET_DECKS'; decks: Deck[] }
   | { type: 'TOGGLE_PIN'; entryId: string; index: number }
   | { type: 'CLEAR_PINS'; entryId: string }
   | { type: 'TOGGLE_EXCLUDE'; entryId: string; index: number }
@@ -71,6 +72,8 @@ function reducer(state: AppData, action: Action): AppData {
       return { ...state, settings: { ...state.settings, quizMode: action.mode } };
     case 'SET_SHOW_GLOSS_HINTS':
       return { ...state, settings: { ...state.settings, showGlossHints: action.show } };
+    case 'SET_DECKS':
+      return { ...state, settings: { ...state.settings, decks: action.decks } };
     case 'TOGGLE_PIN':
       return {
         ...state,

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { parseMarkedText, parsePresetTopics, presetEntriesToAdd } from './presets';
-import { getPresetTopics } from './presetLibrary';
+import { getPresetTopics, getTask1Figure, getTask1Topics } from './presetLibrary';
 import type { Entry } from '../types';
 
 describe('parsePresetTopics', () => {
@@ -27,6 +27,38 @@ describe('parsePresetTopics', () => {
       expect(ranges.length).toBeGreaterThan(0);
       expect(tokens.some((tok) => tok.includes('{') || tok.includes('}'))).toBe(false);
     }
+  });
+});
+
+describe('Task 1 topics', () => {
+  it('bundles 12 model answers, two for each chart type, each with a figure', () => {
+    const topics = getTask1Topics();
+    expect(topics).toHaveLength(12);
+    expect(topics.every((t) => t.presetId.startsWith('task1-'))).toBe(true);
+    expect(topics.every((t) => t.text.includes('Overall, it is clear that'))).toBe(true);
+    expect(topics.every((t) => getTask1Figure(t.presetId)?.startsWith('<svg'))).toBe(true);
+  });
+
+  it('keeps numbers out of the overview paragraph', () => {
+    for (const t of getTask1Topics()) {
+      const overview = t.text.split(/\n\s*\n/)[1]!;
+      expect(overview.startsWith('Overall'), t.title).toBe(true);
+      expect(/\d/.test(overview), t.title).toBe(false);
+    }
+  });
+
+  it('follows the Looking first at / Turning to paragraphs', () => {
+    for (const t of getTask1Topics()) {
+      const paras = t.text.split(/\n\s*\n/);
+      expect(paras, t.title).toHaveLength(4);
+      expect(paras[2]!.startsWith('Looking first at'), t.title).toBe(true);
+      expect(paras[3]!.startsWith('Turning to'), t.title).toBe(true);
+    }
+  });
+
+  it('adds Task 1 topics into the given tab', () => {
+    const { entries } = presetEntriesToAdd(getTask1Topics(), [], new Date(), 'ielts-task1');
+    expect(entries.every((e) => e.deckId === 'ielts-task1')).toBe(true);
   });
 });
 

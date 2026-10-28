@@ -9,16 +9,19 @@ export interface PresetTopic {
   text: string;
 }
 
+/** IELTS Task 1 の題材の presetId の接頭辞 */
+export const TASK1_PREFIX = 'task1-';
+
 const HEADING_RE = /^\*\*(\d+)\.\s*(.+?)\*\*\s*$/;
 
 /** 「**番号. タイトル**」の見出しと本文が並んだテキストを題材の一覧にする */
-export function parsePresetTopics(raw: string): PresetTopic[] {
+export function parsePresetTopics(raw: string, idPrefix = 'topic-'): PresetTopic[] {
   const topics: PresetTopic[] = [];
   let current: { num: string; title: string; lines: string[] } | null = null;
   const flush = () => {
     if (!current) return;
     const text = current.lines.join('\n').trim();
-    if (text) topics.push({ presetId: `topic-${current.num}`, title: `${current.num}. ${current.title}`, text });
+    if (text) topics.push({ presetId: `${idPrefix}${current.num}`, title: `${current.num}. ${current.title}`, text });
   };
   for (const line of raw.split(/\r?\n/)) {
     const heading = HEADING_RE.exec(line);
@@ -70,6 +73,7 @@ export function presetEntriesToAdd(
   topics: PresetTopic[],
   existing: Entry[],
   now = new Date(),
+  deckId?: string,
 ): { entries: Entry[]; markings: MarkingSet[] } {
   const added = new Set(existing.map((e) => e.presetId).filter(Boolean));
   const entries: Entry[] = [];
@@ -86,6 +90,7 @@ export function presetEntriesToAdd(
         tokens,
         title: t.title,
         presetId: t.presetId,
+        deckId,
       });
       markings.push({ entryId: id, ranges });
     });

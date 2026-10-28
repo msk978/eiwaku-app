@@ -7,13 +7,14 @@ export function useEntries() {
   const { data, dispatch } = useAppData();
 
   const addEntry = useCallback(
-    (rawText: string, title?: string): Entry => {
+    (rawText: string, title?: string, deckId?: string): Entry => {
       const trimmedTitle = title?.trim();
       const entry: Entry = {
         id: crypto.randomUUID(),
         createdAt: new Date().toISOString(),
         tokens: tokenize(rawText),
         title: trimmedTitle ? trimmedTitle : undefined,
+        deckId,
       };
       dispatch({ type: 'ADD_ENTRY', entry });
       return entry;

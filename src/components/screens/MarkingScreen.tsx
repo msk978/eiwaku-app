@@ -6,6 +6,9 @@ import { isMarked, toggleWordMarking } from '../../lib/markingLogic';
 import { expandToWordRanges } from '../../lib/quizSelection';
 import { MarkingParagraph } from '../common/MarkingParagraph';
 import { BackButton } from '../common/BackButton';
+import { TaskFigure } from '../common/TaskFigure';
+import { getTask1Figure } from '../../lib/presetLibrary';
+import { IS_PERSONAL } from '../../lib/target';
 
 export function MarkingScreen() {
   const { id } = useParams<{ id: string }>();
@@ -18,6 +21,7 @@ export function MarkingScreen() {
 
   if (!entry) return null;
 
+  const figure = IS_PERSONAL ? getTask1Figure(entry.presetId) : null;
   const markedWordCount = expandToWordRanges(entry.tokens, ranges).length;
 
   const onTap = (index: number) => {
@@ -37,6 +41,7 @@ export function MarkingScreen() {
           完了
         </button>
       </div>
+      {figure && <TaskFigure svg={figure} />}
 
       <div className="screen-body" style={{ flex: 1 }}>
         <MarkingParagraph tokens={entry.tokens} ranges={ranges} activeIndex={activeIndex} onTap={onTap} />
