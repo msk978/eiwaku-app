@@ -7,7 +7,7 @@ import { expandToWordRanges } from '../../lib/quizSelection';
 import { MarkingParagraph } from '../common/MarkingParagraph';
 import { BackButton } from '../common/BackButton';
 import { TaskFigure } from '../common/TaskFigure';
-import { getPresetLineBreaks, entryFigure, getToeflPrompt } from '../../lib/presetLibrary';
+import { getPresetLineBreaks, entryFigure, entryPrompt } from '../../lib/presetLibrary';
 import { TaskPromptCard } from '../common/TaskPromptCard';
 import { HAS_PRESETS } from '../../lib/target';
 
@@ -23,7 +23,7 @@ export function MarkingScreen() {
   if (!entry) return null;
 
   const figure = entryFigure(entry);
-  const prompt = HAS_PRESETS ? getToeflPrompt(entry.presetId) : null;
+  const prompt = entryPrompt(entry);
   const markedWordCount = expandToWordRanges(entry.tokens, ranges).length;
 
   const onTap = (index: number) => {

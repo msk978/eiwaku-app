@@ -52,7 +52,7 @@ export function parseImportFile(raw: string): ImportResult {
     return { ok: false, error: { kind: 'invalid-shape' } };
   }
 
-  const entries = d.entries as { id: unknown; tokens: unknown; title?: unknown; presetId?: unknown; glosses?: unknown; pinned?: unknown; excluded?: unknown; figure?: unknown }[];
+  const entries = d.entries as { id: unknown; tokens: unknown; title?: unknown; presetId?: unknown; glosses?: unknown; pinned?: unknown; excluded?: unknown; figure?: unknown; promptId?: unknown }[];
   for (const e of entries) {
     if (typeof e.id !== 'string' || !Array.isArray(e.tokens)) {
       return { ok: false, error: { kind: 'invalid-shape' } };
@@ -60,7 +60,8 @@ export function parseImportFile(raw: string): ImportResult {
     if (
       (e.title !== undefined && typeof e.title !== 'string') ||
       (e.presetId !== undefined && typeof e.presetId !== 'string') ||
-      (e.figure !== undefined && !isFigureDataUrl(e.figure))
+      (e.figure !== undefined && !isFigureDataUrl(e.figure)) ||
+      (e.promptId !== undefined && typeof e.promptId !== 'string')
     ) {
       return { ok: false, error: { kind: 'invalid-shape' } };
     }

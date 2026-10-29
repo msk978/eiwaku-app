@@ -15,6 +15,8 @@ export interface Entry {
   deckId?: string;
   /** 自分で添付した図(縮小した画像の data URL)。IELTS Task 1 のグラフなどを上部に固定して表示する */
   figure?: string;
+  /** 自分で選んだ TOEFL の問題(公開版)。問題文を上部に固定して表示する */
+  promptId?: string;
 }
 
 /** ホームのタブ(自分専用版)。名前は自由に変えられる */

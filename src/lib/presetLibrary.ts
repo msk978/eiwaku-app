@@ -5,6 +5,7 @@ import task1TranslationsRaw from '../data/task1Translations.txt?raw';
 import toeflRaw from '../data/toeflTopics.txt?raw';
 import toeflTranslationsRaw from '../data/toeflTranslations.txt?raw';
 import toeflPromptsRaw from '../data/toeflPrompts.txt?raw';
+import toeflDiscussionsRaw from '../data/toeflDiscussions.txt?raw';
 import band6Task2Raw from '../data/band6/task2Topics.txt?raw';
 import band6Task2TranslationsRaw from '../data/band6/task2Translations.txt?raw';
 import band6Task1Raw from '../data/band6/task1Topics.txt?raw';
@@ -32,6 +33,7 @@ let task1Translations: Map<string, string[]> | null = null;
 let toeflTopics: PresetTopic[] | null = null;
 let toeflTranslations: Map<string, string[]> | null = null;
 let toeflPrompts: Map<string, TaskPrompt> | null = null;
+let toeflDiscussions: Map<string, TaskPrompt> | null = null;
 
 /** 個人版だけで使う内蔵の題材(公開版のバンドルに入らないよう、呼ばれたときに読む) */
 export function getPresetTopics(): PresetTopic[] {
@@ -89,39 +91,90 @@ export function entryFigure(entry: Entry): string | null {
   return svg ? svgDataUrl(svg) : null;
 }
 
-/** TOEFL の Email の問題文 */
+/** TOEFL の問題文(Email と Academic Discussion) */
 export interface TaskPrompt {
+  /** 問題を選ぶときの名前(Email は件名) */
+  title: string;
   /** To: や Subject: の行 */
   headers: string[];
   /** 状況の説明と指示文 */
   paragraphs: string[];
-  /** 満たすべき3つの要件 */
+  /** 満たすべき要件 */
   requirements: string[];
+  /** Academic Discussion の教授と学生の投稿(Email では空) */
+  posts: { name: string; text: string }[];
 }
 
-/** 「**番号**」の見出しの下に、To:/Subject: の行・説明・「- 」で始まる要件が並んだテキストを読む */
+/** Academic Discussion の問題の ID の接頭辞(Email の問題の ID は内蔵題材の presetId と同じ toefl-番号) */
+export const DISCUSSION_PREFIX = 'toefl-discussion-';
+
+/**
+ * 「**番号**」の見出しの下に、To:/Subject: の行・説明・「- 」で始まる要件が並んだテキストを読む。
+ * 「Title: 」は選ぶときの名前、「@名前: 」は Academic Discussion の投稿
+ */
 export function parseTaskPrompts(raw: string, idPrefix: string): Map<string, TaskPrompt> {
   const map = new Map<string, TaskPrompt>();
   let current: TaskPrompt | null = null;
   for (const line of raw.split(/\r?\n/).map((l) => l.trim())) {
     const heading = /^\*\*(\d+)\*\*$/.exec(line);
+    const post = /^@([^:]+):\s*(.+)$/.exec(line);
     if (heading) {
-      current = { headers: [], paragraphs: [], requirements: [] };
+      current = { title: '', headers: [], paragraphs: [], requirements: [], posts: [] };
       map.set(`${idPrefix}${heading[1]}`, current);
-    } else if (current && line) {
-      if (line.startsWith('- ')) current.requirements.push(line.slice(2));
-      else if (/^(To|Subject):/.test(line)) current.headers.push(line);
-      else current.paragraphs.push(line);
+    } else if (!current || !line) {
+      continue;
+    } else if (post) {
+      current.posts.push({ name: post[1]!.trim(), text: post[2]! });
+    } else if (line.startsWith('Title:')) {
+      current.title = line.slice(6).trim();
+    } else if (line.startsWith('- ')) {
+      current.requirements.push(line.slice(2));
+    } else if (/^(To|Subject):/.test(line)) {
+      current.headers.push(line);
+      if (line.startsWith('Subject:') && !current.title) current.title = line.slice(8).trim();
+    } else {
+      current.paragraphs.push(line);
     }
   }
   return map;
 }
 
-/** TOEFL の題材の問題文。問題文の無い題材なら null */
+function toeflEmailPrompts(): Map<string, TaskPrompt> {
+  toeflPrompts ??= BAND6 ? new Map() : parseTaskPrompts(toeflPromptsRaw, TOEFL_PREFIX);
+  return toeflPrompts;
+}
+
+function toeflDiscussionPrompts(): Map<string, TaskPrompt> {
+  toeflDiscussions ??= BAND6 ? new Map() : parseTaskPrompts(toeflDiscussionsRaw, DISCUSSION_PREFIX);
+  return toeflDiscussions;
+}
+
+/** TOEFL の Email の題材の問題文。問題文の無い題材なら null */
 export function getToeflPrompt(presetId: string | undefined): TaskPrompt | null {
   if (!presetId?.startsWith(TOEFL_PREFIX)) return null;
-  toeflPrompts ??= BAND6 ? new Map() : parseTaskPrompts(toeflPromptsRaw, TOEFL_PREFIX);
-  return toeflPrompts.get(presetId) ?? null;
+  return toeflEmailPrompts().get(presetId) ?? null;
+}
+
+/** 問題の ID(Email は toefl-番号、Academic Discussion は toefl-discussion-番号)から問題文を引く */
+export function getTaskPrompt(promptId: string | undefined): TaskPrompt | null {
+  if (!promptId) return null;
+  return toeflDiscussionPrompts().get(promptId) ?? toeflEmailPrompts().get(promptId) ?? null;
+}
+
+/** 登録するときに選べる問題(公開版。問題は固定で、本文は自由に入力する) */
+export function getTaskPromptChoices(): { group: string; options: { id: string; label: string }[] }[] {
+  const options = (map: Map<string, TaskPrompt>, kind: string) =>
+    [...map].map(([id, p], i) => ({ id, label: `${kind} ${i + 1}: ${p.title}` }));
+  return [
+    { group: 'TOEFL Email', options: options(toeflEmailPrompts(), 'Email') },
+    { group: 'TOEFL Academic Discussion', options: options(toeflDiscussionPrompts(), 'Discussion') },
+  ];
+}
+
+/** 題材の上部に固定する問題文。自分で選んだ問題を優先し、無ければ内蔵の TOEFL の題材の問題文 */
+export function entryPrompt(entry: Entry): TaskPrompt | null {
+  if (entry.promptId) return getTaskPrompt(entry.promptId);
+  return HAS_PRESETS ? getToeflPrompt(entry.presetId) : null;
 }
 
 /**

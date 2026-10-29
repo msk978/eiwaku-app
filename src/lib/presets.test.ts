@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { lineBreaks, parseMarkedText, parsePresetTopics, presetEntriesToAdd, TASK1_PREFIX } from './presets';
-import { getPresetTopics, getTask1Figure, getTask1Topics, getToeflPrompt, getToeflTopics } from './presetLibrary';
+import { getPresetTopics, getTask1Figure, getTask1Topics, getTaskPrompt, getTaskPromptChoices, getToeflPrompt, getToeflTopics } from './presetLibrary';
 import type { Entry } from '../types';
 import band6Task1Raw from '../data/band6/task1Topics.txt?raw';
 import band6Task2Raw from '../data/band6/task2Topics.txt?raw';
@@ -129,6 +129,33 @@ describe('TOEFL email topics', () => {
       expect(t.text, t.title).toMatch(/^Dear .+,\n\nHello, I hope you are doing well\. I am writing /);
       expect(t.text.endsWith('Best regards,\nMisaki'), t.title).toBe(true);
     }
+  });
+});
+
+describe('TOEFL prompts to pick on the client build', () => {
+  it('offers the 10 emails and 9 academic discussions', () => {
+    const [emails, discussions] = getTaskPromptChoices();
+    expect(emails?.options).toHaveLength(10);
+    expect(discussions?.options).toHaveLength(9);
+    for (const o of [...emails!.options, ...discussions!.options]) {
+      expect(o.label, o.id).toMatch(/^(Email|Discussion) \d+: \S/);
+      expect(getTaskPrompt(o.id), o.id).not.toBeNull();
+    }
+  });
+
+  it('gives each discussion a professor post, two student posts and two requirements', () => {
+    for (const o of getTaskPromptChoices()[1]!.options) {
+      const prompt = getTaskPrompt(o.id)!;
+      expect(prompt.posts, o.id).toHaveLength(3);
+      expect(prompt.posts[0]!.name, o.id).toMatch(/^(Prof|Dr)\. /);
+      expect(prompt.requirements, o.id).toHaveLength(2);
+      expect(prompt.paragraphs, o.id).toHaveLength(1);
+    }
+  });
+
+  it('keeps the email prompts the same as the built-in TOEFL topics', () => {
+    expect(getTaskPrompt('toefl-1')).toBe(getToeflPrompt('toefl-1'));
+    expect(getTaskPrompt('toefl-1')?.posts).toEqual([]);
   });
 });
 

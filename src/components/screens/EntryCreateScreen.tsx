@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useEntries } from '../../hooks/useEntries';
 import { BackButton } from '../common/BackButton';
 import { FigureAttach } from '../common/FigureAttach';
+import { TaskPromptPicker } from '../common/TaskPromptPicker';
 import { loadSelectedDeckId } from '../../lib/decks';
 import { HAS_PRESETS } from '../../lib/target';
 
@@ -12,6 +13,9 @@ export function EntryCreateScreen() {
   const [text, setText] = useState('');
   const [title, setTitle] = useState('');
   const [figure, setFigure] = useState<string | undefined>();
+  const [promptId, setPromptId] = useState<string | undefined>();
+  // 問題を選んで自動で入れたタイトル。自分で書き換えていなければ、問題を選び直したときに差し替える
+  const [autoTitle, setAutoTitle] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleTextFile = async (file: File) => {
@@ -31,10 +35,19 @@ export function EntryCreateScreen() {
         ? '推奨(100〜300語)を大きく超えています'
         : null;
 
+  const handlePromptChange = (id: string | undefined, label: string | undefined) => {
+    setPromptId(id);
+    if (!title.trim() || title === autoTitle) {
+      const next = label ? `TOEFL ${label}` : '';
+      setTitle(next);
+      setAutoTitle(next);
+    }
+  };
+
   const handleSave = () => {
     if (!text.trim()) return;
     // 自分専用版では、ホームで開いていたタブに入れる
-    const entry = addEntry(text, title, HAS_PRESETS ? (loadSelectedDeckId() ?? undefined) : undefined, figure);
+    const entry = addEntry(text, title, HAS_PRESETS ? (loadSelectedDeckId() ?? undefined) : undefined, figure, promptId);
     navigate(`/entries/${entry.id}/mark`, { replace: true });
   };
 
@@ -62,6 +75,8 @@ export function EntryCreateScreen() {
             color: 'var(--text)',
           }}
         />
+        {/* 公開版だけ、固定の TOEFL の問題を選べる(自分専用版・みんな向け版は内蔵の題材に問題文が付いている) */}
+        {!HAS_PRESETS && <TaskPromptPicker promptId={promptId} onChange={handlePromptChange} />}
         <FigureAttach figure={figure} onChange={setFigure} />
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <span style={{ fontSize: 13, color: 'var(--text-muted)', fontWeight: 500 }}>英文(100〜300語程度)</span>

@@ -11,6 +11,7 @@ type Action =
   | { type: 'DELETE_ENTRY'; entryId: string }
   | { type: 'SET_ENTRY_TITLE'; entryId: string; title: string | undefined }
   | { type: 'SET_ENTRY_FIGURE'; entryId: string; figure: string | undefined }
+  | { type: 'SET_ENTRY_PROMPT'; entryId: string; promptId: string | undefined }
   | { type: 'SET_MARKING_RANGES'; entryId: string; ranges: MarkingRange[] }
   | { type: 'ADD_SESSION'; session: SessionRecord }
   | { type: 'SET_QUIZ_RATIO'; ratio: number }
@@ -62,6 +63,13 @@ function reducer(state: AppData, action: Action): AppData {
         ...state,
         entries: state.entries.map((e) =>
           e.id === action.entryId ? { ...e, figure: action.figure } : e,
+        ),
+      };
+    case 'SET_ENTRY_PROMPT':
+      return {
+        ...state,
+        entries: state.entries.map((e) =>
+          e.id === action.entryId ? { ...e, promptId: action.promptId } : e,
         ),
       };
     case 'SET_MARKING_RANGES': {

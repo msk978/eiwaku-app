@@ -6,11 +6,12 @@ interface TaskPromptCardProps {
 }
 
 /**
- * TOEFL の Email の問題文。図と同じく画面の上部に固定し、本文だけを下でスクロールさせる。
+ * TOEFL の問題文(Email と Academic Discussion)。図と同じく画面の上部に固定し、本文だけを下でスクロールさせる。
  * 長い問題文はカードの中でスクロールでき、右上の「たたむ」で本文を広く使える。
  */
 export function TaskPromptCard({ prompt }: TaskPromptCardProps) {
   const [collapsed, setCollapsed] = useState(false);
+  const isDiscussion = prompt.posts.length > 0;
 
   if (collapsed) {
     return (
@@ -61,15 +62,45 @@ export function TaskPromptCard({ prompt }: TaskPromptCardProps) {
           ))}
         </div>
         {prompt.paragraphs.map((p, i) => (
-          <p key={i} style={{ margin: '6px 0 0', fontWeight: i === prompt.paragraphs.length - 1 ? 700 : 400 }}>
+          <p
+            key={i}
+            style={{
+              margin: '6px 0 0',
+              // Email は最後の指示文を太字にする。Academic Discussion は教授の質問の方が大事なので太字にしない
+              fontWeight: !isDiscussion && i === prompt.paragraphs.length - 1 ? 700 : 400,
+            }}
+          >
             {p}
           </p>
         ))}
-        <ol style={{ margin: '6px 0 0', paddingLeft: 20 }}>
-          {prompt.requirements.map((r) => (
-            <li key={r}>{r}</li>
-          ))}
-        </ol>
+        {isDiscussion ? (
+          <ul style={{ margin: '4px 0 0', paddingLeft: 20 }}>
+            {prompt.requirements.map((r) => (
+              <li key={r}>{r}</li>
+            ))}
+          </ul>
+        ) : (
+          <ol style={{ margin: '6px 0 0', paddingLeft: 20 }}>
+            {prompt.requirements.map((r) => (
+              <li key={r}>{r}</li>
+            ))}
+          </ol>
+        )}
+        {prompt.posts.map((post, i) => (
+          <div
+            key={post.name}
+            style={{
+              marginTop: 8,
+              padding: '6px 10px',
+              borderRadius: 8,
+              // 1つ目は教授の質問、続く2つが学生の投稿
+              background: i === 0 ? 'var(--accent-soft)' : 'var(--bg)',
+            }}
+          >
+            <span style={{ fontWeight: 700 }}>{post.name}: </span>
+            {post.text}
+          </div>
+        ))}
       </div>
       <button
         onClick={() => setCollapsed(true)}
