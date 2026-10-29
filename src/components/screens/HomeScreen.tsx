@@ -84,6 +84,17 @@ export function HomeScreen() {
     </>
   );
 
+  // iPhone でホーム画面に追加したアプリは Safari と保存場所が別なので、空のときは引き継ぎ方を案内する
+  const transferHint = !IS_PERSONAL && entries.length === 0 && isHomeScreenApp() && (
+    <div className="card" style={{ fontSize: 13, lineHeight: 1.6 }}>
+      <div style={{ fontWeight: 600 }}>Safari で登録した英文を移すには</div>
+      <div style={{ color: 'var(--text-muted)', fontSize: 12.5 }}>
+        ホーム画面のアプリは、Safari とは別の場所に保存します(Safari の英文は消えていません)。
+        Safari でこのページを開き、右上の歯車 →「引き継ぎ用にコピー」。次にこのアプリで、歯車 →「貼り付けて引き継ぐ」を押してください。
+      </div>
+    </div>
+  );
+
   return (
     <div className="app-shell" style={{ position: 'relative' }}>
       <div className="topbar">
@@ -111,6 +122,7 @@ export function HomeScreen() {
 
       {deckEntries.length === 0 && promptList ? (
         <div className="screen-body" style={{ paddingBottom: 100 }}>
+          {transferHint}
           {promptList}
           <div style={{ fontSize: 12.5, color: 'var(--text-muted)', textAlign: 'center', lineHeight: 1.6 }}>
             問題を選んで英文を登録しましょう。
@@ -121,6 +133,7 @@ export function HomeScreen() {
       ) : deckEntries.length === 0 ? (
         <>
           <div className="screen-body" style={{ flex: 'none', paddingBottom: 0 }}>
+            {transferHint}
             {libraryCard}
           </div>
           <EmptyState
@@ -226,6 +239,14 @@ export function HomeScreen() {
 
       <Fab onClick={() => navigate('/new')} />
     </div>
+  );
+}
+
+/** ホーム画面に追加したアプリとして開いているか(iPhone の Safari では navigator.standalone) */
+function isHomeScreenApp(): boolean {
+  return (
+    window.matchMedia?.('(display-mode: standalone)').matches ||
+    (navigator as Navigator & { standalone?: boolean }).standalone === true
   );
 }
 

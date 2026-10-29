@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildExportFile, parseImportFile } from './exportImport';
+import { buildExportFile, mergeAppData, parseImportFile } from './exportImport';
 import type { AppData } from '../types';
 
 const validData: AppData = {
@@ -89,5 +89,36 @@ describe('buildExportFile / parseImportFile round trip', () => {
     raw.data.entries[0].title = 123;
     const result = parseImportFile(JSON.stringify(raw));
     expect(result).toEqual({ ok: false, error: { kind: 'invalid-shape' } });
+  });
+});
+
+describe('mergeAppData', () => {
+  const other: AppData = {
+    ...validData,
+    entries: [
+      { id: 'e1', createdAt: '2026-01-01T00:00:00.000Z', tokens: ['changed'] },
+      { id: 'e2', createdAt: '2026-01-03T00:00:00.000Z', tokens: ['new', 'one'] },
+    ],
+    markings: [
+      { entryId: 'e1', ranges: [] },
+      { entryId: 'e2', ranges: [{ start: 1, end: 1 }] },
+    ],
+    sessions: [{ id: 's2', entryId: 'e2', timestamp: '2026-01-04T00:00:00.000Z', totalQuestions: 1, correctCount: 0 }],
+    settings: { quizRatio: 0.9 },
+  };
+
+  it('adds only the entries this side does not have, with their markings and sessions', () => {
+    const { data, added } = mergeAppData(validData, other);
+    expect(added).toBe(1);
+    expect(data.entries.map((e) => e.id)).toEqual(['e1', 'e2']);
+    expect(data.entries[0]!.tokens).toEqual(['hi', 'there']);
+    expect(data.markings).toEqual([...validData.markings, other.markings[1]]);
+    expect(data.sessions.map((s) => s.id)).toEqual(['s1', 's2']);
+    expect(data.settings.quizRatio).toBe(0.5);
+  });
+
+  it('adds nothing when merging the same data twice', () => {
+    const once = mergeAppData(validData, other).data;
+    expect(mergeAppData(once, other)).toEqual({ data: once, added: 0 });
   });
 });

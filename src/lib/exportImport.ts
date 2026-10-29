@@ -129,3 +129,26 @@ export function parseImportFile(raw: string): ImportResult {
     },
   };
 }
+
+/**
+ * 別の場所(Safari とホーム画面のアプリなど)のデータを今のデータに足す。
+ * 同じ ID の英文は今の方を残し、無い英文だけをマーキング・学習履歴ごと加える。設定は今のまま
+ */
+export function mergeAppData(current: AppData, incoming: AppData): { data: AppData; added: number } {
+  const known = new Set(current.entries.map((e) => e.id));
+  const newEntries = incoming.entries.filter((e) => !known.has(e.id));
+  const newIds = new Set(newEntries.map((e) => e.id));
+  const knownSessions = new Set(current.sessions.map((s) => s.id));
+  return {
+    added: newEntries.length,
+    data: {
+      ...current,
+      entries: [...current.entries, ...newEntries],
+      markings: [...current.markings, ...incoming.markings.filter((m) => newIds.has(m.entryId))],
+      sessions: [
+        ...current.sessions,
+        ...incoming.sessions.filter((s) => newIds.has(s.entryId) && !knownSessions.has(s.id)),
+      ],
+    },
+  };
+}
