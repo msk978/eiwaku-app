@@ -1,21 +1,28 @@
 import { useMemo, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useEntries } from '../../hooks/useEntries';
 import { BackButton } from '../common/BackButton';
 import { FigureAttach } from '../common/FigureAttach';
 import { TaskPromptPicker } from '../common/TaskPromptPicker';
+import { getTaskPromptChoices } from '../../lib/presetLibrary';
 import { loadSelectedDeckId } from '../../lib/decks';
 import { HAS_PRESETS } from '../../lib/target';
 
 export function EntryCreateScreen() {
   const navigate = useNavigate();
   const { addEntry } = useEntries();
+  // ホームの問題一覧から来たときは、その問題を選んだ状態で開く(公開版)
+  const [searchParams] = useSearchParams();
+  const initialPrompt = HAS_PRESETS
+    ? undefined
+    : getTaskPromptChoices().flatMap((g) => g.options).find((o) => o.id === searchParams.get('prompt'));
+  const initialTitle = initialPrompt ? `TOEFL ${initialPrompt.label}` : '';
   const [text, setText] = useState('');
-  const [title, setTitle] = useState('');
+  const [title, setTitle] = useState(initialTitle);
   const [figure, setFigure] = useState<string | undefined>();
-  const [promptId, setPromptId] = useState<string | undefined>();
+  const [promptId, setPromptId] = useState(initialPrompt?.id);
   // 問題を選んで自動で入れたタイトル。自分で書き換えていなければ、問題を選び直したときに差し替える
-  const [autoTitle, setAutoTitle] = useState('');
+  const [autoTitle, setAutoTitle] = useState(initialTitle);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleTextFile = async (file: File) => {

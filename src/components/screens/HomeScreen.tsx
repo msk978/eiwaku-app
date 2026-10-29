@@ -14,6 +14,7 @@ import { HAS_PRESETS, IS_EVERYONE, IS_PERSONAL } from '../../lib/target';
 import type { SyncStatus } from '../../lib/cloudSync';
 import { Fab } from '../common/Fab';
 import { EmptyState } from '../common/EmptyState';
+import { TaskPromptList } from '../common/TaskPromptList';
 import { GearIcon, PencilIcon } from '../common/icons';
 
 const SORT_LABEL: Record<SortMode, string> = {
@@ -75,6 +76,14 @@ export function HomeScreen() {
     </div>
   );
 
+  // 公開版は内蔵の題材が無い代わりに、TOEFL の問題(固定)を最初から並べておく
+  const promptList = !HAS_PRESETS && (
+    <>
+      <TaskPromptList entries={entries} />
+      {deckEntries.length > 0 && <div className="section-label" style={{ marginTop: 6 }}>登録した英文</div>}
+    </>
+  );
+
   return (
     <div className="app-shell" style={{ position: 'relative' }}>
       <div className="topbar">
@@ -100,7 +109,16 @@ export function HomeScreen() {
           <DeckTabs decks={decks} current={currentDeck} onSelect={selectDeck} onEdit={() => setEditingDecks(true)} />
         ))}
 
-      {deckEntries.length === 0 ? (
+      {deckEntries.length === 0 && promptList ? (
+        <div className="screen-body" style={{ paddingBottom: 100 }}>
+          {promptList}
+          <div style={{ fontSize: 12.5, color: 'var(--text-muted)', textAlign: 'center', lineHeight: 1.6 }}>
+            問題を選んで英文を登録しましょう。
+            <br />
+            問題に関係ない英文は、右下のボタンから登録できます。
+          </div>
+        </div>
+      ) : deckEntries.length === 0 ? (
         <>
           <div className="screen-body" style={{ flex: 'none', paddingBottom: 0 }}>
             {libraryCard}
@@ -112,6 +130,7 @@ export function HomeScreen() {
       ) : (
         <div className="screen-body" style={{ paddingBottom: 100 }}>
           {libraryCard}
+          {promptList}
           <div style={{ display: 'flex', gap: 8 }}>
             <input
               type="text"
