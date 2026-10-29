@@ -6,6 +6,8 @@ import { defineConfig } from 'vite'
 export default defineConfig(({ mode }) => ({
   base: './',
   plugins: [react()],
+  // public/ の配布用 PDF(IELTS の型)は公開版のサイト直下にだけ置く
+  publicDir: mode === 'everyone' || mode === 'personal' ? false : 'public',
   // 自分専用版(npm run build:personal)はアーティファクトとして公開するので、
   // 出力先を分け、再公開のたびに同じパスへ上書きできるようファイル名を固定する
   // みんな向けの IELTS 版(npm run build:everyone)は公開版の dist の下 /ielts/ に出し、同じ GitHub Pages に載せる
