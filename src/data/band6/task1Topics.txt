@@ -2,118 +2,118 @@
 
 The table shows how patients rated five services at three health centres on a scale of 1 to 10.
 
-Overall, it is clear that while the Peveril Centre {{got the highest scores}} in every category, the Longston Centre {{had the lowest ratings}}. Meanwhile, {{the biggest difference}} was in response to concerns, but doctors' service {{got similar scores}} at all three centres.
+Overall, it is clear that while the Brookside Centre {{got the highest scores}} in every category, the Ashford Centre {{had the lowest ratings}}. Meanwhile, {{the biggest difference}} was in response to concerns, but doctors' service {{got similar scores}} at all three centres.
 
-Looking first at the Peveril Centre, its average score was 8.3, which was {{the highest of the three}}. Response to concerns and booking appointments {{got very high scores}}, at 9.6 and 9.2 {{respectively}}. In contrast, Longston's average was {{only}} 5.7, and its score for response to concerns was 4.1, {{less than half}} of Peveril's score.
+Looking first at the Brookside Centre, its average score was 8.4, which was {{the highest of the three}}. Response to concerns and booking appointments {{got very high scores}}, at 9.5 and 9.3 {{respectively}}. In contrast, Ashford's average was {{only}} 5.6, and its score for response to concerns was 4.5, {{less than half}} of Brookside's score.
 
-Turning to doctors' service, the scores were {{almost the same}} at all centres, {{between}} 8 {{+and}} 8.7. Care of children {{was rated at}} 6.3, 7.5 and 7.3 at Longston, Peveril and Marchbank {{respectively}}. On the other hand, pharmacy {{had the lowest scores}} at every centre, at 5.1, 6.3 and 5.8. The Marchbank Centre {{was in the middle}}, with an average score of 7.2.
+Turning to doctors' service, the scores were {{almost the same}} at all centres, {{between}} 7.9 {{+and}} 8.6. Care of children {{was rated at}} 6.0, 7.8 and 7.1 at Ashford, Brookside and Carlton {{respectively}}. On the other hand, pharmacy {{had the lowest scores}} at every centre, at 4.0, 6.6 and 5.6. The Carlton Centre {{was in the middle}}, with an average score of 7.1.
 
-**2. 表｜カナダの世帯構成**
+**2. 表｜ニュージーランドの世帯構成**
 
-The table shows the percentages of people living in five types of households in Canada from 1984 to 2020.
+The table shows the percentages of people living in five types of households in New Zealand from 1975 to 2015.
 
 Overall, it is clear that while couples with dependent children {{decreased the most}}, one-person and lone-parent households {{increased a lot}}. Meanwhile, the figure for couples with non-dependent children {{stayed almost the same}}.
 
-Looking first at couples with dependent children, this group {{was the largest}} in 1984, with 52%. However, it {{went down steadily}} and {{reached}} 36% in 2020. Even so, it was still {{the most common type}} of household. In contrast, lone-parent households {{tripled}} from 4% to 12%. Similarly, the percentage of people living alone {{more than doubled}} from 5% to 12%, and it {{did not change}} after 2014.
+Looking first at couples with dependent children, this group {{was the largest}} in 1975, with 50%. However, it {{went down steadily}} and {{reached}} 35% in 2015. Even so, it was still {{the most common type}} of household. In contrast, lone-parent households {{tripled}} from 5% to 15%. Similarly, the percentage of people living alone {{more than doubled}} from 6% to 13%, and it {{did not change}} after 2005.
 
-Turning to couples without children, this group {{rose slightly}}, {{from}} 19% {{+to}} 25%, and it became the second largest group in 2020. On the other hand, couples with non-dependent children {{stayed at}} around 10%, although the figure {{dropped a little}} to 9% in 2014 and did not change after that.
+Turning to couples without children, this group {{rose slightly}}, {{from}} 18% {{+to}} 22%, and it was the second largest group throughout the period. On the other hand, couples with non-dependent children {{stayed at}} around 11%, although the figure {{dropped a little}} to 10% in 2005 and did not change after that.
 
 **3. 折れ線｜金属価格の月ごとの変化**
 
-The line graph shows the average monthly change in the prices of copper, nickel and zinc compared with the previous month in 2014.
+The line graph shows the average monthly change in the prices of aluminium, tin and lead compared with the previous month in 2016.
 
-Overall, it is clear that while nickel {{changed the most}}, copper {{changed the least}} during the year. Meanwhile, all three metals {{had a similar pattern}}, with prices falling in the middle of the year and rising again at the end.
+Overall, it is clear that while tin {{changed the most}}, aluminium {{changed the least}} during the year. Meanwhile, all three metals {{had a similar pattern}}, with prices falling in the middle of the year and rising again at the end.
 
-Looking first at nickel, its price {{went up}} by 5.5% in January, which was {{the highest figure}}. After that, the increase {{became smaller}} and was only 1% in March. In June, the price {{fell}} by 3%, and it {{kept falling}} until October. Then it {{went back up}} to 1% in November.
+Looking first at tin, its price {{went up}} by 6% in January, which was {{the highest figure}}. After that, the increase {{became smaller}} and was only 1.5% in March. In June, the price {{fell}} by 2.5%, and it {{kept falling}} until September. Then it {{went back up}} to 0.5% in October.
 
-Turning to copper and zinc, the figures for both metals {{changed a little}} between minus 1% and 3%. Copper {{was quite stable}}, and it {{was below zero}} only in May and June. Zinc {{reached a peak of}} 3% in February and {{finished the year at}} 2%, which was slightly higher than copper at 1.5%.
+Turning to aluminium and lead, the figures for both metals {{changed a little}} between minus 2% and 3.5%. Aluminium {{was quite stable}}, and it {{was below zero}} only in April and May. Lead {{reached a peak of}} 3.5% in February and {{finished the year at}} 3%, which was slightly higher than aluminium at 2.5%.
 
 **4. 折れ線｜3つのベーカリーの年間収入**
 
-The line graph shows the yearly income of three bakeries in Calgary from 2000 to 2010.
+The line graph shows the yearly income of three bakeries in Halifax from 2002 to 2012.
 
-Overall, it is clear that while the income of Amandine Bakery and Bolo Cakery {{went up}}, that of Mari Bakeshop {{went down a lot}} over the period. Meanwhile, the income of Amandine Bakery {{did not change}} in the first half of the period.
+Overall, it is clear that while the income of Golden Crust and Maple Sweets {{went up}}, that of Sunrise Ovens {{went down a lot}} over the period. Meanwhile, the income of Golden Crust {{did not change}} in the first half of the period.
 
-Looking first at Amandine Bakery and Bolo Cakery, Amandine's income {{stayed at}} 55,000 dollars from 2000 to 2005. However, it then {{rose quickly}}, {{became higher than}} Mari Bakeshop's income in 2006 and {{reached a peak of}} 108,000 dollars in 2010. Bolo Cakery {{started at}} only 20,000 dollars, which was {{the lowest figure}}, but its income {{more than tripled}} to 65,000 dollars by 2010.
+Looking first at Golden Crust and Maple Sweets, Golden Crust's income {{stayed at}} 50,000 dollars from 2002 to 2006. However, it then {{rose quickly}}, {{became higher than}} Sunrise Ovens in 2009 and {{reached a peak of}} 112,000 dollars in 2012. Maple Sweets {{started at}} 25,000 dollars, which was {{the lowest figure}}, but its income {{more than tripled}} to 80,000 dollars by 2012.
 
-Turning to Mari Bakeshop, it {{had the highest income}} at the beginning, and its income {{was between}} 80,000 {{+and}} 93,000 dollars until 2004. After that, it {{dropped sharply}} to 63,000 dollars in 2005 and {{continued to fall}}. It {{stayed at}} 40,000 dollars in 2009 and 2010, and it {{became the lowest}} of the three bakeries.
+Turning to Sunrise Ovens, it {{had the highest income}} at the beginning, and its income {{rose to}} a peak of 95,000 dollars in 2004. After that, it {{went down slowly}} until 2008 and then {{dropped sharply}} to 52,000 dollars in 2009. It {{continued to fall}} to 38,000 dollars in 2012, and it {{became the lowest}} of the three.
 
 **5. 棒｜旅行者の余暇の過ごし方**
 
-The bar chart shows how many hours per day tourists from four countries spent on three holiday activities in Greece in August 2019.
+The bar chart shows how many hours per day tourists from four countries spent on three holiday activities in Spain in July 2022.
 
-Overall, it is clear that while Chinese tourists {{spent the most time}} reading books, visiting places {{was the least popular activity}} for all nationalities. Meanwhile, the time spent at the beach {{was very different}} by nationality.
+Overall, it is clear that while Japanese tourists {{spent the most time}} reading books, shopping {{was the least popular activity}} for all nationalities. Meanwhile, the time spent at the beach {{was very different}} by nationality.
 
-Looking first at Chinese tourists, they spent 8 hours a day reading books, which was {{the highest figure}}. However, they spent only 3 hours at the beach and 1 hour visiting places. Brazilian tourists, on the other hand, {{liked}} the beach the most and spent 7 hours there, {{followed by}} Turkish and American tourists at 5 and 4 hours {{respectively}}.
+Looking first at Japanese tourists, they spent 7 hours a day reading books, which was {{the highest figure}}. However, they spent only 2 hours at the beach and 1 hour shopping. Mexican tourists, on the other hand, {{liked}} the beach the most and spent 6 hours there, {{followed by}} Canadian and German tourists at 5 and 3 hours {{respectively}}.
 
-Turning to the other activities, the other nationalities spent {{a similar amount of time}} reading books, at 5 hours for Americans and 4 hours for Turkish and Brazilian tourists. Visiting places was {{not very popular}} with any group, {{from}} 1 {{+to}} 3 hours. American and Turkish tourists {{spent the same amount of time}} on this activity, at 3 hours each.
+Turning to the other activities, the other nationalities spent {{much less time}} reading books, at 4 hours for Canadians, 3 hours for Germans and 2 hours for Mexicans. Shopping was {{not very popular}} with any group, {{from}} 1 {{+to}} 2 hours. German and Canadian tourists {{spent the same amount of time}} on this activity, at 2 hours each.
 
-**6. 棒｜カナダの産業別労働人口**
+**6. 棒｜オーストラリアの産業別労働人口**
 
-The bar chart shows the percentage of Canadian workers in five main industries in 1850 and 2020.
+The bar chart shows the percentage of Australian workers in five main industries in 1870 and 2021.
 
 Overall, it is clear that while the services sector {{grew the most}}, manufacturing and agriculture {{decreased a lot}}. Meanwhile, construction and energy {{changed only a little}} over the period.
 
-Looking first at services, this sector {{made up}} 33% of workers in 1850, which was a little lower than manufacturing. However, it {{increased greatly}} to 79% in 2020 and {{became the largest}} sector by far, employing almost four out of five workers. In contrast, manufacturing, which was the largest sector in 1850, {{fell}} from 36% to only 9%. Similarly, agriculture and fishing {{dropped}} from 22% in 1850 to just 1%.
+Looking first at services, this sector {{made up}} 30% of workers in 1870, which was a little lower than manufacturing. However, it {{increased greatly}} to 78% in 2021 and {{became the largest}} sector by far, employing almost four out of five workers. In contrast, manufacturing, which was the largest sector in 1870, {{fell}} from 34% to only 8%. Similarly, agriculture and fishing {{dropped}} from 26% in 1870 to just 3%.
 
-Turning to construction and energy, both sectors {{were small}} in both years, at less than 10%. Construction {{rose slightly}}, {{from}} 5% {{+to}} 8%. On the other hand, the figure for energy and water {{went down}} from 3% to 1%, and it was {{the same as}} agriculture in 2020, at the bottom of the chart.
+Turning to construction and energy, both sectors {{were small}} in both years, at less than 10%. Construction {{rose slightly}}, {{from}} 6% {{+to}} 9%. On the other hand, the figure for energy and water {{went down}} from 4% to 2%, and it was {{the lowest}} of all the industries in 2021, with the shortest bar on the chart.
 
 **7. 円｜エネルギー容量の内訳**
 
-The pie charts show the percentage of energy capacity by source in 2015 and the predictions for 2040.
+The pie charts show the percentage of energy capacity by source in 2020 and the predictions for 2050.
 
-Overall, it is clear that while fossil fuels {{are expected to decrease the most}}, solar power {{is expected to increase the most}}. Meanwhile, the shares of nuclear power and other renewables {{will stay almost the same}}.
+Overall, it is clear that while the share of fossil fuels {{is expected to decrease the most}}, that of solar power {{is expected to increase the most}}. Meanwhile, the shares of nuclear power and other renewables {{will stay almost the same}}.
 
-Looking first at fossil fuels, they {{were the largest source}} in 2015, at 64%. This figure is expected to {{fall}} to 43% in 2040, but it {{will still be the largest}}. In contrast, solar power {{made up}} only 2% in 2015, but it is expected to {{rise sharply}} to 19%. Wind power {{is likely to}} more than double from 5% to 12%.
+Looking first at fossil fuels, they {{were the largest source}} in 2020, at 59%. This figure is expected to {{fall}} to 37% in 2050, but it {{will still be the largest}}. In contrast, solar power {{made up}} only 3% in 2020, but it is expected to {{rise sharply}} to 20%. Wind power {{is likely to}} more than double from 6% to 14%.
 
-Turning to nuclear power and other renewables, they {{are expected to}} {{fall slightly}}. The share of other renewables will {{drop}} from 23% to 21%, and that of nuclear power will fall from 6% to 5%. Total capacity {{is expected to grow}} from 6,688 GW to 11,678 GW, which is {{almost double}} the 2015 figure.
+Turning to nuclear power and other renewables, their shares {{are expected to}} {{fall slightly}}. The share of other renewables will {{drop}} from 24% to 22%, and that of nuclear power will fall from 8% to 7%. Total capacity {{is expected to grow}} from 7,050 GW to 13,600 GW, which is {{almost double}} the 2020 figure.
 
-**8. 円｜イギリスの雇用形態**
+**8. 円｜オーストラリアの雇用形態**
 
-The pie charts show the percentage of full-time and part-time workers by gender in the UK in 1988 and 2012.
+The pie charts show the percentage of full-time and part-time workers by gender in Australia in 1990 and 2015.
 
 Overall, it is clear that while the share of women working full-time {{increased the most}}, that of men working full-time {{decreased}}. Meanwhile, the percentages of part-time workers {{did not change much}} for both genders.
 
-Looking first at full-time workers, men {{had the largest share}} in 1988, at 53%, which {{was equal to}} 12,539 thousand people. This figure {{fell}} to 47% in 2012, but it was still {{the largest group}}. In contrast, the share of women working full-time {{rose}} from 19% to 26%. Their number {{increased sharply}} from 4,482 thousand to 7,712 thousand.
+Looking first at full-time workers, men {{had the largest share}} in 1990, at 55%, which {{was equal to}} 4,290 thousand people. This figure {{fell}} to 48% in 2015, but it was still {{the largest group}}. In contrast, the share of women working full-time {{rose}} from 18% to 27%. Their number {{increased sharply}} from 1,404 thousand to 3,159 thousand.
 
-Turning to part-time workers, women {{made up}} 22% of workers in 1988, and this {{went down slightly}} to 20% in 2012. Men working part-time {{stayed almost the same}}, {{rising a little}} from 6% to 7%. The total number of workers {{went up}} from 23,839 thousand to 29,616 thousand over the period.
+Turning to part-time workers, women {{made up}} 23% of workers in 1990, and this {{went down slightly}} to 19% in 2015. Men working part-time {{stayed almost the same}}, {{rising a little}} from 4% to 6%. The total number of workers {{went up}} from 7,800 thousand to 11,700 thousand over the period.
 
-**9. 地図｜パシフィック鉄道駅の変化**
+**9. 地図｜リバーサイド駅の変化**
 
-The maps show the changes at Pacific Railway Station between 1998 and now.
+The maps show the changes at Riverside Railway Station between 2005 and now.
 
-Overall, it is clear that while the station {{has become much bigger}} with new platforms and shops, the original platforms {{have not changed}}. Meanwhile, the toilets {{have been removed}} to build the new platforms.
+Overall, it is clear that while the station {{has been modernised}} with better transport links, the platform and the toilets {{have stayed in the same place}}. Meanwhile, the car park {{is no longer there}}.
 
-Looking first at the west side of the station, the toilets {{have been knocked down}} and {{replaced with}} two new platforms. In addition, a new row of facilities {{has been built}} between the old and new platforms, and it {{includes}} a restaurant and two shops. Also, a supermarket has been built in the south-west corner, which {{used to be}} an empty space.
+Looking first at the north side of the station, the car park {{has been removed}} and {{replaced with}} a bus station. In addition, a bicycle park {{has been built}} next to it, and a new footbridge {{connects}} the north side to the south side. Also, the platform {{has been made longer}} towards the east, so it now almost reaches the eastern edge of the station.
 
-Turning to the east side, the old platforms {{are still the same}}. The cafe and ticket office in the south-east corner {{are also in the same place}}, but the ticket office {{has been made bigger}}. On the other hand, the shop between them {{has been moved}} to the centre of the station.
+Turning to the south side, the toilets {{are still the same}}. However, the ticket office {{has been changed into}} ticket machines, and the cafe {{has been moved}} closer to the main entrance. On the other hand, a waiting room {{has been added}} where the cafe {{used to be}}.
 
-**10. 地図｜ネルソン市の変化**
+**10. 地図｜エルムフォードの町の変化**
 
-The maps show the changes in the city of Nelson between 2000 and now.
+The maps show the changes in the town of Elmford between 2010 and now.
 
-Overall, it is clear that while the city {{has changed a lot}} with better transport and more shops, the university, the city centre and the port {{are still in the same place}}. Meanwhile, the area {{has become easier to walk around}}.
+Overall, it is clear that while the east side of the town {{has been developed a lot}}, the west side {{has not changed much}}. Meanwhile, the river {{has become easier to cross}}.
 
-Looking first at transport, the old station in the west {{has been knocked down}}, and a new one {{has been built}} north of the city centre. It {{is connected to}} the university by a tramline. In addition, the southern road {{has been changed into}} a pedestrian street, and a bike rental service {{has been introduced}}. Also, the trees east of the university {{have been cut down}} for a new shopping centre.
+Looking first at the east side, the farmland {{has been replaced by}} a large housing estate with twelve houses, and a supermarket {{has been built}} next to it. In addition, the old factory by the river {{has been knocked down}} and {{turned into}} a park. Also, a new road {{has been constructed}} along the eastern edge of the town, next to the housing estate.
 
-Turning to the other areas, the old market in the west {{has been replaced by}} a new shop, and a new covered market {{has opened}} east of the city centre. On the other hand, the port {{has not changed}}, but a restaurant and some bars {{have been added}} {{on both sides of}} it.
+Turning to the west side, the town centre and the school {{are still in the same place}}. However, the hospital {{has been made bigger}}, and a car park {{has been added}} next to it. On the other hand, a footbridge {{now crosses}} the river {{to the south of}} the old bridge, near the park.
 
 **11. 図解｜ハチミツができるまで**
 
 The diagram shows how bees make honey.
 
-Overall, it is clear that there are seven main stages in this natural process, {{starting with}} bees leaving the hive and {{ending with}} the production of honey. Meanwhile, the first three stages {{happen}} outside the hive, while the last four take place inside it.
+Overall, it is clear that there are eight main stages in this natural process, {{starting with}} bees leaving the hive and {{ending with}} the honey being sealed in wax. Meanwhile, the first three stages {{happen}} outside the hive, while the last five take place inside it.
 
-Looking first at the early stages, bees {{fly out of}} the hive {{to look for}} flowers. When they {{find}} the flowers, they {{collect}} nectar from them, which is the third stage. After that, the bees {{go back to}} the hive and {{put}} the nectar {{+into}} the honeycomb cells, so the work inside the hive begins.
+Looking first at the early stages, worker bees {{fly out of}} the hive {{to look for}} flowers. When they {{find}} the flowers, they {{collect}} nectar from them and keep it in a special stomach. After that, they {{go back to}} the hive and {{pass}} the nectar {{+to}} house bees, which is the fourth stage.
 
-Turning to the final stages, the bees {{move their wings}} quickly to send air over the cells, which is the fifth stage. This moving air {{makes}} the water in the nectar {{+evaporate}} slowly. As a result, the nectar slowly {{becomes thicker}} and finally {{turns into}} honey, which {{is the end of}} the whole process.
+Turning to the final stages, the house bees {{put}} the nectar {{+into}} the honeycomb cells and {{move their wings}} quickly to send air over them. This moving air {{makes}} the water in the nectar {{+evaporate}}. As a result, the nectar slowly {{becomes thicker}} and {{turns into}} honey. Finally, the cells {{are covered with}} wax, which {{is the end of}} the whole process.
 
-**12. 図解｜冷凍フィッシュパイの製造**
+**12. 図解｜冷凍チキンパイの製造**
 
-The diagrams show what is in a frozen fish pie and how it is made.
+The diagrams show what is in a frozen chicken pie and how it is made.
 
-Overall, it is clear that the pie {{is made of}} potatoes, fish, peas and sauce in a microwave container, and there are {{two separate lines}} in the production, which {{join together}} before the final stages. Meanwhile, the potatoes {{can be kept much longer than}} the salmon before they are used.
+Overall, it is clear that the pie {{is made of}} potatoes, chicken, carrots and gravy in an oven-safe tray, and there are {{two separate lines}} in the production, which {{join together}} before the final stages. Meanwhile, the potatoes {{can be kept much longer than}} the chicken before they are used.
 
-Looking first at the potatoes, they {{are delivered}} to the factory and {{can be stored for up to}} one month. They {{are then washed}}, peeled and sliced, and then they {{are boiled}} and chilled. After that, they {{are kept in storage}} until they are needed.
+Looking first at the potatoes, they {{are delivered}} to the factory and {{can be stored for up to}} three weeks. They {{are then washed}} and peeled, and then they {{are boiled}} and mashed. After that, they {{are kept in storage}} until needed.
 
-Turning to the salmon, it {{is delivered}} fresh within 10 hours. Lemon juice and salt {{are added}}, and then it {{is cooked}} in a steam oven. Next, the skin and bones {{are removed}} by hand, and the fish {{is checked}}. After peas and sauce {{are added}}, the sliced potatoes {{are put on top}}. Finally, the pies {{are wrapped}}, frozen and stored {{before they are sent out}}.
+Turning to the chicken, it {{is delivered}} and can only be stored for two days. Herbs and spices {{are added}}, and then it {{is roasted}} in an oven. Next, it {{is cut}} into pieces by a machine, and the portions {{are weighed}}. After carrots and gravy {{are added}}, the mashed potatoes {{are put on top}}. Finally, the pies {{are sealed}}, frozen and {{put into boxes}} before they are sent out.

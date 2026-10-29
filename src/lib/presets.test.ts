@@ -5,6 +5,8 @@ import type { Entry } from '../types';
 import band6Task1Raw from '../data/band6/task1Topics.txt?raw';
 import band6Task2Raw from '../data/band6/task2Topics.txt?raw';
 
+const band6Figures = import.meta.glob<string>('../data/band6/task1Figures/*.svg', { query: '?raw', import: 'default', eager: true });
+
 describe('parsePresetTopics', () => {
   it('splits headings and bodies', () => {
     const topics = parsePresetTopics('**1. First**\n\nHello world.\n\nSecond para.\n\n**2. Next Topic**\nBye.\n');
@@ -135,8 +137,17 @@ describe('band 6 model answers for the everyone build', () => {
   const task2 = parsePresetTopics(band6Task2Raw);
 
   it('rewrites the same topics under the same titles', () => {
-    expect(task1.map((t) => t.title)).toEqual(getTask1Topics().map((t) => t.title));
     expect(task2.map((t) => t.title)).toEqual(getPresetTopics().map((t) => t.title));
+  });
+
+  it('keeps the same Task 1 chart types, with its own figures', () => {
+    const chartType = (title: string) => title.split('｜')[0];
+    expect(task1.map((t) => chartType(t.title))).toEqual(getTask1Topics().map((t) => chartType(t.title)));
+    for (const t of task1) {
+      const figure = band6Figures[`../data/band6/task1Figures/${t.presetId.slice(TASK1_PREFIX.length)}.svg`];
+      expect(figure?.startsWith('<svg'), t.title).toBe(true);
+      expect(figure, t.title).not.toBe(getTask1Figure(t.presetId));
+    }
   });
 
   it('keeps the Task 1 template and the number-free overview', () => {
@@ -147,7 +158,6 @@ describe('band 6 model answers for the everyone build', () => {
       expect(/\d/.test(paras[1]!), t.title).toBe(false);
       expect(paras[2]!.startsWith('Looking first at'), t.title).toBe(true);
       expect(paras[3]!.startsWith('Turning to'), t.title).toBe(true);
-      expect(getTask1Figure(t.presetId)?.startsWith('<svg'), t.title).toBe(true);
     }
   });
 

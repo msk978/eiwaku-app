@@ -13,15 +13,15 @@ import { lineBreaks, parseMarkedText, parsePresetTopics, TASK1_PREFIX, TOEFL_PRE
 import type { Entry } from '../types';
 import { parseTranslations } from './translation';
 
-const task1Figures = import.meta.glob<string>('../data/task1Figures/*.svg', {
-  query: '?raw',
-  import: 'default',
-  eager: true,
-});
-
-// みんな向けの IELTS 版は、同じ題材・同じ型のまま、バンド6.0〜6.5の書き方にしたモデルアンサーを使う
-// (VITE_TARGET を直接比べ、使わない側の本文がバンドルに入らないようにする)
+// みんな向けの IELTS 版は、同じ型のまま、バンド6.0〜6.5の書き方にしたモデルアンサーを使う。
+// Task 1 は数値・地名などを元の問題から変えたオリジナルの図にする
+// (VITE_TARGET を直接比べ、使わない側の本文と図がバンドルに入らないようにする)
 const BAND6 = import.meta.env.VITE_TARGET === 'everyone';
+
+const task1Figures = BAND6
+  ? import.meta.glob<string>('../data/band6/task1Figures/*.svg', { query: '?raw', import: 'default', eager: true })
+  : import.meta.glob<string>('../data/task1Figures/*.svg', { query: '?raw', import: 'default', eager: true });
+const TASK1_FIGURE_DIR = BAND6 ? '../data/band6/task1Figures' : '../data/task1Figures';
 
 let topics: PresetTopic[] | null = null;
 let translations: Map<string, string[]> | null = null;
@@ -77,7 +77,7 @@ export function getAllPresetTranslations(): Map<string, string[]> {
 /** Task 1 の題材の図(SVG のソース)。図の無い題材なら null */
 export function getTask1Figure(presetId: string | undefined): string | null {
   if (!presetId?.startsWith(TASK1_PREFIX)) return null;
-  return task1Figures[`../data/task1Figures/${presetId.slice(TASK1_PREFIX.length)}.svg`] ?? null;
+  return task1Figures[`${TASK1_FIGURE_DIR}/${presetId.slice(TASK1_PREFIX.length)}.svg`] ?? null;
 }
 
 /** TOEFL の Email の問題文 */
