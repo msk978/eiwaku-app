@@ -133,10 +133,10 @@ describe('TOEFL email topics', () => {
 });
 
 describe('TOEFL prompts to pick on the client build', () => {
-  it('offers the 10 emails and 9 academic discussions', () => {
+  it('offers the 10 emails and 10 academic discussions', () => {
     const [emails, discussions] = getTaskPromptChoices();
     expect(emails?.options).toHaveLength(10);
-    expect(discussions?.options).toHaveLength(9);
+    expect(discussions?.options).toHaveLength(10);
     for (const o of [...emails!.options, ...discussions!.options]) {
       expect(o.label, o.id).toMatch(/^(Email|Discussion) \d+: \S/);
       expect(getTaskPrompt(o.id), o.id).not.toBeNull();
