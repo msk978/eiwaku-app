@@ -2,6 +2,7 @@ import { useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useEntries } from '../../hooks/useEntries';
 import { BackButton } from '../common/BackButton';
+import { FigureAttach } from '../common/FigureAttach';
 import { loadSelectedDeckId } from '../../lib/decks';
 import { HAS_PRESETS } from '../../lib/target';
 
@@ -10,6 +11,7 @@ export function EntryCreateScreen() {
   const { addEntry } = useEntries();
   const [text, setText] = useState('');
   const [title, setTitle] = useState('');
+  const [figure, setFigure] = useState<string | undefined>();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleTextFile = async (file: File) => {
@@ -32,7 +34,7 @@ export function EntryCreateScreen() {
   const handleSave = () => {
     if (!text.trim()) return;
     // 自分専用版では、ホームで開いていたタブに入れる
-    const entry = addEntry(text, title, HAS_PRESETS ? (loadSelectedDeckId() ?? undefined) : undefined);
+    const entry = addEntry(text, title, HAS_PRESETS ? (loadSelectedDeckId() ?? undefined) : undefined, figure);
     navigate(`/entries/${entry.id}/mark`, { replace: true });
   };
 
@@ -60,6 +62,7 @@ export function EntryCreateScreen() {
             color: 'var(--text)',
           }}
         />
+        <FigureAttach figure={figure} onChange={setFigure} />
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <span style={{ fontSize: 13, color: 'var(--text-muted)', fontWeight: 500 }}>英文(100〜300語程度)</span>
           <button

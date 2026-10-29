@@ -1,4 +1,5 @@
 import type { AppData, ExportFileV1 } from '../types';
+import { isFigureDataUrl } from './figureImage';
 
 export function buildExportFile(data: AppData): ExportFileV1 {
   return {
@@ -51,14 +52,15 @@ export function parseImportFile(raw: string): ImportResult {
     return { ok: false, error: { kind: 'invalid-shape' } };
   }
 
-  const entries = d.entries as { id: unknown; tokens: unknown; title?: unknown; presetId?: unknown; glosses?: unknown; pinned?: unknown; excluded?: unknown }[];
+  const entries = d.entries as { id: unknown; tokens: unknown; title?: unknown; presetId?: unknown; glosses?: unknown; pinned?: unknown; excluded?: unknown; figure?: unknown }[];
   for (const e of entries) {
     if (typeof e.id !== 'string' || !Array.isArray(e.tokens)) {
       return { ok: false, error: { kind: 'invalid-shape' } };
     }
     if (
       (e.title !== undefined && typeof e.title !== 'string') ||
-      (e.presetId !== undefined && typeof e.presetId !== 'string')
+      (e.presetId !== undefined && typeof e.presetId !== 'string') ||
+      (e.figure !== undefined && !isFigureDataUrl(e.figure))
     ) {
       return { ok: false, error: { kind: 'invalid-shape' } };
     }

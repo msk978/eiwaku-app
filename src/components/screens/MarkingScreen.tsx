@@ -7,7 +7,7 @@ import { expandToWordRanges } from '../../lib/quizSelection';
 import { MarkingParagraph } from '../common/MarkingParagraph';
 import { BackButton } from '../common/BackButton';
 import { TaskFigure } from '../common/TaskFigure';
-import { getPresetLineBreaks, getTask1Figure, getToeflPrompt } from '../../lib/presetLibrary';
+import { getPresetLineBreaks, entryFigure, getToeflPrompt } from '../../lib/presetLibrary';
 import { TaskPromptCard } from '../common/TaskPromptCard';
 import { HAS_PRESETS } from '../../lib/target';
 
@@ -22,7 +22,7 @@ export function MarkingScreen() {
 
   if (!entry) return null;
 
-  const figure = HAS_PRESETS ? getTask1Figure(entry.presetId) : null;
+  const figure = entryFigure(entry);
   const prompt = HAS_PRESETS ? getToeflPrompt(entry.presetId) : null;
   const markedWordCount = expandToWordRanges(entry.tokens, ranges).length;
 
@@ -43,7 +43,7 @@ export function MarkingScreen() {
           完了
         </button>
       </div>
-      {figure && <TaskFigure svg={figure} />}
+      {figure && <TaskFigure src={figure} />}
       {prompt && <TaskPromptCard prompt={prompt} />}
 
       <div className="screen-body" style={{ flex: 1 }}>

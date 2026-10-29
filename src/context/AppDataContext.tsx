@@ -10,6 +10,7 @@ type Action =
   | { type: 'ADD_ENTRIES'; entries: Entry[]; markings?: MarkingSet[] }
   | { type: 'DELETE_ENTRY'; entryId: string }
   | { type: 'SET_ENTRY_TITLE'; entryId: string; title: string | undefined }
+  | { type: 'SET_ENTRY_FIGURE'; entryId: string; figure: string | undefined }
   | { type: 'SET_MARKING_RANGES'; entryId: string; ranges: MarkingRange[] }
   | { type: 'ADD_SESSION'; session: SessionRecord }
   | { type: 'SET_QUIZ_RATIO'; ratio: number }
@@ -54,6 +55,13 @@ function reducer(state: AppData, action: Action): AppData {
         ...state,
         entries: state.entries.map((e) =>
           e.id === action.entryId ? { ...e, title: action.title } : e,
+        ),
+      };
+    case 'SET_ENTRY_FIGURE':
+      return {
+        ...state,
+        entries: state.entries.map((e) =>
+          e.id === action.entryId ? { ...e, figure: action.figure } : e,
         ),
       };
     case 'SET_MARKING_RANGES': {
@@ -153,6 +161,8 @@ interface AppDataContextValue {
   dispatch: React.Dispatch<Action>;
   /** 個人版の端末間同期の状態(公開版では常に offline) */
   syncStatus: SyncStatus;
+  /** 端末の保存容量が足りず、最後の変更を保存できなかった */
+  saveFailed: boolean;
 }
 
 const AppDataContext = createContext<AppDataContextValue | null>(null);
@@ -161,14 +171,39 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   const [data, dispatch] = useReducer(reducer, undefined, loadData);
 
   const syncStatus = useCloudSync(data, dispatch);
+  const [saveFailed, setSaveFailed] = useState(false);
 
   useEffect(() => {
-    saveData(data);
+    setSaveFailed(!saveData(data));
   }, [data]);
 
-  const value = useMemo(() => ({ data, dispatch, syncStatus }), [data, syncStatus]);
+  const value = useMemo(() => ({ data, dispatch, syncStatus, saveFailed }), [data, syncStatus, saveFailed]);
 
-  return <AppDataContext.Provider value={value}>{children}</AppDataContext.Provider>;
+  return (
+    <AppDataContext.Provider value={value}>
+      {children}
+      {saveFailed && (
+        <div
+          role="alert"
+          style={{
+            position: 'fixed',
+            left: 12,
+            right: 12,
+            bottom: 12,
+            zIndex: 60,
+            background: '#7a2e2e',
+            color: '#fff',
+            borderRadius: 10,
+            padding: '10px 14px',
+            fontSize: 13,
+            lineHeight: 1.5,
+          }}
+        >
+          端末の保存容量が足りず、変更を保存できませんでした。添付した図を外すか、使わない題材を削除してください。
+        </div>
+      )}
+    </AppDataContext.Provider>
+  );
 }
 
 /** 個人版だけ、claude.ai アーティファクトの db と同期する */

@@ -36,10 +36,12 @@ export function loadData(): AppData {
   }
 }
 
-export function saveData(data: AppData): void {
+/** 保存できなかったとき(容量オーバーなど)は false */
+export function saveData(data: AppData): boolean {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    return true;
   } catch {
-    // 保存できない環境(プライベートブラウズなど)では何もしない
+    return false;
   }
 }

@@ -13,6 +13,8 @@ export interface Entry {
   presetId?: string;
   /** 入っているタブ(自分専用版)。無ければ presetId などから決める */
   deckId?: string;
+  /** 自分で添付した図(縮小した画像の data URL)。IELTS Task 1 のグラフなどを上部に固定して表示する */
+  figure?: string;
 }
 
 /** ホームのタブ(自分専用版)。名前は自由に変えられる */

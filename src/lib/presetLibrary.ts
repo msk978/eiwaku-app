@@ -12,6 +12,8 @@ import band6Task1TranslationsRaw from '../data/band6/task1Translations.txt?raw';
 import { lineBreaks, parseMarkedText, parsePresetTopics, TASK1_PREFIX, TOEFL_PREFIX, type PresetTopic } from './presets';
 import type { Entry } from '../types';
 import { parseTranslations } from './translation';
+import { svgDataUrl } from './figureImage';
+import { HAS_PRESETS } from './target';
 
 // みんな向けの IELTS 版は、同じ型のまま、バンド6.0〜6.5の書き方にしたモデルアンサーを使う。
 // Task 1 は数値・地名などを元の問題から変えたオリジナルの図にする
@@ -78,6 +80,13 @@ export function getAllPresetTranslations(): Map<string, string[]> {
 export function getTask1Figure(presetId: string | undefined): string | null {
   if (!presetId?.startsWith(TASK1_PREFIX)) return null;
   return task1Figures[`${TASK1_FIGURE_DIR}/${presetId.slice(TASK1_PREFIX.length)}.svg`] ?? null;
+}
+
+/** 題材の上部に固定する図。自分で添付した図を優先し、無ければ内蔵の Task 1 の図(自分専用版・みんな向け版のみ) */
+export function entryFigure(entry: Entry): string | null {
+  if (entry.figure) return entry.figure;
+  const svg = HAS_PRESETS ? getTask1Figure(entry.presetId) : null;
+  return svg ? svgDataUrl(svg) : null;
 }
 
 /** TOEFL の Email の問題文 */

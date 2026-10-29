@@ -13,7 +13,7 @@ import { BackButton } from '../common/BackButton';
 import { EntrySwitcher } from '../common/EntrySwitcher';
 import { WordToken, type WordTokenVariant } from '../common/WordToken';
 import { HAS_PRESETS } from '../../lib/target';
-import { getAllPresetTopics, getAllPresetTranslations, getPresetLineBreaks, getTask1Figure, getToeflPrompt } from '../../lib/presetLibrary';
+import { getAllPresetTopics, getAllPresetTranslations, getPresetLineBreaks, entryFigure, getToeflPrompt } from '../../lib/presetLibrary';
 import { TaskPromptCard } from '../common/TaskPromptCard';
 import { ParagraphBreak } from '../common/ParagraphBreak';
 import { useDecks } from '../../hooks/useDecks';
@@ -163,7 +163,7 @@ function QuizSession() {
   };
 
   // 現在の出題設定で穴を作れる題材だけを移動先にする
-  const figure = HAS_PRESETS ? getTask1Figure(entry.presetId) : null;
+  const figure = entryFigure(entry);
   const prompt = HAS_PRESETS ? getToeflPrompt(entry.presetId) : null;
   // 自分専用版はどの題材も本文を広く取るため、タイトル行と操作バーを最小限にする
   const compact = HAS_PRESETS;
@@ -221,7 +221,7 @@ function QuizSession() {
         </button>
         )}
       </div>
-      {figure && <TaskFigure svg={figure} />}
+      {figure && <TaskFigure src={figure} />}
       {prompt && <TaskPromptCard prompt={prompt} />}
       <EntrySwitcher {...adjacent} onMove={(e) => moveTo(e.id)} compactTitle={compact ? (entry.title ?? '') : undefined} />
       {entry.title && !compact && (

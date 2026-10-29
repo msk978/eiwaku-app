@@ -17,6 +17,13 @@ describe('buildExportFile / parseImportFile round trip', () => {
     expect(result).toEqual({ ok: true, data: validData });
   });
 
+  it('round-trips an attached figure and rejects one that is not an image', () => {
+    const withFigure = { ...validData, entries: [{ ...validData.entries[0]!, figure: 'data:image/webp;base64,AAAA' }] };
+    expect(parseImportFile(JSON.stringify(buildExportFile(withFigure)))).toEqual({ ok: true, data: withFigure });
+    const bad = { ...validData, entries: [{ ...validData.entries[0]!, figure: 'javascript:alert(1)' }] };
+    expect(parseImportFile(JSON.stringify(buildExportFile(bad)))).toEqual({ ok: false, error: { kind: 'invalid-shape' } });
+  });
+
   it('rejects unparseable JSON', () => {
     const result = parseImportFile('{not json');
     expect(result).toEqual({ ok: false, error: { kind: 'parse' } });

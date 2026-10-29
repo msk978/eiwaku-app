@@ -14,6 +14,7 @@ import { adjacentEntries } from '../../lib/adjacentEntries';
 import { BackButton } from '../common/BackButton';
 import { EntrySwitcher } from '../common/EntrySwitcher';
 import { RatioSlider } from '../common/RatioSlider';
+import { FigureAttach } from '../common/FigureAttach';
 import { PencilIcon } from '../common/icons';
 import { HAS_PRESETS } from '../../lib/target';
 import { useDecks } from '../../hooks/useDecks';
@@ -27,7 +28,7 @@ function StudyDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const entry = useRequireEntry(id);
-  const { entries, setEntryTitle } = useEntries();
+  const { entries, setEntryTitle, setEntryFigure } = useEntries();
   const { dispatch } = useAppData();
   const { ranges } = useMarkings(id ?? '');
   const { sessions, studyCount } = useSessions(id ?? '');
@@ -120,6 +121,12 @@ function StudyDetail() {
             {excludedCount > 0 && <span>除外 {excludedCount}語</span>}
             <span>最終学習: {formatRelativeDate(lastStudiedAt(sessions))}</span>
           </div>
+          {/* 内蔵の題材は図が決まっているので、自分で登録した題材だけ図を添付できる */}
+          {!entry.presetId && (
+            <div style={{ marginTop: 14, paddingTop: 12, borderTop: '1px solid var(--border)' }}>
+              <FigureAttach figure={entry.figure} onChange={(f) => setEntryFigure(entry.id, f)} />
+            </div>
+          )}
         </div>
 
         <div>

@@ -7,7 +7,7 @@ export function useEntries() {
   const { data, dispatch } = useAppData();
 
   const addEntry = useCallback(
-    (rawText: string, title?: string, deckId?: string): Entry => {
+    (rawText: string, title?: string, deckId?: string, figure?: string): Entry => {
       const trimmedTitle = title?.trim();
       const entry: Entry = {
         id: crypto.randomUUID(),
@@ -15,6 +15,7 @@ export function useEntries() {
         tokens: tokenize(rawText),
         title: trimmedTitle ? trimmedTitle : undefined,
         deckId,
+        figure,
       };
       dispatch({ type: 'ADD_ENTRY', entry });
       return entry;
@@ -26,6 +27,13 @@ export function useEntries() {
     (entryId: string, title: string) => {
       const trimmed = title.trim();
       dispatch({ type: 'SET_ENTRY_TITLE', entryId, title: trimmed ? trimmed : undefined });
+    },
+    [dispatch],
+  );
+
+  const setEntryFigure = useCallback(
+    (entryId: string, figure: string | undefined) => {
+      dispatch({ type: 'SET_ENTRY_FIGURE', entryId, figure });
     },
     [dispatch],
   );
@@ -42,5 +50,5 @@ export function useEntries() {
     [data.entries],
   );
 
-  return { entries: data.entries, addEntry, deleteEntry, getEntry, setEntryTitle };
+  return { entries: data.entries, addEntry, deleteEntry, getEntry, setEntryTitle, setEntryFigure };
 }

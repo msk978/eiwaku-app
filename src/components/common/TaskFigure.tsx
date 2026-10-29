@@ -1,18 +1,17 @@
 import { useState } from 'react';
 
 interface TaskFigureProps {
-  /** SVG のソース */
-  svg: string;
+  /** 図の画像(内蔵の図は SVG、自分で添付した図は縮小した画像の data URL) */
+  src: string;
 }
 
 /**
- * IELTS Task 1 の図。画面の上部に固定し、本文だけを下でスクロールさせる。
+ * IELTS Task 1 の図(内蔵の図、または自分で添付した図)。画面の上部に固定し、本文だけを下でスクロールさせる。
  * タップで全画面に拡大、右上の「たたむ」で本文を広く使える。
  */
-export function TaskFigure({ svg }: TaskFigureProps) {
+export function TaskFigure({ src }: TaskFigureProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [zoomed, setZoomed] = useState(false);
-  const src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
 
   return (
     <>
