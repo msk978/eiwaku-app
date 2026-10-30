@@ -13,7 +13,7 @@ import { BackButton } from '../common/BackButton';
 import { EntrySwitcher } from '../common/EntrySwitcher';
 import { WordToken, type WordTokenVariant } from '../common/WordToken';
 import { HAS_PRESETS } from '../../lib/target';
-import { getAllPresetTopics, getAllPresetTranslations, getPresetLineBreaks, entryFigure, entryPrompt } from '../../lib/presetLibrary';
+import { getAllPresetTopics, getAllPresetTranslations, entryLineBreaks, entryFigure, entryPrompt, skipsTemplates } from '../../lib/presetLibrary';
 import { TaskPromptCard } from '../common/TaskPromptCard';
 import { ParagraphBreak } from '../common/ParagraphBreak';
 import { useDecks } from '../../hooks/useDecks';
@@ -45,7 +45,7 @@ function QuizSession() {
           blankCandidates(entry.tokens, ranges, quizMode, settings.quizRatio, {
             pinned: entry.pinned,
             excluded: entry.excluded,
-            skipTemplates: HAS_PRESETS,
+            skipTemplates: HAS_PRESETS && skipsTemplates(entry),
           }),
           entry.pinned ?? [],
           settings.quizRatio,
@@ -77,7 +77,7 @@ function QuizSession() {
 
   if (!entry || blanks.length === 0) return null;
 
-  const breaks = HAS_PRESETS ? getPresetLineBreaks(entry) : new Map<number, boolean>();
+  const breaks = entryLineBreaks(entry);
   const pinned = new Set(entry.pinned ?? []);
   const excluded = new Set(entry.excluded ?? []);
   const pieces = buildQuizPieces(entry.tokens, blanks);
@@ -176,7 +176,7 @@ function QuizSession() {
         blankCandidates(e.tokens, entryRanges, quizMode, settings.quizRatio, {
           pinned: pinnedOf,
           excluded: e.excluded,
-          skipTemplates: HAS_PRESETS,
+          skipTemplates: HAS_PRESETS && skipsTemplates(e),
         }),
         pinnedOf,
         settings.quizRatio,

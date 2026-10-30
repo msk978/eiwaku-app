@@ -11,8 +11,20 @@ import band6Task2Raw from '../data/band6/task2Topics.txt?raw';
 import band6Task2TranslationsRaw from '../data/band6/task2Translations.txt?raw';
 import band6Task1Raw from '../data/band6/task1Topics.txt?raw';
 import band6Task1TranslationsRaw from '../data/band6/task1Translations.txt?raw';
-import { lineBreaks, parseMarkedText, parsePresetTopics, TASK1_PREFIX, TOEFL_PREFIX, type PresetTopic } from './presets';
-import type { Entry } from '../types';
+import chunkRaw from '../data/chunkTopics.txt?raw';
+import chunkTranslationsRaw from '../data/chunkTranslations.txt?raw';
+import idiomaticRaw from '../data/idiomatic300Topics.txt?raw';
+import {
+  CHUNK_PREFIX,
+  IDIOMATIC_PREFIX,
+  lineBreaks,
+  parseMarkedText,
+  parsePresetTopics,
+  TASK1_PREFIX,
+  TOEFL_PREFIX,
+  type PresetTopic,
+} from './presets';
+import type { Entry, MarkingRange } from '../types';
 import { parseTranslations } from './translation';
 import { svgDataUrl } from './figureImage';
 import { HAS_PRESETS } from './target';
@@ -36,6 +48,9 @@ let toeflTranslations: Map<string, string[]> | null = null;
 let toeflPrompts: Map<string, TaskPrompt> | null = null;
 let toeflDiscussions: Map<string, TaskPrompt> | null = null;
 let task2Prompts: Map<string, TaskPrompt> | null = null;
+let chunkTopics: PresetTopic[] | null = null;
+let chunkTranslations: Map<string, string[]> | null = null;
+let idiomaticTopics: PresetTopic[] | null = null;
 
 /** 個人版だけで使う内蔵の題材(公開版のバンドルに入らないよう、呼ばれたときに読む) */
 export function getPresetTopics(): PresetTopic[] {
@@ -71,13 +86,43 @@ export function getToeflTranslations(): Map<string, string[]> {
   return toeflTranslations;
 }
 
-/** 内蔵の題材すべて(IELTS Task 2・Task 1・TOEFL)と和訳 */
+/** チャンク大全の1日分(17ブロック。21日で1周)。みんな向けの IELTS 版には入れない */
+export function getChunkTopics(): PresetTopic[] {
+  chunkTopics ??= BAND6 ? [] : parsePresetTopics(chunkRaw, CHUNK_PREFIX);
+  return chunkTopics;
+}
+
+export function getChunkTranslations(): Map<string, string[]> {
+  chunkTranslations ??= BAND6 ? new Map() : parseTranslations(chunkTranslationsRaw, CHUNK_PREFIX);
+  return chunkTranslations;
+}
+
+/** Idiomatic 300 の1日分(10文。全30日)。和訳は無い。みんな向けの IELTS 版には入れない */
+export function getIdiomaticTopics(): PresetTopic[] {
+  idiomaticTopics ??= BAND6 ? [] : parsePresetTopics(idiomaticRaw, IDIOMATIC_PREFIX);
+  return idiomaticTopics;
+}
+
+/** 内蔵の題材すべて(IELTS Task 2・Task 1・TOEFL・チャンク大全・Idiomatic 300)と和訳 */
 export function getAllPresetTopics(): PresetTopic[] {
-  return [...getPresetTopics(), ...getTask1Topics(), ...getToeflTopics()];
+  return [...getPresetTopics(), ...getTask1Topics(), ...getToeflTopics(), ...getChunkTopics(), ...getIdiomaticTopics()];
 }
 
 export function getAllPresetTranslations(): Map<string, string[]> {
-  return new Map([...getPresetTranslations(), ...getTask1Translations(), ...getToeflTranslations()]);
+  return new Map([
+    ...getPresetTranslations(),
+    ...getTask1Translations(),
+    ...getToeflTranslations(),
+    ...getChunkTranslations(),
+  ]);
+}
+
+/**
+ * エッセイの型(For instance・However など)と数値を穴にしないかどうか。
+ * チャンク大全と Idiomatic 300 は、そうした表現そのものが覚える対象なので外さない
+ */
+export function skipsTemplates(entry: Entry): boolean {
+  return !(entry.presetId?.startsWith(CHUNK_PREFIX) || entry.presetId?.startsWith(IDIOMATIC_PREFIX));
 }
 
 /** Task 1 の題材の図(SVG のソース)。図の無い題材なら null */
@@ -197,4 +242,21 @@ export function getPresetLineBreaks(entry: Entry): Map<number, boolean> {
   if (!topic) return new Map();
   const total = parseMarkedText(topic.text).tokens.length;
   return total === entry.tokens.length ? lineBreaks(topic.text) : new Map();
+}
+
+/** 英文の改行位置。本文を編集した(または改行つきで登録した)英文は保存した位置、それ以外は内蔵題材の本文から */
+export function entryLineBreaks(entry: Entry): Map<number, boolean> {
+  if (entry.breaks) return new Map(entry.breaks);
+  return HAS_PRESETS ? getPresetLineBreaks(entry) : new Map();
+}
+
+/** 内蔵題材の元の本文とマーキングに戻した英文(固定・除外・和訳の修正は消す)。元の題材が無ければ null */
+export function restoredPresetEntry(entry: Entry): { entry: Entry; ranges: MarkingRange[] } | null {
+  const topic = entry.presetId ? getAllPresetTopics().find((t) => t.presetId === entry.presetId) : undefined;
+  if (!topic) return null;
+  const { tokens, ranges } = parseMarkedText(topic.text);
+  return {
+    entry: { ...entry, tokens, pinned: undefined, excluded: undefined, glosses: undefined, breaks: undefined, edited: undefined },
+    ranges,
+  };
 }

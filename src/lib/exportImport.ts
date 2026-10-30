@@ -52,7 +52,7 @@ export function parseImportFile(raw: string): ImportResult {
     return { ok: false, error: { kind: 'invalid-shape' } };
   }
 
-  const entries = d.entries as { id: unknown; tokens: unknown; title?: unknown; presetId?: unknown; glosses?: unknown; pinned?: unknown; excluded?: unknown; figure?: unknown; promptId?: unknown }[];
+  const entries = d.entries as { id: unknown; tokens: unknown; title?: unknown; presetId?: unknown; glosses?: unknown; pinned?: unknown; excluded?: unknown; figure?: unknown; promptId?: unknown; breaks?: unknown; edited?: unknown }[];
   for (const e of entries) {
     if (typeof e.id !== 'string' || !Array.isArray(e.tokens)) {
       return { ok: false, error: { kind: 'invalid-shape' } };
@@ -70,6 +70,16 @@ export function parseImportFile(raw: string): ImportResult {
       (typeof e.glosses !== 'object' ||
         e.glosses === null ||
         Object.values(e.glosses).some((g) => typeof g !== 'string'))
+    ) {
+      return { ok: false, error: { kind: 'invalid-shape' } };
+    }
+    if (
+      (e.edited !== undefined && typeof e.edited !== 'boolean') ||
+      (e.breaks !== undefined &&
+        (!Array.isArray(e.breaks) ||
+          e.breaks.some(
+            (b) => !Array.isArray(b) || typeof b[0] !== 'number' || typeof b[1] !== 'boolean' || b[0] < 0 || b[0] >= (e.tokens as unknown[]).length,
+          )))
     ) {
       return { ok: false, error: { kind: 'invalid-shape' } };
     }

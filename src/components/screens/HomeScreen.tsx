@@ -5,9 +5,18 @@ import { useAppData } from '../../context/AppDataContext';
 import { joinTokens } from '../../lib/joinTokens';
 import { formatRelativeDate } from '../../lib/relativeDate';
 import { filterAndSortEntries, type SortMode } from '../../lib/homeListView';
-import { getPresetTopics, getTask1Topics, getToeflTopics } from '../../lib/presetLibrary';
+import { getChunkTopics, getIdiomaticTopics, getPresetTopics, getTask1Topics, getToeflTopics } from '../../lib/presetLibrary';
 import { presetEntriesToAdd, presetEntriesToRefresh, type PresetTopic } from '../../lib/presets';
-import { deckIdOf, loadSelectedDeckId, saveSelectedDeckId, TASK1_DECK_ID, TASK2_DECK_ID, TOEFL_DECK_ID } from '../../lib/decks';
+import {
+  CHUNK_DECK_ID,
+  deckIdOf,
+  IDIOMATIC_DECK_ID,
+  loadSelectedDeckId,
+  saveSelectedDeckId,
+  TASK1_DECK_ID,
+  TASK2_DECK_ID,
+  TOEFL_DECK_ID,
+} from '../../lib/decks';
 import { useDecks } from '../../hooks/useDecks';
 import type { Deck } from '../../types';
 import { HAS_PRESETS, IS_EVERYONE, IS_PERSONAL } from '../../lib/target';
@@ -313,6 +322,16 @@ function libraryFor(deckId: string): Library | null {
     return {
       topics: getToeflTopics(),
       description: (n) => `問題文つきのメール ${n}本を追加できます(使える表現はマーキング済み)`,
+    };
+  if (deckId === CHUNK_DECK_ID)
+    return {
+      topics: getChunkTopics(),
+      description: (n) => `${n}日分(1日17ブロック・${n}日で1周)を追加できます(イディオムと句動詞はマーキング済み・全文和訳つき)`,
+    };
+  if (deckId === IDIOMATIC_DECK_ID)
+    return {
+      topics: getIdiomaticTopics(),
+      description: (n) => `${n}日分(1日10文)を追加できます(言い回し・コロケーションはマーキング済み)`,
     };
   return null;
 }

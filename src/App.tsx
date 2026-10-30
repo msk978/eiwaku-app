@@ -3,6 +3,7 @@ import { AppDataProvider } from './context/AppDataContext';
 import { HomeScreen } from './components/screens/HomeScreen';
 import { EntryCreateScreen } from './components/screens/EntryCreateScreen';
 import { MarkingScreen } from './components/screens/MarkingScreen';
+import { EntryEditScreen } from './components/screens/EntryEditScreen';
 import { StudyDetailScreen } from './components/screens/StudyDetailScreen';
 import { QuizScreen } from './components/screens/QuizScreen';
 import { SettingsScreen } from './components/screens/SettingsScreen';
@@ -20,6 +21,7 @@ export function App() {
           <Route path="/new" element={<EntryCreateScreen />} />
           <Route path="/entries/:id" element={<StudyDetailScreen />} />
           <Route path="/entries/:id/mark" element={<MarkingScreen />} />
+          <Route path="/entries/:id/edit" element={<EntryEditScreen />} />
           <Route path="/entries/:id/quiz" element={<QuizScreen />} />
           <Route path="/settings" element={<SettingsScreen />} />
         </Routes>

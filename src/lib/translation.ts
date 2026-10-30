@@ -1,4 +1,5 @@
 import { parseMarkedText, type PresetTopic } from './presets';
+import { alignTokens } from './tokenDiff';
 import type { Entry } from '../types';
 
 /**
@@ -83,21 +84,27 @@ export function buildEntryTranslation(
   const lines = translations.get(entry.presetId);
   if (!topic || !lines) return null;
   const { tokens, expressions } = parseMarkedText(topic.text);
-  // 追加後に本文を書き換えていたら対応づけない
-  if (tokens.length !== entry.tokens.length || tokens.some((t, i) => t !== entry.tokens[i])) return null;
-
   const sentenceOf = sentenceIndices(tokens);
-  const sentenceCount = sentenceOf.length ? sentenceOf[sentenceOf.length - 1]! + 1 : 0;
-  if (sentenceCount !== lines.length) return null;
+  const entrySentenceOf = sentenceIndices(entry.tokens);
+  // 追加後に本文を書き換えていても、文の数が同じなら変えていない語で対応づける
+  const sentenceCount = (of: number[]) => (of.length ? of[of.length - 1]! + 1 : 0);
+  if (sentenceCount(sentenceOf) !== lines.length || sentenceCount(entrySentenceOf) !== lines.length) return null;
+  const same = tokens.length === entry.tokens.length && tokens.every((t, i) => t === entry.tokens[i]);
+  const moved = same ? null : alignTokens(tokens, entry.tokens);
 
   const sentenceEnds: number[] = [];
-  sentenceOf.forEach((s, i) => (sentenceEnds[s] = i));
+  entrySentenceOf.forEach((s, i) => (sentenceEnds[s] = i));
 
   const exprOfToken = new Map<number, number>();
-  expressions.forEach((indices, e) => indices.forEach((i) => exprOfToken.set(i, e)));
+  expressions.forEach((indices, e) =>
+    indices.forEach((i) => {
+      const at = moved ? moved.get(i) : i;
+      if (at !== undefined) exprOfToken.set(at, e);
+    }),
+  );
 
   const sentences = lines.map((line, s) => {
-    // この文に属する表現の、本文全体での番号を先頭から順に並べる
+    // この文に属する表現の、本文全体での番号を先頭から順に並べる(元の題材の文で数える)
     const local = expressions.flatMap((indices, e) => (sentenceOf[indices[0]!] === s ? [e] : []));
     return parseJpLine(line).map((seg) =>
       seg.expr === undefined ? seg : { text: seg.text, expr: local[seg.expr] },

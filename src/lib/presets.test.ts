@@ -1,6 +1,18 @@
 import { describe, expect, it } from 'vitest';
 import { lineBreaks, parseMarkedText, parsePresetTopics, presetEntriesToAdd, presetEntriesToRefresh, TASK1_PREFIX } from './presets';
-import { getPresetTopics, getTask1Figure, getTask1Topics, getTask2Prompt, getTaskPrompt, getTaskPromptChoices, getToeflPrompt, getToeflTopics } from './presetLibrary';
+import {
+  getChunkTopics,
+  getIdiomaticTopics,
+  getPresetTopics,
+  getTask1Figure,
+  getTask1Topics,
+  getTask2Prompt,
+  getTaskPrompt,
+  getTaskPromptChoices,
+  getToeflPrompt,
+  getToeflTopics,
+  skipsTemplates,
+} from './presetLibrary';
 import type { Entry } from '../types';
 import band6Task1Raw from '../data/band6/task1Topics.txt?raw';
 import band6Task2Raw from '../data/band6/task2Topics.txt?raw';
@@ -132,6 +144,50 @@ describe('TOEFL email topics', () => {
       expect(t.text, t.title).toMatch(/^Dear .+,\n\nHello, I hope you are doing well\. I am writing /);
       expect(t.text.endsWith('Best regards,\nMisaki'), t.title).toBe(true);
     }
+  });
+});
+
+/** 代名詞は、イディオムの中にあっても穴にしない(give them an edge in の them など) */
+const PRONOUNS = new Set(
+  'i me my mine myself you your yours yourself he him his himself she her hers herself it its itself we us our ours ourselves they them their theirs themselves someone something'.split(' '),
+);
+
+function markedWords(text: string): string[] {
+  const { tokens, ranges } = parseMarkedText(text);
+  return ranges.map((r) => tokens[r.start]!.toLowerCase());
+}
+
+describe('Chunk topics', () => {
+  it('bundles 21 days of 17 blocks each, so one lap takes three weeks', () => {
+    const topics = getChunkTopics();
+    expect(topics).toHaveLength(21);
+    topics.forEach((t, i) => {
+      expect(t.title).toBe(`${i + 1}. Day ${i + 1}`);
+      expect(t.text.split(/\n\s*\n/), t.title).toHaveLength(17);
+    });
+  });
+
+  it('never marks a pronoun', () => {
+    for (const t of getChunkTopics()) expect(markedWords(t.text).filter((w) => PRONOUNS.has(w)), t.title).toEqual([]);
+  });
+});
+
+describe('Idiomatic 300 topics', () => {
+  it('bundles 30 days of 10 sentences each', () => {
+    const topics = getIdiomaticTopics();
+    expect(topics).toHaveLength(30);
+    for (const t of topics) expect(t.text.split(/\n\s*\n/), t.title).toHaveLength(10);
+  });
+
+  it('never marks a pronoun', () => {
+    for (const t of getIdiomaticTopics()) expect(markedWords(t.text).filter((w) => PRONOUNS.has(w)), t.title).toEqual([]);
+  });
+
+  it('keeps For instance and the numbers blankable, unlike the essay templates', () => {
+    const [entry] = presetEntriesToAdd(getIdiomaticTopics().slice(0, 1), []).entries;
+    expect(skipsTemplates(entry!)).toBe(false);
+    const [essay] = presetEntriesToAdd(getPresetTopics().slice(0, 1), []).entries;
+    expect(skipsTemplates(essay!)).toBe(true);
   });
 });
 

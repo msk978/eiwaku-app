@@ -7,9 +7,8 @@ import { expandToWordRanges } from '../../lib/quizSelection';
 import { MarkingParagraph } from '../common/MarkingParagraph';
 import { BackButton } from '../common/BackButton';
 import { TaskFigure } from '../common/TaskFigure';
-import { getPresetLineBreaks, entryFigure, entryPrompt } from '../../lib/presetLibrary';
+import { entryLineBreaks, entryFigure, entryPrompt } from '../../lib/presetLibrary';
 import { TaskPromptCard } from '../common/TaskPromptCard';
-import { HAS_PRESETS } from '../../lib/target';
 
 export function MarkingScreen() {
   const { id } = useParams<{ id: string }>();
@@ -52,7 +51,7 @@ export function MarkingScreen() {
           ranges={ranges}
           activeIndex={activeIndex}
           onTap={onTap}
-          lineBreaks={HAS_PRESETS ? getPresetLineBreaks(entry) : undefined}
+          lineBreaks={entryLineBreaks(entry)}
         />
       </div>
 

@@ -15,6 +15,11 @@ describe('deckIdOf', () => {
     expect(deckIdOf(entry({}), DEFAULT_DECKS)).toBe('ielts-task2');
   });
 
+  it('puts untagged Chunk and Idiomatic 300 presets into their own tabs', () => {
+    expect(deckIdOf(entry({ presetId: 'chunk-4' }), DEFAULT_DECKS)).toBe('chunk-taizen');
+    expect(deckIdOf(entry({ presetId: 'idiomatic300-12' }), DEFAULT_DECKS)).toBe('idiomatic-300');
+  });
+
   it('falls back to the first tab when the stored tab was deleted', () => {
     expect(deckIdOf(entry({ deckId: 'gone' }), DEFAULT_DECKS)).toBe('ielts-task2');
   });
@@ -27,11 +32,13 @@ describe('withNewDefaultDecks', () => {
       'ielts-task2',
       'ielts-task1',
       'toefl-email',
+      'chunk-taizen',
+      'idiomatic-300',
     ]);
   });
 
   it('does not bring back a default tab the user deleted', () => {
     const saved = [{ id: 'ielts-task2', name: 'Essay' }];
-    expect(withNewDefaultDecks(saved, ['ielts-task2', 'ielts-task1', 'toefl-email'])).toBe(saved);
+    expect(withNewDefaultDecks(saved, ['ielts-task2', 'ielts-task1', 'toefl-email', 'chunk-taizen', 'idiomatic-300'])).toBe(saved);
   });
 });

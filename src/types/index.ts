@@ -17,6 +17,10 @@ export interface Entry {
   figure?: string;
   /** 自分で選んだ TOEFL の問題(公開版)。問題文を上部に固定して表示する */
   promptId?: string;
+  /** 本文の改行位置([行の最後のトークンのインデックス, 段落の切れ目か])。無ければ内蔵題材の本文から割り出す */
+  breaks?: [number, boolean][];
+  /** 本文を自分で書き換えた。内蔵題材の更新で上書きしない */
+  edited?: boolean;
 }
 
 /** ホームのタブ(自分専用版)。名前は自由に変えられる */

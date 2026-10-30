@@ -133,7 +133,7 @@ export function EntryCreateScreen() {
           </div>
         )}
         <div style={{ background: 'var(--accent-soft)', borderRadius: 10, padding: '12px 14px', fontSize: 13, color: '#33506e', lineHeight: 1.5 }}>
-          保存すると本文は編集できなくなります。誤字があれば削除して登録し直してください。保存後は穴埋めにする単語の選択に進みます(学習開始画面で「全単語からランダム」を選べば、選択なしでも学習できます)。
+          本文は保存後も「学習を始める」画面の「本文を編集」から直せます。保存後は穴埋めにする単語の選択に進みます(学習開始画面で「全単語からランダム」を選べば、選択なしでも学習できます)。
         </div>
         <button className="primary-btn" style={{ marginTop: 'auto' }} disabled={!text.trim()} onClick={handleSave}>
           保存してマーキングへ

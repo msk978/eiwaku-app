@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { getAllPresetTopics, getAllPresetTranslations } from './presetLibrary';
-import { parseMarkedText, parsePresetTopics, presetEntriesToAdd, TASK1_PREFIX, type PresetTopic } from './presets';
+import { IDIOMATIC_PREFIX, parseMarkedText, parsePresetTopics, presetEntriesToAdd, TASK1_PREFIX, type PresetTopic } from './presets';
 import { buildEntryTranslation, parseJpLine, parseTranslations, sentenceIndices } from './translation';
 import band6Task1Raw from '../data/band6/task1Topics.txt?raw';
 import band6Task1TranslationsRaw from '../data/band6/task1Translations.txt?raw';
@@ -47,7 +47,8 @@ describe('band 6 model answers for the everyone build', () => {
 });
 
 describe('bundled translations', () => {
-  const topics = getAllPresetTopics();
+  // Idiomatic 300 だけは和訳が無い
+  const topics = getAllPresetTopics().filter((t) => !t.presetId.startsWith(IDIOMATIC_PREFIX));
   const translations = getAllPresetTranslations();
 
   it('has one line per English sentence and matches the expressions sentence by sentence', () => {
@@ -65,9 +66,20 @@ describe('bundled translations', () => {
     }
   });
 
-  it('gives up when the entry text no longer matches the bundled text', () => {
+  it('keeps the translation after a word is edited, following the unchanged words', () => {
     const { entries } = presetEntriesToAdd(topics.slice(0, 1), []);
-    const edited = { ...entries[0]!, tokens: entries[0]!.tokens.slice(1) };
+    const entry = entries[0]!;
+    const before = buildEntryTranslation(entry, topics, translations)!;
+    // 先頭の語を2語に書き換えると、後ろの語の位置が1つずつずれる
+    const edited = { ...entry, tokens: ['Well', 'now', ...entry.tokens.slice(1)] };
+    const after = buildEntryTranslation(edited, topics, translations)!;
+    expect(after.sentences).toEqual(before.sentences);
+    for (const [i, e] of before.exprOfToken) if (i > 0) expect(after.exprOfToken.get(i + 1)).toBe(e);
+  });
+
+  it('gives up when the number of sentences changes', () => {
+    const { entries } = presetEntriesToAdd(topics.slice(0, 1), []);
+    const edited = { ...entries[0]!, tokens: [...entries[0]!.tokens, 'One', 'more', '.'] };
     expect(buildEntryTranslation(edited, topics, translations)).toBeNull();
   });
 });

@@ -18,6 +18,7 @@ import { FigureAttach } from '../common/FigureAttach';
 import { TaskPromptPicker } from '../common/TaskPromptPicker';
 import { PencilIcon } from '../common/icons';
 import { HAS_PRESETS } from '../../lib/target';
+import { skipsTemplates } from '../../lib/presetLibrary';
 import { useDecks } from '../../hooks/useDecks';
 
 export function StudyDetailScreen() {
@@ -54,7 +55,7 @@ function StudyDetail() {
   const candidates = blankCandidates(entry.tokens, ranges, quizMode, settings.quizRatio, {
     pinned: entry.pinned,
     excluded: entry.excluded,
-    skipTemplates: HAS_PRESETS,
+    skipTemplates: HAS_PRESETS && skipsTemplates(entry),
   });
   const markedWordCount = quizCandidates(entry.tokens, ranges, 'marked').length;
   const pinnedCount = entry.pinned?.length ?? 0;
@@ -192,6 +193,9 @@ function StudyDetail() {
         )}
         <button className="secondary-btn" onClick={() => navigate(`/entries/${id}/mark`)}>
           {ranges.length === 0 ? 'マーキングへ' : 'マーキングを編集'}
+        </button>
+        <button className="secondary-btn" onClick={() => navigate(`/entries/${id}/edit`)}>
+          本文を編集
         </button>
         {excludedCount > 0 && (
           <button className="secondary-btn" onClick={() => dispatch({ type: 'CLEAR_EXCLUDED', entryId: entry.id })}>

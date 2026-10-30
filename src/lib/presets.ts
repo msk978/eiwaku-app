@@ -15,6 +15,12 @@ export const TASK1_PREFIX = 'task1-';
 /** TOEFL Writing(Email)の題材の presetId の接頭辞 */
 export const TOEFL_PREFIX = 'toefl-';
 
+/** チャンク大全(イディオム700・句動詞300を組み合わせた例文。1日分ずつ)の presetId の接頭辞 */
+export const CHUNK_PREFIX = 'chunk-';
+
+/** Idiomatic 300(1日10文)の presetId の接頭辞 */
+export const IDIOMATIC_PREFIX = 'idiomatic300-';
+
 const HEADING_RE = /^\*\*(\d+)\.\s*(.+?)\*\*\s*$/;
 
 /** 「**番号. タイトル**」の見出しと本文が並んだテキストを題材の一覧にする */
@@ -132,6 +138,8 @@ export function presetEntriesToRefresh(
   const entries: Entry[] = [];
   const markings: MarkingSet[] = [];
   for (const e of existing) {
+    // 自分で本文を書き換えた英文は、そちらを優先して差し替えない
+    if (e.edited) continue;
     const topic = e.presetId ? topics.find((t) => t.presetId === e.presetId) : undefined;
     if (!topic) continue;
     const { tokens, ranges } = parseMarkedText(topic.text);

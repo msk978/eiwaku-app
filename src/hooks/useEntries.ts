@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import { useAppData } from '../context/AppDataContext';
 import { tokenize } from '../lib/tokenize';
+import { lineBreaks } from '../lib/presets';
 import type { Entry } from '../types';
 
 export function useEntries() {
@@ -9,6 +10,8 @@ export function useEntries() {
   const addEntry = useCallback(
     (rawText: string, title?: string, deckId?: string, figure?: string, promptId?: string): Entry => {
       const trimmedTitle = title?.trim();
+      // 貼り付けた本文の改行・段落はそのまま表示する
+      const breaks = [...lineBreaks(rawText.trim())];
       const entry: Entry = {
         id: crypto.randomUUID(),
         createdAt: new Date().toISOString(),
@@ -17,6 +20,7 @@ export function useEntries() {
         deckId,
         figure,
         promptId,
+        breaks: breaks.length ? breaks : undefined,
       };
       dispatch({ type: 'ADD_ENTRY', entry });
       return entry;
