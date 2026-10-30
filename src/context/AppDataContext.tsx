@@ -8,6 +8,7 @@ import { IS_PERSONAL } from '../lib/target';
 type Action =
   | { type: 'ADD_ENTRY'; entry: Entry }
   | { type: 'ADD_ENTRIES'; entries: Entry[]; markings?: MarkingSet[] }
+  | { type: 'REPLACE_ENTRIES'; entries: Entry[]; markings: MarkingSet[] }
   | { type: 'DELETE_ENTRY'; entryId: string }
   | { type: 'SET_ENTRY_TITLE'; entryId: string; title: string | undefined }
   | { type: 'SET_ENTRY_FIGURE'; entryId: string; figure: string | undefined }
@@ -44,6 +45,15 @@ function reducer(state: AppData, action: Action): AppData {
           ),
         ],
       };
+    case 'REPLACE_ENTRIES': {
+      const replaced = new Map(action.entries.map((e) => [e.id, e]));
+      const ranges = new Map(action.markings.map((m) => [m.entryId, m.ranges]));
+      return {
+        ...state,
+        entries: state.entries.map((e) => replaced.get(e.id) ?? e),
+        markings: state.markings.map((m) => (ranges.has(m.entryId) ? { ...m, ranges: ranges.get(m.entryId)! } : m)),
+      };
+    }
     case 'DELETE_ENTRY':
       return {
         ...state,

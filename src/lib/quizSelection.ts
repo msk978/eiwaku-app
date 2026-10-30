@@ -134,6 +134,11 @@ const TEMPLATE_PHRASES = [
   'for instance',
   'secondly',
   'as can be seen in',
+  // Task 2 の賛成反対・メリットデメリットの型
+  'admittedly some people argue that',
+  'however i firmly believe that',
+  'one major advantage of',
+  'on the other hand there are some serious drawbacks to',
   // Task 1 の型
   'overall it is clear that',
   'looking first at',

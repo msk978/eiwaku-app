@@ -120,3 +120,24 @@ export function presetEntriesToAdd(
     });
   return { entries, markings };
 }
+
+/**
+ * 内蔵題材の本文を書き換えたとき、追加済みの英文を新しい本文に差し替える。
+ * トークンの位置が変わるので、固定・除外・和訳の修正は消し、マーキングも題材の {{ }} に戻す
+ */
+export function presetEntriesToRefresh(
+  topics: PresetTopic[],
+  existing: Entry[],
+): { entries: Entry[]; markings: MarkingSet[] } {
+  const entries: Entry[] = [];
+  const markings: MarkingSet[] = [];
+  for (const e of existing) {
+    const topic = e.presetId ? topics.find((t) => t.presetId === e.presetId) : undefined;
+    if (!topic) continue;
+    const { tokens, ranges } = parseMarkedText(topic.text);
+    if (tokens.length === e.tokens.length && tokens.every((t, i) => t === e.tokens[i])) continue;
+    entries.push({ ...e, tokens, pinned: undefined, excluded: undefined, glosses: undefined });
+    markings.push({ entryId: e.id, ranges });
+  }
+  return { entries, markings };
+}

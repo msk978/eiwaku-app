@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { lineBreaks, parseMarkedText, parsePresetTopics, presetEntriesToAdd, TASK1_PREFIX } from './presets';
-import { getPresetTopics, getTask1Figure, getTask1Topics, getTaskPrompt, getTaskPromptChoices, getToeflPrompt, getToeflTopics } from './presetLibrary';
+import { lineBreaks, parseMarkedText, parsePresetTopics, presetEntriesToAdd, presetEntriesToRefresh, TASK1_PREFIX } from './presets';
+import { getPresetTopics, getTask1Figure, getTask1Topics, getTask2Prompt, getTaskPrompt, getTaskPromptChoices, getToeflPrompt, getToeflTopics } from './presetLibrary';
 import type { Entry } from '../types';
 import band6Task1Raw from '../data/band6/task1Topics.txt?raw';
 import band6Task2Raw from '../data/band6/task2Topics.txt?raw';
@@ -21,7 +21,10 @@ describe('parsePresetTopics', () => {
     expect(topics).toHaveLength(29);
     expect(topics[0]!.title).toBe('1. Higher Education vs. Vocational Training');
     expect(topics[28]!.title).toBe('29. Pressure on Young People to Succeed');
-    expect(topics.every((t) => t.text.startsWith('Some might claim'))).toBe(true);
+    // 両論＋意見・賛成反対・メリットデメリットの3つの型のどれかで始まる
+    const openers = ['Some might claim that', 'Admittedly, some people argue that', 'One major advantage of'];
+    expect(topics.every((t) => openers.some((o) => t.text.startsWith(o)))).toBe(true);
+    expect(openers.map((o) => topics.filter((t) => t.text.startsWith(o)).length)).toEqual([10, 9, 10]);
   });
 
   it('marks idiomatic expressions in every topic, with balanced braces', () => {
@@ -192,6 +195,39 @@ describe('band 6 model answers for the everyone build', () => {
     for (const t of task2) {
       expect(t.text, t.title).toMatch(/^Some might claim that .+ A good example of this can be observed in Japan/s);
       expect(t.text, t.title).toMatch(/\n\nHowever, (others assert that|opponents) .+ Firstly, .+ For instance, .+ Secondly, /s);
+    }
+  });
+});
+
+describe('presetEntriesToRefresh', () => {
+  it('replaces only entries whose preset text changed and resets index-based settings', () => {
+    const topics = [
+      { presetId: 'topic-1', title: '1. A', text: 'One major advantage of {{it}} is speed.' },
+      { presetId: 'topic-2', title: '2. B', text: 'Same text.' },
+    ];
+    const old = { id: 'a', createdAt: '', tokens: ['Old', 'text', '.'], presetId: 'topic-1', pinned: [0], excluded: [1] };
+    const same = { id: 'b', createdAt: '', tokens: parseMarkedText('Same text.').tokens, presetId: 'topic-2' };
+    const { entries, markings } = presetEntriesToRefresh(topics, [old, same]);
+    expect(entries.map((e) => e.id)).toEqual(['a']);
+    expect(entries[0]!.tokens).toEqual(parseMarkedText(topics[0]!.text).tokens);
+    expect(entries[0]!.pinned).toBeUndefined();
+    expect(entries[0]!.excluded).toBeUndefined();
+    expect(markings).toEqual([{ entryId: 'a', ranges: parseMarkedText(topics[0]!.text).ranges }]);
+  });
+});
+
+describe('IELTS Task 2 prompts', () => {
+  it('gives every built-in essay a question whose type matches the opener', () => {
+    const typeOf: Record<string, string> = {
+      'Some might claim that': 'Type: Discuss both views',
+      'Admittedly, some people argue that': 'Type: Agree or disagree',
+      'One major advantage of': 'Type: Advantages and disadvantages',
+    };
+    for (const t of getPresetTopics()) {
+      const prompt = getTask2Prompt(t.presetId);
+      const opener = Object.keys(typeOf).find((o) => t.text.startsWith(o))!;
+      expect(prompt?.headers).toEqual([typeOf[opener]]);
+      expect(prompt?.paragraphs).toHaveLength(2);
     }
   });
 });

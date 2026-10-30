@@ -6,7 +6,7 @@ import { joinTokens } from '../../lib/joinTokens';
 import { formatRelativeDate } from '../../lib/relativeDate';
 import { filterAndSortEntries, type SortMode } from '../../lib/homeListView';
 import { getPresetTopics, getTask1Topics, getToeflTopics } from '../../lib/presetLibrary';
-import { presetEntriesToAdd, type PresetTopic } from '../../lib/presets';
+import { presetEntriesToAdd, presetEntriesToRefresh, type PresetTopic } from '../../lib/presets';
 import { deckIdOf, loadSelectedDeckId, saveSelectedDeckId, TASK1_DECK_ID, TASK2_DECK_ID, TOEFL_DECK_ID } from '../../lib/decks';
 import { useDecks } from '../../hooks/useDecks';
 import type { Deck } from '../../types';
@@ -72,6 +72,26 @@ export function HomeScreen() {
       </div>
       <button className="primary-btn" style={{ padding: '9px 16px', fontSize: 13.5, flexShrink: 0 }} onClick={addPresets}>
         まとめて追加
+      </button>
+    </div>
+  );
+
+  // 内蔵題材の本文を書き換えたら、追加済みの英文を差し替えられるようにする
+  const refresh = useMemo(() => presetEntriesToRefresh(presetTopics, entries), [presetTopics, entries]);
+  const refreshCard = refresh.entries.length > 0 && (
+    <div className="card" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+      <div style={{ flex: 1, fontSize: 13, lineHeight: 1.5 }}>
+        <div style={{ fontWeight: 600 }}>題材の本文が新しくなりました({refresh.entries.length}本)</div>
+        <div style={{ color: 'var(--text-muted)', fontSize: 12.5 }}>
+          更新すると、その題材の固定・除外とマーキングの変更は元に戻ります
+        </div>
+      </div>
+      <button
+        className="primary-btn"
+        style={{ padding: '9px 16px', fontSize: 13.5, flexShrink: 0 }}
+        onClick={() => dispatch({ type: 'REPLACE_ENTRIES', ...refresh })}
+      >
+        更新
       </button>
     </div>
   );
@@ -142,6 +162,7 @@ export function HomeScreen() {
         </>
       ) : (
         <div className="screen-body" style={{ paddingBottom: 100 }}>
+          {refreshCard}
           {libraryCard}
           {promptList}
           <div style={{ display: 'flex', gap: 8 }}>

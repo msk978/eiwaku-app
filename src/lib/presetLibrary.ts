@@ -6,6 +6,7 @@ import toeflRaw from '../data/toeflTopics.txt?raw';
 import toeflTranslationsRaw from '../data/toeflTranslations.txt?raw';
 import toeflPromptsRaw from '../data/toeflPrompts.txt?raw';
 import toeflDiscussionsRaw from '../data/toeflDiscussions.txt?raw';
+import task2PromptsRaw from '../data/task2Prompts.txt?raw';
 import band6Task2Raw from '../data/band6/task2Topics.txt?raw';
 import band6Task2TranslationsRaw from '../data/band6/task2Translations.txt?raw';
 import band6Task1Raw from '../data/band6/task1Topics.txt?raw';
@@ -34,6 +35,7 @@ let toeflTopics: PresetTopic[] | null = null;
 let toeflTranslations: Map<string, string[]> | null = null;
 let toeflPrompts: Map<string, TaskPrompt> | null = null;
 let toeflDiscussions: Map<string, TaskPrompt> | null = null;
+let task2Prompts: Map<string, TaskPrompt> | null = null;
 
 /** 個人版だけで使う内蔵の題材(公開版のバンドルに入らないよう、呼ばれたときに読む) */
 export function getPresetTopics(): PresetTopic[] {
@@ -95,7 +97,7 @@ export function entryFigure(entry: Entry): string | null {
 export interface TaskPrompt {
   /** 問題を選ぶときの名前(Email は件名) */
   title: string;
-  /** To: や Subject: の行 */
+  /** To: や Subject: の行(IELTS Task 2 は Type: の行) */
   headers: string[];
   /** 状況の説明と指示文 */
   paragraphs: string[];
@@ -109,7 +111,7 @@ export interface TaskPrompt {
 export const DISCUSSION_PREFIX = 'toefl-discussion-';
 
 /**
- * 「**番号**」の見出しの下に、To:/Subject: の行・説明・「- 」で始まる要件が並んだテキストを読む。
+ * 「**番号**」の見出しの下に、To:/Subject:/Type: の行・説明・「- 」で始まる要件が並んだテキストを読む。
  * 「Title: 」は選ぶときの名前、「@名前: 」は Academic Discussion の投稿
  */
 export function parseTaskPrompts(raw: string, idPrefix: string): Map<string, TaskPrompt> {
@@ -129,7 +131,7 @@ export function parseTaskPrompts(raw: string, idPrefix: string): Map<string, Tas
       current.title = line.slice(6).trim();
     } else if (line.startsWith('- ')) {
       current.requirements.push(line.slice(2));
-    } else if (/^(To|Subject):/.test(line)) {
+    } else if (/^(To|Subject|Type):/.test(line)) {
       current.headers.push(line);
       if (line.startsWith('Subject:') && !current.title) current.title = line.slice(8).trim();
     } else {
@@ -171,10 +173,19 @@ export function getTaskPromptChoices(): { group: string; options: { id: string; 
   ];
 }
 
-/** 題材の上部に固定する問題文。自分で選んだ問題を優先し、無ければ内蔵の TOEFL の題材の問題文 */
+/**
+ * IELTS Task 2 の題材の問題文(自分専用版のみ)。Type: の行が賛成反対・両論＋意見・メリットデメリットのどれか。
+ * みんな向けの IELTS 版の本文は元の型のままなので出さない
+ */
+export function getTask2Prompt(presetId: string | undefined): TaskPrompt | null {
+  task2Prompts ??= BAND6 ? new Map() : parseTaskPrompts(task2PromptsRaw, 'topic-');
+  return (presetId && task2Prompts.get(presetId)) || null;
+}
+
+/** 題材の上部に固定する問題文。自分で選んだ問題を優先し、無ければ内蔵の TOEFL・IELTS Task 2 の題材の問題文 */
 export function entryPrompt(entry: Entry): TaskPrompt | null {
   if (entry.promptId) return getTaskPrompt(entry.promptId);
-  return HAS_PRESETS ? getToeflPrompt(entry.presetId) : null;
+  return HAS_PRESETS ? (getToeflPrompt(entry.presetId) ?? getTask2Prompt(entry.presetId)) : null;
 }
 
 /**
