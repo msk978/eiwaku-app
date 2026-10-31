@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { getAllPresetTopics, getAllPresetTranslations } from './presetLibrary';
-import { IDIOMATIC_PREFIX, parseMarkedText, parsePresetTopics, presetEntriesToAdd, TASK1_PREFIX, type PresetTopic } from './presets';
+import { parseMarkedText, parsePresetTopics, presetEntriesToAdd, TASK1_PREFIX, type PresetTopic } from './presets';
 import { buildEntryTranslation, parseJpLine, parseTranslations, sentenceIndices } from './translation';
 import band6Task1Raw from '../data/band6/task1Topics.txt?raw';
 import band6Task1TranslationsRaw from '../data/band6/task1Translations.txt?raw';
@@ -47,8 +47,7 @@ describe('band 6 model answers for the everyone build', () => {
 });
 
 describe('bundled translations', () => {
-  // Idiomatic 300 だけは和訳が無い
-  const topics = getAllPresetTopics().filter((t) => !t.presetId.startsWith(IDIOMATIC_PREFIX));
+  const topics = getAllPresetTopics();
   const translations = getAllPresetTranslations();
 
   it('has one line per English sentence and matches the expressions sentence by sentence', () => {
@@ -81,5 +80,11 @@ describe('bundled translations', () => {
     const { entries } = presetEntriesToAdd(topics.slice(0, 1), []);
     const edited = { ...entries[0]!, tokens: [...entries[0]!.tokens, 'One', 'more', '.'] };
     expect(buildEntryTranslation(edited, topics, translations)).toBeNull();
+  });
+});
+
+describe('sentenceIndices', () => {
+  it('does not end a sentence at Mr. or Dr.', () => {
+    expect(sentenceIndices(['I', 'met', 'Mr', '.', 'Yamamoto', '.', 'Yes', '.'])).toEqual([0, 0, 0, 0, 0, 0, 1, 1]);
   });
 });

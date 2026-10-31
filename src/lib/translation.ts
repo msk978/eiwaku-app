@@ -55,11 +55,14 @@ export function parseTranslations(raw: string, idPrefix = 'topic-'): Map<string,
 }
 
 /** トークンごとの文番号(. ? ! で文が終わる) */
+const ABBREVIATIONS = new Set(['Mr', 'Mrs', 'Ms', 'Dr', 'v', 'vs']);
+
 export function sentenceIndices(tokens: string[]): number[] {
   let s = 0;
-  return tokens.map((t) => {
+  return tokens.map((t, i) => {
     const index = s;
-    if (/^[.?!]$/.test(t)) s++;
+    // Mr. や Dr.、Roe v. Wade の「.」では文を切らない
+    if (/^[.?!]$/.test(t) && !(t === '.' && ABBREVIATIONS.has(tokens[i - 1] ?? ''))) s++;
     return index;
   });
 }

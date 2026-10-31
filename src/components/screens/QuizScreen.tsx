@@ -13,9 +13,9 @@ import { BackButton } from '../common/BackButton';
 import { EntrySwitcher } from '../common/EntrySwitcher';
 import { WordToken, type WordTokenVariant } from '../common/WordToken';
 import { HAS_PRESETS } from '../../lib/target';
-import { getAllPresetTopics, getAllPresetTranslations, entryLineBreaks, entryFigure, entryPrompt, skipsTemplates } from '../../lib/presetLibrary';
+import { getAllPresetTopics, getAllPresetTranslations, entryLineBreaks, entryParagraphNumbers, entryFigure, entryPrompt, skipsTemplates } from '../../lib/presetLibrary';
 import { TaskPromptCard } from '../common/TaskPromptCard';
-import { ParagraphBreak } from '../common/ParagraphBreak';
+import { ParagraphBreak, ParagraphNumber } from '../common/ParagraphBreak';
 import { useDecks } from '../../hooks/useDecks';
 import { TaskFigure } from '../common/TaskFigure';
 import { buildEntryTranslation } from '../../lib/translation';
@@ -78,6 +78,7 @@ function QuizSession() {
   if (!entry || blanks.length === 0) return null;
 
   const breaks = entryLineBreaks(entry);
+  const numbers = entryParagraphNumbers(entry, breaks);
   const pinned = new Set(entry.pinned ?? []);
   const excluded = new Set(entry.excluded ?? []);
   const pieces = buildQuizPieces(entry.tokens, blanks);
@@ -255,6 +256,7 @@ function QuizSession() {
                       return (
                         <Fragment key={tokenIndex}>
                           {gap}
+                          <ParagraphNumber n={numbers.get(tokenIndex)} />
                           {token}
                           {jpLine(tokenIndex)}
                           {breaks.has(tokenIndex) && <ParagraphBreak paragraph={breaks.get(tokenIndex)} />}
@@ -263,6 +265,7 @@ function QuizSession() {
                     return (
                       <Fragment key={tokenIndex}>
                         {gap}
+                        <ParagraphNumber n={numbers.get(tokenIndex)} />
                         <WordToken
                           variant={excluded.has(tokenIndex) ? 'excluded' : 'normal'}
                           onClick={() => addPinnedBlank(tokenIndex)}
@@ -295,6 +298,7 @@ function QuizSession() {
             return (
               <Fragment key={i}>
                 {space}
+                <ParagraphNumber n={numbers.get(tokenIndex)} />
                 {token}
               </Fragment>
             );

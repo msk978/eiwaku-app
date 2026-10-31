@@ -7,7 +7,7 @@ import { expandToWordRanges } from '../../lib/quizSelection';
 import { MarkingParagraph } from '../common/MarkingParagraph';
 import { BackButton } from '../common/BackButton';
 import { TaskFigure } from '../common/TaskFigure';
-import { entryLineBreaks, entryFigure, entryPrompt } from '../../lib/presetLibrary';
+import { entryLineBreaks, entryFigure, entryParagraphNumbers, entryPrompt } from '../../lib/presetLibrary';
 import { TaskPromptCard } from '../common/TaskPromptCard';
 
 export function MarkingScreen() {
@@ -21,6 +21,7 @@ export function MarkingScreen() {
 
   if (!entry) return null;
 
+  const breaks = entryLineBreaks(entry);
   const figure = entryFigure(entry);
   const prompt = entryPrompt(entry);
   const markedWordCount = expandToWordRanges(entry.tokens, ranges).length;
@@ -51,7 +52,8 @@ export function MarkingScreen() {
           ranges={ranges}
           activeIndex={activeIndex}
           onTap={onTap}
-          lineBreaks={entryLineBreaks(entry)}
+          lineBreaks={breaks}
+          paragraphNumbers={entryParagraphNumbers(entry, breaks)}
         />
       </div>
 

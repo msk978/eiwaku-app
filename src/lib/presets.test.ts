@@ -249,8 +249,8 @@ describe('band 6 model answers for the everyone build', () => {
 
   it('keeps the Task 2 template', () => {
     for (const t of task2) {
-      expect(t.text, t.title).toMatch(/^Some might claim that .+ A good example of this can be observed in Japan/s);
-      expect(t.text, t.title).toMatch(/\n\nHowever, (others assert that|opponents) .+ Firstly, .+ For instance, .+ Secondly, /s);
+      expect(t.text, t.title).toMatch(/^(Some might claim that|Admittedly, some people argue that|One major advantage of) .+ A good example of this can be observed in Japan/s);
+      expect(t.text, t.title).toMatch(/\n\n(However, others assert that|However, I firmly believe that|On the other hand, there are some serious drawbacks to) .+ Firstly, .+ For instance, .+ Secondly, /s);
     }
   });
 });
@@ -284,6 +284,22 @@ describe('IELTS Task 2 prompts', () => {
       const opener = Object.keys(typeOf).find((o) => t.text.startsWith(o))!;
       expect(prompt?.headers).toEqual([typeOf[opener]]);
       expect(prompt?.paragraphs).toHaveLength(2);
+    }
+  });
+
+  it('gives the band 6 essays for everyone the same question types', () => {
+    const typeOf: Record<string, [string, string]> = {
+      'Type: Discuss both views': ['Some might claim that', 'However, others assert that'],
+      'Type: Agree or disagree': ['Admittedly, some people argue that', 'However, I firmly believe that'],
+      'Type: Advantages and disadvantages': ['One major advantage of', 'On the other hand, there are some serious drawbacks to'],
+    };
+    const topics = parsePresetTopics(band6Task2Raw);
+    expect(topics).toHaveLength(29);
+    for (const t of topics) {
+      const [first, second] = typeOf[getTask2Prompt(t.presetId)!.headers[0]!]!;
+      const paragraphs = t.text.split(/\n\s*\n/);
+      expect(paragraphs[0]).toMatch(new RegExp(`^${first}`));
+      expect(paragraphs[1]).toMatch(new RegExp(`^${second}`));
     }
   });
 });

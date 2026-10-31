@@ -3,7 +3,7 @@ import { isMarked } from '../../lib/markingLogic';
 import { isWordToken } from '../../lib/tokenize';
 import type { MarkingRange } from '../../types';
 import { WordToken } from './WordToken';
-import { ParagraphBreak } from './ParagraphBreak';
+import { ParagraphBreak, ParagraphNumber } from './ParagraphBreak';
 
 interface MarkingParagraphProps {
   tokens: string[];
@@ -12,9 +12,11 @@ interface MarkingParagraphProps {
   onTap: (index: number) => void;
   /** 行の最後のトークンのインデックス → 段落の切れ目なら true(この後で改行する) */
   lineBreaks?: Map<number, boolean>;
+  /** 段落の最初のトークンのインデックス → 通し番号 */
+  paragraphNumbers?: Map<number, number>;
 }
 
-export function MarkingParagraph({ tokens, ranges, activeIndex, onTap, lineBreaks }: MarkingParagraphProps) {
+export function MarkingParagraph({ tokens, ranges, activeIndex, onTap, lineBreaks, paragraphNumbers }: MarkingParagraphProps) {
   return (
     <div
       style={{
@@ -31,6 +33,7 @@ export function MarkingParagraph({ tokens, ranges, activeIndex, onTap, lineBreak
         return (
           <Fragment key={i}>
             {i > 0 && isWord && ' '}
+            <ParagraphNumber n={paragraphNumbers?.get(i)} />
             <WordToken
               variant={variant}
               paddingLeft={isWord ? 3 : 0}

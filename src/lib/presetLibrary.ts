@@ -14,6 +14,7 @@ import band6Task1TranslationsRaw from '../data/band6/task1Translations.txt?raw';
 import chunkRaw from '../data/chunkTopics.txt?raw';
 import chunkTranslationsRaw from '../data/chunkTranslations.txt?raw';
 import idiomaticRaw from '../data/idiomatic300Topics.txt?raw';
+import idiomaticTranslationsRaw from '../data/idiomatic300Translations.txt?raw';
 import {
   CHUNK_PREFIX,
   IDIOMATIC_PREFIX,
@@ -51,6 +52,7 @@ let task2Prompts: Map<string, TaskPrompt> | null = null;
 let chunkTopics: PresetTopic[] | null = null;
 let chunkTranslations: Map<string, string[]> | null = null;
 let idiomaticTopics: PresetTopic[] | null = null;
+let idiomaticTranslations: Map<string, string[]> | null = null;
 
 /** 個人版だけで使う内蔵の題材(公開版のバンドルに入らないよう、呼ばれたときに読む) */
 export function getPresetTopics(): PresetTopic[] {
@@ -97,10 +99,15 @@ export function getChunkTranslations(): Map<string, string[]> {
   return chunkTranslations;
 }
 
-/** Idiomatic 300 の1日分(10文。全30日)。和訳は無い。みんな向けの IELTS 版には入れない */
+/** Idiomatic 300 の1日分(10文。全30日)。みんな向けの IELTS 版には入れない */
 export function getIdiomaticTopics(): PresetTopic[] {
   idiomaticTopics ??= BAND6 ? [] : parsePresetTopics(idiomaticRaw, IDIOMATIC_PREFIX);
   return idiomaticTopics;
+}
+
+export function getIdiomaticTranslations(): Map<string, string[]> {
+  idiomaticTranslations ??= BAND6 ? new Map() : parseTranslations(idiomaticTranslationsRaw, IDIOMATIC_PREFIX);
+  return idiomaticTranslations;
 }
 
 /** 内蔵の題材すべて(IELTS Task 2・Task 1・TOEFL・チャンク大全・Idiomatic 300)と和訳 */
@@ -114,6 +121,7 @@ export function getAllPresetTranslations(): Map<string, string[]> {
     ...getTask1Translations(),
     ...getToeflTranslations(),
     ...getChunkTranslations(),
+    ...getIdiomaticTranslations(),
   ]);
 }
 
@@ -219,11 +227,11 @@ export function getTaskPromptChoices(): { group: string; options: { id: string; 
 }
 
 /**
- * IELTS Task 2 の題材の問題文(自分専用版のみ)。Type: の行が賛成反対・両論＋意見・メリットデメリットのどれか。
- * みんな向けの IELTS 版の本文は元の型のままなので出さない
+ * IELTS Task 2 の題材の問題文。Type: の行が賛成反対・両論＋意見・メリットデメリットのどれか。
+ * みんな向けの IELTS 版も同じ問題・同じ型の振り分け
  */
 export function getTask2Prompt(presetId: string | undefined): TaskPrompt | null {
-  task2Prompts ??= BAND6 ? new Map() : parseTaskPrompts(task2PromptsRaw, 'topic-');
+  task2Prompts ??= parseTaskPrompts(task2PromptsRaw, 'topic-');
   return (presetId && task2Prompts.get(presetId)) || null;
 }
 
@@ -248,6 +256,19 @@ export function getPresetLineBreaks(entry: Entry): Map<number, boolean> {
 export function entryLineBreaks(entry: Entry): Map<number, boolean> {
   if (entry.breaks) return new Map(entry.breaks);
   return HAS_PRESETS ? getPresetLineBreaks(entry) : new Map();
+}
+
+/** チャンク大全(1日17ブロック)と Idiomatic 300(1日10文)の通し番号。段落の最初のトークンのインデックス → 番号 */
+export function entryParagraphNumbers(entry: Entry, breaks: Map<number, boolean>): Map<number, number> {
+  const perDay = entry.presetId?.startsWith(CHUNK_PREFIX) ? 17 : entry.presetId?.startsWith(IDIOMATIC_PREFIX) ? 10 : 0;
+  const day = Number(entry.presetId?.split('-').pop());
+  if (!perDay || !Number.isInteger(day)) return new Map();
+  let n = (day - 1) * perDay + 1;
+  const numbers = new Map([[0, n]]);
+  for (const [i, paragraph] of [...breaks].sort((a, b) => a[0] - b[0])) {
+    if (paragraph && i + 1 < entry.tokens.length) numbers.set(i + 1, ++n);
+  }
+  return numbers;
 }
 
 /** 内蔵題材の元の本文とマーキングに戻した英文(固定・除外・和訳の修正は消す)。元の題材が無ければ null */

@@ -50,14 +50,15 @@ export function HomeScreen() {
     [decksEnabled, entries, decks, currentDeck],
   );
 
-  // いちばん最近学習した英文に「前回」の印を付け、続きから始められるようにする
+  // 開いているタブの中でいちばん最近学習した英文に「前回」の印を付け、タブごとに続きから始められるようにする
   const previousId = useMemo(() => {
+    const inDeck = new Set(deckEntries.map((e) => e.id));
     const latest = data.sessions.reduce<{ entryId: string; timestamp: string } | null>(
-      (best, s) => (!best || s.timestamp > best.timestamp ? s : best),
+      (best, s) => (inDeck.has(s.entryId) && (!best || s.timestamp > best.timestamp) ? s : best),
       null,
     );
     return latest?.entryId ?? null;
-  }, [data.sessions]);
+  }, [data.sessions, deckEntries]);
 
   const rows = useMemo(
     () => filterAndSortEntries(deckEntries, data.sessions, query, sortMode),
@@ -331,7 +332,7 @@ function libraryFor(deckId: string): Library | null {
   if (deckId === IDIOMATIC_DECK_ID)
     return {
       topics: getIdiomaticTopics(),
-      description: (n) => `${n}日分(1日10文)を追加できます(言い回し・コロケーションはマーキング済み)`,
+      description: (n) => `${n}日分(1日10文)を追加できます(言い回し・コロケーションはマーキング済み・全文和訳つき)`,
     };
   return null;
 }

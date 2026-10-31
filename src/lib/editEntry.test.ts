@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { alignTokens } from './tokenDiff';
 import { editedEntry, entryText } from './editEntry';
 import { lineBreaks, presetEntriesToRefresh } from './presets';
+import { entryParagraphNumbers } from './presetLibrary';
 import { tokenize } from './tokenize';
 import type { Entry } from '../types';
 
@@ -53,5 +54,16 @@ describe('presetEntriesToRefresh', () => {
     const edited = entryOf('My own text.', { presetId: 'chunk-1', edited: true });
     const stale = entryOf('Old text.', { id: 'e2', presetId: 'chunk-1' });
     expect(presetEntriesToRefresh(topics, [edited, stale]).entries.map((e) => e.id)).toEqual(['e2']);
+  });
+});
+
+describe('entryParagraphNumbers', () => {
+  it('numbers the paragraphs of a Chunk or Idiomatic 300 day from where that day starts', () => {
+    const text = 'One.\n\nTwo.\nStill two.\n\nThree.';
+    const breaks = lineBreaks(text);
+    const idiomatic = entryOf(text, { presetId: 'idiomatic300-3' });
+    expect([...entryParagraphNumbers(idiomatic, breaks)]).toEqual([[0, 21], [2, 22], [7, 23]]);
+    expect(entryParagraphNumbers(entryOf(text, { presetId: 'chunk-2' }), breaks).get(0)).toBe(18);
+    expect(entryParagraphNumbers(entryOf(text), breaks).size).toBe(0);
   });
 });
